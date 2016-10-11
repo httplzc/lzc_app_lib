@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.yioks.yioks_club.View.FangLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    <ImageView
+        android:id="@+id/pic_img"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop">
+    </ImageView>
+    <com.yioks.yioks_club.View.NumberCheckView
+        android:id="@+id/pic_check_box"
+        android:layout_width="23dp"
+        android:layout_height="23dp"
+        android:checked="true"
+        android:layout_margin="5dp"
+        android:focusable="false"
+        android:clickable="false"
+        />
+    </RelativeLayout>
+</com.yioks.yioks_club.View.FangLinearLayout>

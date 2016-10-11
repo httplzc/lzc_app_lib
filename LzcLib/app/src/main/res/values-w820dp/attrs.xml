@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ParentView">
+        <attr name="InterceptTouch" format="boolean"/>
+        <attr name="canScroll" format="boolean"/>
+        <attr name="content_not_scroll" format="boolean"/>
+        <attr name="is_debug" format="boolean"/>
+        <attr name="show_progress" format="boolean"/>
+    </declare-styleable>
+    
+    <declare-styleable name="FitLinearLayout">
+        <attr name="l_ratio" format="float"/>
+    </declare-styleable>
+
+    <declare-styleable name="FitRelativeLayout">
+        <attr name="r_ratio" format="float"/>
+        <attr name="enable" format="boolean"></attr>
+    </declare-styleable>
+
+    <declare-styleable name="OverScrollScrollView">
+        <attr name="flingOverScrollEnable_sv" format="boolean"></attr>
+        <attr name="dragOverScrollEnable_sv" format="boolean"></attr>
+        <attr name="dragOverScrollHeadEnable_sv" format="boolean"></attr>
+        <attr name="dragOverScrollFootEnable_sv" format="boolean"></attr>
+    </declare-styleable>
+
+    <declare-styleable name="OverScrollListView">
+        <attr name="flingOverScrollEnable_lv" format="boolean"></attr>
+        <attr name="dragOverScrollEnable_lv" format="boolean"></attr>
+        <attr name="dragOverScrollHeadEnable_lv" format="boolean"></attr>
+        <attr name="dragOverScrollFootEnable_lv" format="boolean"></attr>
+    </declare-styleable>
+
+    <declare-styleable name="LoadImg">
+        <attr name="res" format="reference"></attr>
+    </declare-styleable>
+    <declare-styleable name="RefreshScrollParentViewBase">
+        <attr name="postion" format="integer"></attr>
+    </declare-styleable>
+
+    <declare-styleable name="ViewPagerIndicator">
+        <attr name="count" format="integer"/>
+    </declare-styleable>
+</resources>
