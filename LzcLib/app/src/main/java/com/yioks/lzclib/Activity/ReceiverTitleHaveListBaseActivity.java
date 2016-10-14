@@ -1,6 +1,5 @@
 package com.yioks.lzclib.Activity;
 
-import android.util.Log;
 import android.widget.ScrollView;
 
 import com.yioks.lzclib.View.ParentView;
@@ -20,7 +19,6 @@ public abstract class ReceiverTitleHaveListBaseActivity extends ReceiverTitleBas
     @Override
     protected void onResume() {
         ScrollView ScrollView = (ScrollView) parentView.getChildAt(0);
-        Log.i("lzc","ScrollY"+ScrollY);
         ScrollView.smoothScrollTo(0, ScrollY);
         super.onResume();
     }
@@ -32,6 +30,7 @@ public abstract class ReceiverTitleHaveListBaseActivity extends ReceiverTitleBas
         super.onPause();
     }
 
+    //数据请求成功后调用
     protected void GetdataFinish()
     {
         haveAskSucceed = true;
@@ -49,6 +48,7 @@ public abstract class ReceiverTitleHaveListBaseActivity extends ReceiverTitleBas
         }
     }
 
+    //数据处理失败时调用
     protected void DealFail()
     {
         if (!haveAskSucceed) {

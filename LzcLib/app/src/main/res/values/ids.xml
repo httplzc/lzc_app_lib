@@ -2,4 +2,5 @@
 <resources>
     <item type="id" name="parent_view"/>
     <item type="id" name="listview"/>
+    <item type="string" name="app_name"/>
 </resources>

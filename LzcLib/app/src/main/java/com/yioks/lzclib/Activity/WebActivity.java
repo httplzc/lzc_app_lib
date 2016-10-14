@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.webkit.DownloadListener;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -55,7 +56,19 @@ public class WebActivity extends TitleBaseActivity {
                 super.onProgressChanged(view, newProgress);
             }
         });
+        webView.setDownloadListener(new DownLoadListener());
       //  webView.addJavascriptInterface(this, "call_android");
+    }
+
+
+    private class DownLoadListener implements DownloadListener {
+
+        @Override
+        public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
+            Uri uri = Uri.parse(url);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            startActivity(intent);
+        }
     }
 
 

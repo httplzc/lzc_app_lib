@@ -56,8 +56,13 @@ public class ParentView extends FrameLayout {
     //内容全部是按钮
     protected boolean is_all_button = false;
 
+    public Animation animation;
+
+
     //状态枚举  正在加载中  普通  内容错误 ，内容为空
-    public enum Staus {Loading, Normal, Error, Null}
+    public enum Staus {
+        Loading, Normal, Error, Null
+    }
 
     //是否为测试模式
     private boolean isDebug;
@@ -67,7 +72,7 @@ public class ParentView extends FrameLayout {
     //错误时显示的信息
     private String error_text = "sorry~内容出错了~";
     //加载中显示的信息
-    private List<String>loadding_list=new ArrayList<>();
+    private List<String> loadding_list = new ArrayList<>();
     //没有数据时显示的文字
     private String null_text = "哪儿呢哪儿呢？我找不到数据了~";
     //正在加载中的进度条
@@ -99,6 +104,7 @@ public class ParentView extends FrameLayout {
 
     /**
      * 初始化xml里的属性
+     *
      * @param attrs
      */
     protected void initData(AttributeSet attrs) {
@@ -115,6 +121,7 @@ public class ParentView extends FrameLayout {
 
     /**
      * 初始化滑动控件与三大状态视图
+     *
      * @param context
      */
     protected void initView(Context context) {
@@ -162,8 +169,7 @@ public class ParentView extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if(staus!= Staus.Normal)
-        {
+        if (staus != Staus.Normal) {
             return true;
         }
         //是否都为按钮（没有滑动组件）
@@ -202,8 +208,8 @@ public class ParentView extends FrameLayout {
         }
 
     }
-    public void move(int dy)
-    {
+
+    public void move(int dy) {
         scrollBy(0, (int) (-dy));
     }
 
@@ -230,9 +236,8 @@ public class ParentView extends FrameLayout {
 
             //视图随手指滑动
             case MotionEvent.ACTION_MOVE:
-              //  Log.i("lzc","move");
-                if(lastY==firstY)
-                {
+                //  Log.i("lzc","move");
+                if (lastY == firstY) {
                     lastX = eventX;
                     lastY = eventY;
                     return true;
@@ -246,7 +251,7 @@ public class ParentView extends FrameLayout {
             case MotionEvent.ACTION_UP:
                 scroller.startScroll(this.getScrollX(), this.getScrollY(), 0, -this.getScrollY(), 400);
                 invalidate();
-              //  Log.i("lzc","up");
+                //  Log.i("lzc","up");
                 if (Math.abs(this.getScrollY()) > 50) {
                     if (staus == Staus.Null || staus == Staus.Error) {
                         if (reFreshDataListener != null) {
@@ -336,7 +341,7 @@ public class ParentView extends FrameLayout {
         loadView.clearAnimation();
         netFailLayout.clearAnimation();
         nullContentView.clearAnimation();
-        Animation animation = AnimationUtils.loadAnimation(context, R.anim.fade);
+        animation = AnimationUtils.loadAnimation(context, R.anim.fade);
         if (loadView.getVisibility() == VISIBLE) {
             loadView.setAnimation(animation);
         }
@@ -347,16 +352,25 @@ public class ParentView extends FrameLayout {
         if (nullContentView.getVisibility() == VISIBLE) {
             nullContentView.setAnimation(animation);
         }
-        animation.start();
-        this.postDelayed(new Runnable() {
+        animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
-            public void run() {
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
                 loadView.setVisibility(GONE);
                 netFailLayout.setVisibility(GONE);
                 nullContentView.setVisibility(GONE);
             }
-        },500);
 
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        animation.start();
     }
 
     protected void ShowContentData() {
@@ -398,6 +412,7 @@ public class ParentView extends FrameLayout {
 
     /***
      * 设置当前状态
+     *
      * @param staus
      * @param flag
      */
@@ -406,12 +421,14 @@ public class ParentView extends FrameLayout {
         if (staus == Staus.Normal) {
             if (flag.length > 0) {
                 hideallViewCurrent();
+            } else {
+                hideAllView();
             }
-            hideAllView();
             contentView.setVisibility(VISIBLE);
             InterceptTouch = false;
             handler.removeCallbacks(runnable);
         } else if (staus == Staus.Error) {
+            cancelAllAnim();
             hideLoadlayout();
             hildNullView();
             showNetFaillayout();
@@ -423,13 +440,21 @@ public class ParentView extends FrameLayout {
             hildNullView();
             showLoadlayout();
             InterceptTouch = true;
-            handler.postDelayed (runnable,2000);
+            handler.postDelayed(runnable, 2000);
         } else if (staus == Staus.Null) {
             hideNetFaillayout();
             hideLoadlayout();
             ShowNullView();
             InterceptTouch = true;
         }
+    }
+
+    public void cancelAllAnim() {
+        loadView.clearAnimation();
+        netFailLayout.clearAnimation();
+        nullContentView.clearAnimation();
+        if (animation != null)
+            animation.setAnimationListener(null);
     }
 
     public interface ReFreshDataListener {
@@ -472,9 +497,10 @@ public class ParentView extends FrameLayout {
         loadding_progress.setCurrentProgressByAnim(progress);
     }
 
-    public void setProgress(int progress,int time) {
-        loadding_progress.setCurrentProgressByAnim(progress,time);
+    public void setProgress(int progress, int time) {
+        loadding_progress.setCurrentProgressByAnim(progress, time);
     }
+
     public void setProgressNoAnim(int progress) {
         loadding_progress.setCurrentProgress(progress);
     }
@@ -482,22 +508,21 @@ public class ParentView extends FrameLayout {
     public void setmaxProgress(int max_progress) {
         loadding_progress.setMax_progress(max_progress);
     }
-    public void resetProgress()
-    {
+
+    public void resetProgress() {
         loadding_progress.reset();
     }
 
-    public Runnable runnable=new Runnable() {
+    public Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            Random random=new Random();
+            Random random = new Random();
             loadding_textView.setText(loadding_list.get(random.nextInt(loadding_list.size())));
-            handler.postDelayed(runnable,2000);
+            handler.postDelayed(runnable, 2000);
         }
     };
 
-    public void DissMissRun()
-    {
+    public void DissMissRun() {
         handler.removeCallbacks(runnable);
     }
 
