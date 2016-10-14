@@ -56,8 +56,6 @@ public class ParentView extends FrameLayout {
     //内容全部是按钮
     protected boolean is_all_button = false;
 
-    public Animation animation;
-
 
     //状态枚举  正在加载中  普通  内容错误 ，内容为空
     public enum Staus {
@@ -81,6 +79,10 @@ public class ParentView extends FrameLayout {
     private boolean is_show_progress = false;
     //加载中的文字控件
     private TextView loadding_textView;
+
+
+    public Animation animation;
+    public ToNormal toNormal;
 
 
     ;
@@ -352,25 +354,20 @@ public class ParentView extends FrameLayout {
         if (nullContentView.getVisibility() == VISIBLE) {
             nullContentView.setAnimation(animation);
         }
-        animation.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                loadView.setVisibility(GONE);
-                netFailLayout.setVisibility(GONE);
-                nullContentView.setVisibility(GONE);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
+        toNormal = new ToNormal();
+        handler.postDelayed(toNormal, 500);
         animation.start();
+    }
+
+
+    public class ToNormal implements Runnable {
+
+        @Override
+        public void run() {
+            loadView.setVisibility(GONE);
+            netFailLayout.setVisibility(GONE);
+            nullContentView.setVisibility(GONE);
+        }
     }
 
     protected void ShowContentData() {
@@ -455,6 +452,8 @@ public class ParentView extends FrameLayout {
         nullContentView.clearAnimation();
         if (animation != null)
             animation.setAnimationListener(null);
+        if (toNormal != null)
+            handler.removeCallbacks(toNormal);
     }
 
     public interface ReFreshDataListener {
