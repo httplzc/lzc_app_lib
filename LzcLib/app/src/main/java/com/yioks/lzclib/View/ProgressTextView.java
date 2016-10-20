@@ -2,6 +2,7 @@ package com.yioks.lzclib.View;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -25,6 +26,8 @@ public class ProgressTextView extends TextView {
     private Context context;
     private ValueAnimator valueAnimator;
     private static final int animTime = 1000;
+    private boolean isShowSin=true;
+
 
 
     private Paint mPaint, mCriclePaint, mTextPaint;
@@ -50,16 +53,24 @@ public class ProgressTextView extends TextView {
         init();
     }
 
+    private void initAttrs(AttributeSet attrs) {
+        TypedArray typedArray=context.obtainStyledAttributes(attrs,R.styleable.ProgressTextView);
+        isShowSin=typedArray.getBoolean(R.styleable.ProgressTextView_isShowSin,true);
+        typedArray.recycle();
+    }
+
     public ProgressTextView(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.context = context;
         init_progress();
+        initAttrs(attrs);
     }
 
     public ProgressTextView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         this.context = context;
         init_progress();
+        initAttrs(attrs);
     }
 
     public int getMax_progress() {
@@ -158,6 +169,11 @@ public class ProgressTextView extends TextView {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        if(!isShowSin)
+        {
+            super.onDraw(canvas);
+            return;
+        }
         this.setText(current_progress+"%");
         //去除锯齿
         canvas.setDrawFilter(mDrawFilter);

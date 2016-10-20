@@ -159,8 +159,12 @@ public class ParentView extends FrameLayout {
         loadding_textView = (TextView) findViewById(R.id.loadding_text);
         loadding_textView.setText(loadding_list.get(0));
         loadding_progress = (ProgressTextView) loadView.findViewById(R.id.progress_text);
+        LoaddingBollView loadding_boll = (LoaddingBollView) loadView.findViewById(R.id.loadding_boll);
         if (!is_show_progress) {
             loadding_progress.setVisibility(GONE);
+        }
+        else {
+            loadding_boll.setVisibility(GONE);
         }
         if (isDebug) {
             setstaus(Staus.Normal, 1);

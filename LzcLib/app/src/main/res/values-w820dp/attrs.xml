@@ -41,4 +41,8 @@
     <declare-styleable name="ViewPagerIndicator">
         <attr name="count" format="integer"/>
     </declare-styleable>
+
+    <declare-styleable name="ProgressTextView">
+        <attr name="isShowSin" format="boolean"/>
+    </declare-styleable>
 </resources>

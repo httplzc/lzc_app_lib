@@ -47,6 +47,15 @@ public class ResolveDataHelper {
     private int requestType = 0; //0 post 1 get
     private String requestHTTP = GlobalVariable.HTTP;
     private AlertDialog.Builder restartAlertDialog;
+    private HttpParameter httpParameter;
+
+
+    public ResolveDataHelper() {
+    }
+
+    public ResolveDataHelper(HttpParameter httpParameter) {
+        this.httpParameter = httpParameter;
+    }
 
     //开始请求数据   不带parentView
     public void StartGetData(Context context, RequestDataBase requestData, String method, String... strings) {
@@ -54,7 +63,11 @@ public class ResolveDataHelper {
             this.context = context;
             this.requestData = requestData;
             RequestParams params = new RequestParams();
-            HttpParameter.setHttpParam(context, params, method);
+            if (httpParameter != null) {
+                httpParameter.setHttpParamData(context, params, method);
+            } else {
+                HttpParameter.setHttpParam(context, params, method);
+            }
             RequestData(requestData.SetParams(params, strings));
         } catch (Exception e) {
             e.printStackTrace();
@@ -68,7 +81,11 @@ public class ResolveDataHelper {
             this.context = context;
             this.requestData = requestData;
             RequestParams params = new RequestParams();
-            HttpParameter.setHttpParam(context, params, method);
+            if (httpParameter != null) {
+                httpParameter.setHttpParamData(context, params, method);
+            } else {
+                HttpParameter.setHttpParam(context, params, method);
+            }
             if (requestData instanceof RequestDataFile) {
                 RequestData(((RequestDataFile) requestData).setFileParams(params, files, strings));
             } else {
@@ -79,6 +96,7 @@ public class ResolveDataHelper {
             requestDataFail("请求参数错误");
         }
     }
+
 
 
     //开始请求数据  带parentView
@@ -431,5 +449,13 @@ public class ResolveDataHelper {
 
     public void setRequestHTTP(String requestHTTP) {
         this.requestHTTP = requestHTTP;
+    }
+
+    public HttpParameter getHttpParameter() {
+        return httpParameter;
+    }
+
+    public void setHttpParameter(HttpParameter httpParameter) {
+        this.httpParameter = httpParameter;
     }
 }
