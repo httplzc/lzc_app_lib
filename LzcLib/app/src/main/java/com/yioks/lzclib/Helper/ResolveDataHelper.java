@@ -1,8 +1,6 @@
 package com.yioks.lzclib.Helper;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
 import com.loopj.android.http.AsyncHttpResponseHandler;
@@ -12,20 +10,12 @@ import com.yioks.lzclib.Data.Bean;
 import com.yioks.lzclib.Data.GlobalVariable;
 import com.yioks.lzclib.Untils.DialogUtil;
 import com.yioks.lzclib.Untils.HttpUtil;
-import com.yioks.lzclib.Untils.MyCrashhandle;
-import com.yioks.lzclib.View.ParentView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Iterator;
 
 import cz.msebera.android.httpclient.Header;
@@ -40,76 +30,49 @@ public class ResolveDataHelper {
     protected onResolveDataFinish onResolveDataFinish;
     protected onProgresUpDate onProgresUpDate;
     protected Context context;
-    private ParentView parentView;
     private RequestDataBase requestData;
     private Object TAG;
     private int dateType = 0;  //0 model 1 list 2 Hashmap
     private int requestType = 0; //0 post 1 get
     private String requestHTTP = GlobalVariable.HTTP;
-    private AlertDialog.Builder restartAlertDialog;
-    private HttpParameter httpParameter;
+    private RequestParams requestParams;
+    private File[] files;
 
 
-    public ResolveDataHelper() {
+    public ResolveDataHelper(Context context, RequestDataBase requestData) {
+        this.context = context;
+        this.requestData = requestData;
     }
 
-    public ResolveDataHelper(HttpParameter httpParameter) {
-        this.httpParameter = httpParameter;
+    public ResolveDataHelper(Context context, RequestDataBase requestData, RequestParams requestParams) {
+        this.context = context;
+        this.requestData = requestData;
+        this.requestParams = requestParams;
     }
 
-    //开始请求数据   不带parentView
-    public void StartGetData(Context context, RequestDataBase requestData, String method, String... strings) {
-        try {
-            this.context = context;
-            this.requestData = requestData;
-            RequestParams params = new RequestParams();
-            if (httpParameter != null) {
-                httpParameter.setHttpParamData(context, params, method);
-            } else {
-                HttpParameter.setHttpParam(context, params, method);
-            }
-            RequestData(requestData.SetParams(params, strings));
-        } catch (Exception e) {
-            e.printStackTrace();
-            requestDataFail("请求参数错误");
+    public void StartGetData(String... strings) {
+        if (requestParams == null) {
+            requestParams = new RequestParams();
         }
-    }
-
-
-    public void StartGetData(Context context, RequestDataBase requestData, String method, File[] files, String... strings) {
-        try {
-            this.context = context;
-            this.requestData = requestData;
-            RequestParams params = new RequestParams();
-            if (httpParameter != null) {
-                httpParameter.setHttpParamData(context, params, method);
-            } else {
-                HttpParameter.setHttpParam(context, params, method);
+        if (files == null) {
+            try {
+                RequestData(requestData.SetParams(requestParams, strings));
+            } catch (Exception e) {
+                e.printStackTrace();
+                requestDataFail("请求参数错误");
             }
+        } else {
             if (requestData instanceof RequestDataFile) {
-                RequestData(((RequestDataFile) requestData).setFileParams(params, files, strings));
+                try {
+                    RequestData(((RequestDataFile) requestData).setFileParams(requestParams, files, strings));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    requestDataFail("请求参数错误");
+                }
             } else {
                 requestDataFail("请求参数错误");
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            requestDataFail("请求参数错误");
         }
-    }
-
-
-
-    //开始请求数据  带parentView
-    public void StartGetData(Context context, RequestDataBase requestData, String method, ParentView parentView, String... strings) {
-        this.parentView = parentView;
-        StartGetData(context, requestData, method, strings);
-    }
-
-
-    //开始请求数据 带parentView 带TAG
-    public void StartGetData(Context context, RequestDataBase requestData, String method, ParentView parentView, Object TAG, String... strings) {
-        this.TAG = TAG;
-        StartGetData(context, requestData, method, parentView, strings);
     }
 
     //请求数据的方法
@@ -154,9 +117,6 @@ public class ResolveDataHelper {
                     //回调进度
                     if (onProgresUpDate != null) {
                         int progress = (int) (((float) bytesWritten / (float) totalSize) * 100);
-                        if (parentView != null) {
-                            parentView.setProgressNoAnim(progress);
-                        }
                         onProgresUpDate.onProgress(progress);
                     }
                 }
@@ -176,7 +136,6 @@ public class ResolveDataHelper {
         } catch (Exception e) {
             e.printStackTrace();
             requestDataFail("未知错误——");
-            //  WriteRizhi(context, e);
         }
     }
 
@@ -197,7 +156,6 @@ public class ResolveDataHelper {
             onResolveDataFinish.onFail(null);
         }
         context = null;
-        parentView = null;
     }
 
     /**
@@ -211,7 +169,6 @@ public class ResolveDataHelper {
             onResolveDataFinish.onFail(null);
         }
         context = null;
-        parentView = null;
     }
 
     /**
@@ -225,7 +182,6 @@ public class ResolveDataHelper {
             onResolveDataFinish.onFail(code);
         }
         context = null;
-        parentView = null;
     }
 
 
@@ -271,7 +227,6 @@ public class ResolveDataHelper {
                 }
                 onResolveDataFinish.resolveFinish(resolveData);
                 context = null;
-                parentView = null;
             }
         } catch (Exception e) {
             requestDataFail("服务器出问题了~~");
@@ -293,21 +248,7 @@ public class ResolveDataHelper {
     }
 
     protected void Token_error() {
-        if (restartAlertDialog != null) {
-            return;
-        }
-        restartAlertDialog = new AlertDialog.Builder(context);
-        restartAlertDialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                MyCrashhandle.restartApp(context);
-                context = null;
-                restartAlertDialog = null;
-            }
-        });
-        restartAlertDialog.setMessage("你的账号在其他设备上线了，请重新登录");
-        restartAlertDialog.setCancelable(false);
-        restartAlertDialog.show();
+
     }
 
     /**
@@ -378,38 +319,6 @@ public class ResolveDataHelper {
         this.onResolveDataFinish = onResolveDataFinish;
     }
 
-    public void WriteRizhi(Context context, Exception ex) {
-        try {
-            StringWriter stringWriter = new StringWriter();
-            ex.printStackTrace(new PrintWriter(stringWriter));
-            String s = stringWriter.toString();
-            File dir = new File(context.getExternalFilesDir(null).getPath() + "/error_file");
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-            try {
-                File file = new File(dir.getPath() + "/error.txt");
-                if (!file.exists()) {
-                    file.createNewFile();
-                }
-
-                FileOutputStream fileOutputStream = new FileOutputStream(file);
-                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream);
-                BufferedWriter bufferedWriter = new BufferedWriter(outputStreamWriter);
-                bufferedWriter.write("\n" + s);
-                bufferedWriter.flush();
-                bufferedWriter.close();
-                outputStreamWriter.close();
-                fileOutputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     public ResolveDataHelper.onProgresUpDate getOnProgresUpDate() {
         return onProgresUpDate;
@@ -451,11 +360,19 @@ public class ResolveDataHelper {
         this.requestHTTP = requestHTTP;
     }
 
-    public HttpParameter getHttpParameter() {
-        return httpParameter;
+    public RequestParams getRequestParams() {
+        return requestParams;
     }
 
-    public void setHttpParameter(HttpParameter httpParameter) {
-        this.httpParameter = httpParameter;
+    public void setRequestParams(RequestParams requestParams) {
+        this.requestParams = requestParams;
+    }
+
+    public File[] getFiles() {
+        return files;
+    }
+
+    public void setFiles(File[] files) {
+        this.files = files;
     }
 }

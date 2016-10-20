@@ -5,6 +5,10 @@ import android.os.Bundle;
 import com.yioks.lzclib.Adapter.ListAdapter;
 import com.yioks.lzclib.Adapter.MylistAdapter;
 import com.yioks.lzclib.Data.Bean;
+import com.yioks.lzclib.Data.DomeBean;
+import com.yioks.lzclib.Helper.ParamsBuilder;
+import com.yioks.lzclib.Helper.ResolveDataHelper;
+import com.yioks.lzclib.Helper.onResolveDataFinish;
 
 /**
  * Created by ${User} on 2016/10/11 0011.
@@ -22,7 +26,20 @@ public class DemoListActivity extends RefreshListActivity<Bean> {
 
     @Override
     public void GetData() {
-        
+
+        ResolveDataHelper resolveDataHelper=new ResolveDataHelper(context,new DomeBean(), new ParamsBuilder(context).build());
+        resolveDataHelper.setOnResolveDataFinish(new onResolveDataFinish() {
+            @Override
+            public void resolveFinish(Object data) {
+                onSuccessDo(data);
+            }
+
+            @Override
+            public void onFail(String code) {
+                onFailDeal();
+            }
+        });
+        resolveDataHelper.StartGetData();
     }
 
     @Override
