@@ -80,6 +80,8 @@ public class ParentView extends FrameLayout {
     //加载中的文字控件
     private TextView loadding_textView;
 
+    private TextView null_textView;
+
 
     public Animation animation;
     public ToNormal toNormal;
@@ -154,17 +156,17 @@ public class ParentView extends FrameLayout {
 
         TextView textView = (TextView) netFailLayout.findViewById(R.id.net_faile);
         textView.setText(error_text);
-        textView = (TextView) nullContentView.findViewById(R.id.null_content);
-        textView.setText(null_text);
+        null_textView = (TextView) nullContentView.findViewById(R.id.null_content);
+        null_textView.setText(null_text);
         loadding_textView = (TextView) findViewById(R.id.loadding_text);
         loadding_textView.setText(loadding_list.get(0));
         loadding_progress = (ProgressTextView) loadView.findViewById(R.id.progress_text);
         LoaddingBollView loadding_boll = (LoaddingBollView) loadView.findViewById(R.id.loadding_boll);
         if (!is_show_progress) {
             loadding_progress.setVisibility(GONE);
-        }
-        else {
+        } else {
             loadding_boll.setVisibility(GONE);
+            loadding_progress.setIsShowSin(false);
         }
         if (isDebug) {
             setstaus(Staus.Normal, 1);
@@ -478,6 +480,8 @@ public class ParentView extends FrameLayout {
 
     public void setNull_text(String null_text) {
         this.null_text = null_text;
+        if (null_textView != null)
+            null_textView.setText(null_text);
     }
 
     public List<String> getLoadding_list() {

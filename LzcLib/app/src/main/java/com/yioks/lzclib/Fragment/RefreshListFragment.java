@@ -1,5 +1,6 @@
-package com.yioks.lzclib.Activity;
+package com.yioks.lzclib.Fragment;
 
+import android.support.v4.app.Fragment;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -13,12 +14,7 @@ import com.yioks.lzclib.View.RefreshScrollParentViewBase;
 
 import java.util.List;
 
-
-/**
- * 列表刷新基础类
- * Created by ${User} on 2016/9/14 0014.
- */
-public abstract class RefreshListActivity<T extends Bean> extends ReceiverTitleBaseActivity implements ReFreshListViewParentView.LoaddingMoreListener, RefreshScrollParentViewBase.onCenterReFreshListener
+public abstract class RefreshListFragment<T extends Bean> extends Fragment implements ReFreshListViewParentView.LoaddingMoreListener, RefreshScrollParentViewBase.onCenterReFreshListener
         , ParentView.ReFreshDataListener {
     public ReFreshListViewParentView parentView;
     public ListView listView;
@@ -26,13 +22,13 @@ public abstract class RefreshListActivity<T extends Bean> extends ReceiverTitleB
     public boolean isMore = false;
     public int REQUEST_COUNT = 15;
 
-    public void initView() {
-        parentView = (ReFreshListViewParentView) findViewById(R.id.parent_view);
+    public void initView(View view) {
+        parentView = (ReFreshListViewParentView) view.findViewById(R.id.parent_view);
         parentView.setOnCenterReFreshListener(this);
         parentView.setReFreshDataListener(this);
         parentView.setLoaddingMoreListener(this);
         listAdapter = getAdapter();
-        listView = (ListView) findViewById(R.id.listview);
+        listView = (ListView) view.findViewById(R.id.listview);
         listView.setAdapter(listAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -58,12 +54,6 @@ public abstract class RefreshListActivity<T extends Bean> extends ReceiverTitleB
 
     public abstract void onClick(int id);
 
-
-    //后台刷新回调
-    @Override
-    public void reFreshBackGround() {
-        parentView.startload();
-    }
 
     //手动刷新回调
     @Override
@@ -120,6 +110,4 @@ public abstract class RefreshListActivity<T extends Bean> extends ReceiverTitleB
             parentView.setstaus(ParentView.Staus.Error);
         }
     }
-
-
 }

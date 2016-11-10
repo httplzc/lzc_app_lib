@@ -14,7 +14,7 @@
         android:gravity="center"
         android:orientation="vertical">
 
-        <com.yioks.yioks_club.View.ProgressTextView
+        <com.yioks.lzclib.View.ProgressTextView
         android:id="@+id/progress_text"
         android:layout_width="80dp"
         android:layout_height="wrap_content"
@@ -24,7 +24,7 @@
 
 
 
-        <com.yioks.yioks_club.View.LoaddingBollView
+        <com.yioks.lzclib.View.LoaddingBollView
             android:id="@+id/loadding_boll"
             android:layout_width="50dp"
             android:layout_marginTop="5dp"

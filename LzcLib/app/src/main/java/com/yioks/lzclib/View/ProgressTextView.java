@@ -226,8 +226,15 @@ public class ProgressTextView extends TextView {
         return percent;
     }
 
+    public boolean isShowSin() {
+        return isShowSin;
+    }
 
-//    public class refreshLoaddingThread extends Thread {
+    public void setIsShowSin(boolean isShowSin) {
+        this.isShowSin = isShowSin;
+    }
+
+    //    public class refreshLoaddingThread extends Thread {
 //        @Override
 //        public void run() {
 //            while()

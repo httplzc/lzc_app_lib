@@ -3,9 +3,12 @@ package com.yioks.lzclib.View;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.support.annotation.Nullable;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.yioks.lzclib.R;
@@ -18,74 +21,104 @@ public class MyDialog {
     private Context context;
     private Dialog dialog;
     private View.OnClickListener ok_button_click_listener;
+    private View.OnClickListener cancel_button_click_listener;
     private TextView txtOK;
+    private TextView confirm;
+    private TextView txtcancle;
+    private ImageView dialog_img;
+    private TextView title_head;
+    private LinearLayout confirm_cancel_lin;
 
-
-    public MyDialog(Context context, String message, View.OnClickListener ok_button_click_listener) {
-        this(context,message);
-        this.ok_button_click_listener = ok_button_click_listener;
-        this.setOk_button_click_listener(ok_button_click_listener);
-
-
-    }
-
-    public MyDialog(Context context,String message)
-    {
+    private MyDialog(Context context, String message) {
         this.context = context;
         this.dialog = new Dialog(context, R.style.MydialogStyle);
         Window window = dialog.getWindow();
         window.setContentView(R.layout.mydialog_exit);
-        TextView txtCancle = (TextView) window.findViewById(R.id.mydialog_cancle);
+        txtcancle = (TextView) window.findViewById(R.id.mydialog_cancle);
         txtOK = (TextView) window.findViewById(R.id.mydialog_ok);
+        dialog_img = (ImageView) window.findViewById(R.id.dialog_img);
+        title_head = (TextView) window.findViewById(R.id.title_head);
+        confirm_cancel_lin= (LinearLayout) window.findViewById(R.id.confirm_cancel_lin);
         TextView mydialog_remind = (TextView) window.findViewById(R.id.mydialog_remind);
         mydialog_remind.setText(message);
-        txtCancle.setOnClickListener(new View.OnClickListener() {
+        confirm = (TextView) window.findViewById(R.id.mydialog_confirm);
+        txtOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (ok_button_click_listener != null)
+                    ok_button_click_listener.onClick(v);
                 dialog.dismiss();
             }
         });
-
-    }
-    public MyDialog(Context context,String message,int flag)
-    {
-        this(context,message);
-        dialog.setCanceledOnTouchOutside(false);
-    }
-
-    public MyDialog(Context context,String message,boolean can_cancel)
-    {
-        this.context = context;
-        this.dialog = new Dialog(context, R.style.MydialogStyle);
-        Window window = dialog.getWindow();
-        window.setContentView(R.layout.mydialog_exit);
-        TextView txtCancle = (TextView) window.findViewById(R.id.mydialog_cancle);
-        txtCancle.setEnabled(false);
-        txtOK = (TextView) window.findViewById(R.id.mydialog_ok);
-        TextView mydialog_remind = (TextView) window.findViewById(R.id.mydialog_remind);
-        mydialog_remind.setText(message);
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+        txtcancle.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-                if(keyCode==KeyEvent.KEYCODE_BACK)
-                {
-                    return true;
-                }
-                return false;
+            public void onClick(View v) {
+                if (cancel_button_click_listener != null)
+                    cancel_button_click_listener.onClick(v);
+                dialog.dismiss();
+            }
+        });
+        confirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (ok_button_click_listener != null)
+                    ok_button_click_listener.onClick(v);
+                dialog.dismiss();
             }
         });
     }
 
+
+    /**
+     * @param context
+     * @param message        消息内容
+     * @param canTouchCancel 触摸外部取消
+     * @param canBackCancel  按返回键取消
+     * @param isConfirm
+     * @param title          传空则为图片
+     */
+    public MyDialog(Context context, String message, @Nullable String title, boolean canTouchCancel, boolean canBackCancel, boolean isConfirm) {
+        this(context, message);
+        if (canTouchCancel)
+            dialog.setCanceledOnTouchOutside(true);
+        else
+            dialog.setCanceledOnTouchOutside(false);
+
+        if (!canBackCancel) {
+            dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+                @Override
+                public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                    return keyCode == KeyEvent.KEYCODE_BACK;
+                }
+            });
+        }
+        if (isConfirm) {
+            confirm.setVisibility(View.VISIBLE);
+            confirm_cancel_lin.setVisibility(View.GONE);
+        } else {
+            confirm.setVisibility(View.GONE);
+            confirm_cancel_lin.setVisibility(View.VISIBLE);
+        }
+
+        if (title == null || title.equals("")) {
+            title_head.setVisibility(View.GONE);
+            dialog_img.setVisibility(View.VISIBLE);
+        } else {
+            title_head.setVisibility(View.VISIBLE);
+            dialog_img.setVisibility(View.GONE);
+        }
+
+    }
+
+
     public void showDialog() {
-        if(dialog.isShowing())
-        {
+        if (dialog.isShowing()) {
             return;
         }
         this.dialog.show();
     }
-    public void dissMissDialog()
-    {
+
+    public void dismissDialog() {
         this.dialog.dismiss();
     }
 
@@ -95,6 +128,13 @@ public class MyDialog {
 
     public void setOk_button_click_listener(View.OnClickListener ok_button_click_listener) {
         this.ok_button_click_listener = ok_button_click_listener;
-        txtOK.setOnClickListener(ok_button_click_listener);
+    }
+
+    public View.OnClickListener getCancel_button_click_listener() {
+        return cancel_button_click_listener;
+    }
+
+    public void setCancel_button_click_listener(View.OnClickListener cancel_button_click_listener) {
+        this.cancel_button_click_listener = cancel_button_click_listener;
     }
 }

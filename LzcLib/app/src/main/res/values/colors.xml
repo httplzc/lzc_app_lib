@@ -20,5 +20,6 @@
     <color name="dialog_btn_normal">#DFDFDF</color>
     <color name="dialog_btn_normal_line">#EFEFEF</color>
     <color name="orange">#ff7144</color>
+    <color name="main_cheng">#ff6929</color>
 
 </resources>

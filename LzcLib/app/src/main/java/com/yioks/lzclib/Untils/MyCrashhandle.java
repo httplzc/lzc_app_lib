@@ -7,7 +7,6 @@ import android.util.Log;
 
 import com.yioks.lzclib.Activity.LunchActivity;
 import com.yioks.lzclib.Data.GlobalVariable;
-import com.yioks.lzclib.R;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -52,7 +51,7 @@ public class MyCrashhandle implements Thread.UncaughtExceptionHandler {
 
         StringWriter stringWriter = new StringWriter();
         ex.printStackTrace(new PrintWriter(stringWriter));
-        sendErrorMsg(stringWriter.toString());
+        sendErrorMsg(stringWriter.toString(),"");
         return true;
     }
 
@@ -61,7 +60,7 @@ public class MyCrashhandle implements Thread.UncaughtExceptionHandler {
      *
      * @param s
      */
-    private void sendErrorMsg(String s) {
+    private void sendErrorMsg(String s,String app_name) {
         File dir = new File(context.getExternalFilesDir(null).getPath() + "/yioks_club_error_file");
         if (!dir.exists()) {
             dir.mkdirs();
@@ -77,7 +76,7 @@ public class MyCrashhandle implements Thread.UncaughtExceptionHandler {
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream);
             BufferedWriter bufferedWriter = new BufferedWriter(outputStreamWriter);
             bufferedWriter.newLine();
-            bufferedWriter.write("app名称" + context.getResources().getString(R.string.app_name) + "\n");
+            bufferedWriter.write("app名称" + app_name + "\n");
             bufferedWriter.write("当前时间" + StringManagerUtil.getCurrentTime() + "\n");
             bufferedWriter.write("手机型号" + DeviceUtil.getPhoneMessage() + "\n");
             bufferedWriter.write("android 版本" + Build.VERSION.SDK_INT + "\n");

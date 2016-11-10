@@ -17,7 +17,7 @@
         <!--android:layout_width="35dp"-->
         <!--android:layout_height="35dp"-->
         <!--android:layout_gravity="center" />-->
-        <com.yioks.yioks_club.View.LoaddingBollView
+        <com.yioks.lzclib.View.LoaddingBollView
             android:id="@+id/loadding_effect"
             android:layout_width="45dp"
             android:layout_height="35dp"
