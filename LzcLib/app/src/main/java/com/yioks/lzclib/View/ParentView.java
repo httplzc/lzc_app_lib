@@ -1,6 +1,7 @@
 package com.yioks.lzclib.View;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.os.Handler;
 import android.util.AttributeSet;
@@ -139,7 +140,15 @@ public class ParentView extends FrameLayout {
      */
     protected void initLoadView() {
         loadView = LayoutInflater.from(context).inflate(R.layout.load_layout, this, false);
-        netFailLayout = LayoutInflater.from(context).inflate(R.layout.netfail_layout, this, false);
+        if(context.getResources().getConfiguration().orientation== Configuration.ORIENTATION_LANDSCAPE)
+        {
+            netFailLayout = LayoutInflater.from(context).inflate(R.layout.netfail_layout_heng, this, false);
+
+        }else
+        {
+            netFailLayout = LayoutInflater.from(context).inflate(R.layout.netfail_layout, this, false);
+
+        }
         nullContentView = LayoutInflater.from(context).inflate(R.layout._null_content_layout, this, false);
     }
 
@@ -165,7 +174,7 @@ public class ParentView extends FrameLayout {
         if (!is_show_progress) {
             loadding_progress.setVisibility(GONE);
         } else {
-            loadding_boll.setVisibility(GONE);
+          //  loadding_boll.setVisibility(GONE);
             loadding_progress.setIsShowSin(false);
         }
         if (isDebug) {

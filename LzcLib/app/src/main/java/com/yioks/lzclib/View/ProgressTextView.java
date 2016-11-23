@@ -26,8 +26,7 @@ public class ProgressTextView extends TextView {
     private Context context;
     private ValueAnimator valueAnimator;
     private static final int animTime = 1000;
-    private boolean isShowSin=true;
-
+    private boolean isShowSin = true;
 
 
     private Paint mPaint, mCriclePaint, mTextPaint;
@@ -54,8 +53,8 @@ public class ProgressTextView extends TextView {
     }
 
     private void initAttrs(AttributeSet attrs) {
-        TypedArray typedArray=context.obtainStyledAttributes(attrs,R.styleable.ProgressTextView);
-        isShowSin=typedArray.getBoolean(R.styleable.ProgressTextView_isShowSin,true);
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.ProgressTextView);
+        isShowSin = typedArray.getBoolean(R.styleable.ProgressTextView_isShowSin, true);
         typedArray.recycle();
     }
 
@@ -162,19 +161,18 @@ public class ProgressTextView extends TextView {
         //实例化文字画笔
         mTextPaint = new Paint();
         mTextPaint.setAntiAlias(true);
-     //   bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.load_people);
+        //   bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.load_people);
 
     }
 
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if(!isShowSin)
-        {
+        this.setText(current_progress + "%");
+        if (!isShowSin) {
             super.onDraw(canvas);
             return;
         }
-        this.setText(current_progress+"%");
         //去除锯齿
         canvas.setDrawFilter(mDrawFilter);
         runWave();

@@ -23,7 +23,7 @@ import cz.msebera.android.httpclient.Header;
 /**
  * Created by Administrator on 2016/8/3 0003.
  */
-public class ResolveDataHelper {
+public abstract class ResolveDataHelper {
 
 
     //完成解析的回调方法
@@ -56,7 +56,7 @@ public class ResolveDataHelper {
         }
         if (files == null) {
             try {
-                RequestData(requestData.SetParams(requestParams, strings));
+                RequestData(requestData.SetParams(requestParams, dateType, strings));
             } catch (Exception e) {
                 e.printStackTrace();
                 requestDataFail("请求参数错误");
@@ -144,6 +144,7 @@ public class ResolveDataHelper {
             return;
         Log.i("date_print", "request" + params.toString() + "----" + GlobalVariable.HTTP);
     }
+
 
     /**
      * 错误
@@ -247,9 +248,7 @@ public class ResolveDataHelper {
 
     }
 
-    protected void Token_error() {
-
-    }
+    protected abstract void Token_error();
 
     /**
      * //清除null

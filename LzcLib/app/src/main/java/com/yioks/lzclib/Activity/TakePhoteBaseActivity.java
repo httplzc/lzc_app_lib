@@ -1,12 +1,16 @@
 package com.yioks.lzclib.Activity;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -40,6 +44,9 @@ public abstract class TakePhoteBaseActivity extends TitleBaseActivity {
     private boolean is_circle = false;
 
     private Uri photoUri;
+    private Activity activity;
+
+    private int limitCount;
 
     /**
      * 调用裁剪图片方法
@@ -144,21 +151,27 @@ public abstract class TakePhoteBaseActivity extends TitleBaseActivity {
 
     // 创建 选择拍照或相册弹出窗口
     private void CreatePopWindow(final Activity activity, final int limitCount) {
+        this.activity = activity;
+        this.limitCount = limitCount;
         View view = LayoutInflater.from(this).inflate(R.layout.write_popwindow_layout, null);
         popupWindow = new PopupWindow(view, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, true);
         popupWindow.setAnimationStyle(R.style.popwindow_anim_style_bottom);
         popupWindow.setOutsideTouchable(true);
         popupWindow.setFocusable(true);
         popupWindow.setOutsideTouchable(true);
+        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                setBackGroundAlpha(activity, 1f);
+            }
+        });
         view.setFocusable(true);
         view.setFocusableInTouchMode(true);
         view.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 popupWindow.dismiss();
-                WindowManager.LayoutParams lp = activity.getWindow().getAttributes();
-                lp.alpha = 1f;
-                activity.getWindow().setAttributes(lp);
+                setBackGroundAlpha(activity, 1f);
                 return true;
             }
         });
@@ -168,21 +181,19 @@ public abstract class TakePhoteBaseActivity extends TitleBaseActivity {
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
                     popupWindow.dismiss();
-                    WindowManager.LayoutParams lp = activity.getWindow().getAttributes();
-                    lp.alpha = 1f;
-                    activity.getWindow().setAttributes(lp);
+                    setBackGroundAlpha(activity, 1f);
                 }
                 return false;
             }
         });
+
+
         final TextView quxiao = (TextView) view.findViewById(R.id.quexiao);
         //点击取消
         quxiao.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                WindowManager.LayoutParams lp = TakePhoteBaseActivity.this.getWindow().getAttributes();
-                lp.alpha = 1f;
-                TakePhoteBaseActivity.this.getWindow().setAttributes(lp);
+                setBackGroundAlpha(activity, 1f);
                 popupWindow.dismiss();
 
             }
@@ -193,11 +204,19 @@ public abstract class TakePhoteBaseActivity extends TitleBaseActivity {
         paizhao.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                WindowManager.LayoutParams lp = TakePhoteBaseActivity.this.getWindow().getAttributes();
-                lp.alpha = 1f;
-                TakePhoteBaseActivity.this.getWindow().setAttributes(lp);
-                popupWindow.dismiss();
-                getImageFromCamera();
+                if (ContextCompat.checkSelfPermission(context,
+                        Manifest.permission.CAMERA)
+                        != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(context,
+                        Manifest.permission.READ_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(activity,
+                            new String[]{"android.permission.READ_EXTERNAL_STORAGE", "android.permission.CAMERA"},
+                            12546);
+                } else {
+                    setBackGroundAlpha(activity, 1f);
+                    popupWindow.dismiss();
+                    getImageFromCamera();
+                }
             }
         });
 
@@ -207,16 +226,46 @@ public abstract class TakePhoteBaseActivity extends TitleBaseActivity {
         tuku.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                WindowManager.LayoutParams lp = TakePhoteBaseActivity.this.getWindow().getAttributes();
-                lp.alpha = 1f;
-                TakePhoteBaseActivity.this.getWindow().setAttributes(lp);
-                popupWindow.dismiss();
-                getImageFromAlbum(limitCount);
+                if (ContextCompat.checkSelfPermission(context,
+                        Manifest.permission.READ_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(activity,
+                            new String[]{"android.permission.READ_EXTERNAL_STORAGE"},
+                            20221);
+                } else {
+                    setBackGroundAlpha(activity, 1f);
+                    popupWindow.dismiss();
+                    getImageFromAlbum(limitCount);
+                }
             }
         });
 
     }
 
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 20221) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                setBackGroundAlpha(activity, 1f);
+                popupWindow.dismiss();
+                getImageFromAlbum(limitCount);
+            } else {
+                setBackGroundAlpha(activity, 1f);
+                popupWindow.dismiss();
+            }
+        } else if (requestCode == 12546) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                setBackGroundAlpha(activity, 1f);
+                popupWindow.dismiss();
+                getImageFromCamera();
+            } else {
+                setBackGroundAlpha(activity, 1f);
+                popupWindow.dismiss();
+            }
+        }
+    }
 
     /**
      * 显示底部弹窗
@@ -235,9 +284,7 @@ public abstract class TakePhoteBaseActivity extends TitleBaseActivity {
         limit = limitCount;
         CreatePopWindow(activity, limit);
         //降低屏幕颜色
-        WindowManager.LayoutParams lp = activity.getWindow().getAttributes();
-        lp.alpha = 0.5f;
-        activity.getWindow().setAttributes(lp);
+        setBackGroundAlpha(activity, 0.5f);
         popupWindow.showAtLocation(activity.getWindow().getDecorView(), Gravity.BOTTOM, 0, 0);
         return popupWindow;
     }
@@ -259,6 +306,17 @@ public abstract class TakePhoteBaseActivity extends TitleBaseActivity {
         startActivityForResult(intent, PickImgActivity.PICK_MANY_PIC);
     }
 
+    private void setBackGroundAlpha(Activity activity, float alpha) {
+        WindowManager.LayoutParams lp = activity.getWindow().getAttributes();
+        lp.alpha = alpha;
+        if (alpha == 1) {
+            activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        } else {
+            activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        }
+        activity.getWindow().setAttributes(lp);
+    }
+
     /**
      * 选择照相
      */
@@ -271,14 +329,14 @@ public abstract class TakePhoteBaseActivity extends TitleBaseActivity {
             if (file == null) {
                 Toast.makeText(TakePhoteBaseActivity.this, "创建临时文件失败", Toast.LENGTH_LONG).show();
                 return;
-            };
+            }
+            ;
 
             ContentValues values = new ContentValues();
-            values.put(MediaStore.Images.Media.DATA,file.getAbsolutePath());
+            values.put(MediaStore.Images.Media.DATA, file.getAbsolutePath());
             values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
             photoUri = getContentResolver().insert(
                     MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-
 
 
             getImageByCamera.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);

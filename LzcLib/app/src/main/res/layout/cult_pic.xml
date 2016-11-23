@@ -45,18 +45,18 @@
         android:background="#000000"
         android:gravity="center">
 
-        <com.yioks.yioks_club.View.MoveImage
+        <com.yioks.lzclib.View.MoveImage
             android:id="@+id/moveImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:adjustViewBounds="true" />
 
-        <com.yioks.yioks_club.View.PicCultBackground
+        <com.yioks.lzclib.View.PicCultBackground
             android:id="@+id/background"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:alpha="0.7"
-            android:background="#000000"></com.yioks.yioks_club.View.PicCultBackground>
+            android:background="#000000"/>
 
 
     </RelativeLayout>

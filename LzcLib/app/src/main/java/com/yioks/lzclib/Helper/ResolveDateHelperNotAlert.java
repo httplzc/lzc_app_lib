@@ -7,7 +7,7 @@ import com.loopj.android.http.RequestParams;
 /**
  * Created by ${User} on 2016/9/19 0019.
  */
-public class ResolveDateHelperNotAlert extends ResolveDataHelper {
+public  abstract class ResolveDateHelperNotAlert extends ResolveDataHelper {
     public ResolveDateHelperNotAlert(Context context, RequestDataBase requestData) {
         super(context, requestData);
     }

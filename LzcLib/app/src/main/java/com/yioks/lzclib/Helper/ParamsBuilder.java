@@ -1,5 +1,6 @@
 package com.yioks.lzclib.Helper;
 
+import android.app.Activity;
 import android.content.Context;
 
 import com.loopj.android.http.RequestParams;
@@ -53,7 +54,15 @@ public class ParamsBuilder {
         params.put("a", method.trim());//操作
         params.put("t", typeId);//类型ID
         params.put("v", version);//版本
-        params.put("mpKey", DeviceUtil.getDeviceUUID(context));//手机序列号
+        if(context instanceof Activity)
+        {
+            params.put("mpKey", DeviceUtil.getDeviceUUID((Activity) context));//手机序列号
+        }
+        else
+        {
+            params.put("mpKey","");
+        }
+
         params.put("_t", time);//时间戳
         params.put("dataKey", data_md5);//数据的MD5标识
         params.put("codeKey", key);//指纹校验KEY

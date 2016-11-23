@@ -36,6 +36,8 @@ public class StringManagerUtil {
      */
     public static String md5(String string) {
         byte[] hash;
+        if(string==null)
+            string="";
         try {
             hash = MessageDigest.getInstance("MD5").digest(string.getBytes("UTF-8"));
         } catch (NoSuchAlgorithmException e) {

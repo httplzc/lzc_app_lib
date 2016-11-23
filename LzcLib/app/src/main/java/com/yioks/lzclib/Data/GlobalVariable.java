@@ -9,6 +9,6 @@ public class GlobalVariable {
     public static String CLIENT_KEY;//设备唯一标识
     public static String APP_VERSION;//APP版本号
     public static String flag = "";
-    public static String PhoneUUID;
+    public static String PhoneUUID="";
 
 }

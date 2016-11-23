@@ -1,13 +1,17 @@
 package com.yioks.lzclib.Untils;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 import com.yioks.lzclib.Data.GlobalVariable;
 
@@ -115,19 +119,43 @@ public class DeviceUtil {
      * @param context
      * @return
      */
-    public static String getDeviceUUID(Context context) {
-        if(GlobalVariable.PhoneUUID!=null)
+    public static String getDeviceUUID(Activity context) {
+        if(GlobalVariable.PhoneUUID!=null&&!GlobalVariable.PhoneUUID.equals("")&&!GlobalVariable.PhoneUUID.equals(StringManagerUtil.md5("")))
         {
 
             return  StringManagerUtil.md5(GlobalVariable.PhoneUUID);
         }
         final String tmDevice, tmSerial, androidId;
-        TelephonyManager mTm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-        tmDevice = "" + mTm.getDeviceId();
-        tmSerial = "" + mTm.getSimSerialNumber();
-        androidId = "" + android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
-        UUID deviceUuid = new UUID(androidId.hashCode(), ((long) tmDevice.hashCode() << 32) | tmSerial.hashCode());
-        GlobalVariable.PhoneUUID=deviceUuid.toString();
+        if (ContextCompat.checkSelfPermission(context,
+                Manifest.permission.READ_PHONE_STATE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(context,
+                    Manifest.permission.READ_PHONE_STATE)) {
+
+
+
+            } else {
+
+                ActivityCompat.requestPermissions(context,
+                        new String[]{Manifest.permission.READ_PHONE_STATE},
+                        1024);
+
+            }
+        }
+        else
+        {
+            Log.i("lzc", "TelephonyManager");
+            TelephonyManager mTm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            tmDevice = "" + mTm.getDeviceId();
+            tmSerial = "" + mTm.getSimSerialNumber();
+            androidId = "" + android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+            UUID deviceUuid = new UUID(androidId.hashCode(), ((long) tmDevice.hashCode() << 32) | tmSerial.hashCode());
+            GlobalVariable.PhoneUUID=deviceUuid.toString();
+        }
+
+
         return   StringManagerUtil.md5(GlobalVariable.PhoneUUID);
     }
 
@@ -136,9 +164,30 @@ public class DeviceUtil {
      * @param context
      * @return
      */
-    public static String getIMEI(Context context) {
-        String imei;
-        imei = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
+    public static String getIMEI(Activity context) {
+        String imei="";
+        if (ContextCompat.checkSelfPermission(context,
+                Manifest.permission.READ_PHONE_STATE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(context,
+                    Manifest.permission.READ_PHONE_STATE)) {
+
+
+
+            } else {
+
+                ActivityCompat.requestPermissions(context,
+                        new String[]{Manifest.permission.READ_PHONE_STATE},
+                        1024);
+
+            }
+        }
+        else
+        {
+            imei = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
+        }
         return imei;
     }
 

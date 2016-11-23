@@ -45,4 +45,8 @@
     <declare-styleable name="ProgressTextView">
         <attr name="isShowSin" format="boolean"/>
     </declare-styleable>
+
+    <declare-styleable name="DrawableCenterButton">
+        <attr name="fangxiang" format="integer"/>
+    </declare-styleable>
 </resources>

@@ -25,7 +25,7 @@ public class MyDialog {
     private TextView txtOK;
     private TextView confirm;
     private TextView txtcancle;
-    private ImageView dialog_img;
+    private ImageView dialog_waring_img;
     private TextView title_head;
     private LinearLayout confirm_cancel_lin;
 
@@ -36,7 +36,7 @@ public class MyDialog {
         window.setContentView(R.layout.mydialog_exit);
         txtcancle = (TextView) window.findViewById(R.id.mydialog_cancle);
         txtOK = (TextView) window.findViewById(R.id.mydialog_ok);
-        dialog_img = (ImageView) window.findViewById(R.id.dialog_img);
+        dialog_waring_img = (ImageView) window.findViewById(R.id.dialog_waring_img);
         title_head = (TextView) window.findViewById(R.id.title_head);
         confirm_cancel_lin= (LinearLayout) window.findViewById(R.id.confirm_cancel_lin);
         TextView mydialog_remind = (TextView) window.findViewById(R.id.mydialog_remind);
@@ -102,10 +102,10 @@ public class MyDialog {
 
         if (title == null || title.equals("")) {
             title_head.setVisibility(View.GONE);
-            dialog_img.setVisibility(View.VISIBLE);
+            dialog_waring_img.setVisibility(View.VISIBLE);
         } else {
             title_head.setVisibility(View.VISIBLE);
-            dialog_img.setVisibility(View.GONE);
+            dialog_waring_img.setVisibility(View.GONE);
         }
 
     }

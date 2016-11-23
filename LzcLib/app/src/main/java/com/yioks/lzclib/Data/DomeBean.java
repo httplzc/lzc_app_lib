@@ -8,7 +8,7 @@ import com.yioks.lzclib.Helper.RequestDataBase;
  */
 public class DomeBean implements RequestDataBase {
     @Override
-    public RequestParams SetParams(RequestParams requestParams, String... strings) throws Exception {
+    public RequestParams SetParams(RequestParams requestParams,int type,String... strings) throws Exception {
         return requestParams;
     }
 }

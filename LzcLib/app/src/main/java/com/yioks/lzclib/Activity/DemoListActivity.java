@@ -8,6 +8,7 @@ import com.yioks.lzclib.Data.Bean;
 import com.yioks.lzclib.Data.DomeBean;
 import com.yioks.lzclib.Helper.ParamsBuilder;
 import com.yioks.lzclib.Helper.ResolveDataHelper;
+import com.yioks.lzclib.Helper.ResolveDateHelperImp;
 import com.yioks.lzclib.Helper.onResolveDataFinish;
 
 /**
@@ -26,8 +27,7 @@ public class DemoListActivity extends RefreshListActivity<Bean> {
 
     @Override
     public void GetData() {
-
-        ResolveDataHelper resolveDataHelper=new ResolveDataHelper(context,new DomeBean(), new ParamsBuilder(context).build());
+        ResolveDataHelper resolveDataHelper=new ResolveDateHelperImp(context,new DomeBean(), new ParamsBuilder(context).build());
         resolveDataHelper.setOnResolveDataFinish(new onResolveDataFinish() {
             @Override
             public void resolveFinish(Object data) {

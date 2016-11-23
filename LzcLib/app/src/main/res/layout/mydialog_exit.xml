@@ -23,7 +23,7 @@
             >
 
             <ImageView
-                android:id="@+id/dialog_img"
+                android:id="@+id/dialog_waring_img"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/warning_bai"
