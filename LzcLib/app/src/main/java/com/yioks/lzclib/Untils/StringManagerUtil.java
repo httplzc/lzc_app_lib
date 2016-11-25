@@ -229,4 +229,33 @@ public class StringManagerUtil {
         return matcher.matches();
     }
 
+    public static String getTimeFromDate(String date) {
+        Pattern pattern = Pattern.compile("[0-9]{2}:[0-9]{2}:[0-9]{2}$");
+        Matcher matcher = pattern.matcher(date);
+        if (matcher.find()) {
+            return matcher.group(0);
+        } else {
+            return "";
+        }
+    }
+
+    public static String getXingqiFromDate(String date) throws Exception {
+
+        String s[] = GetYearTime(date).split("-");
+        return StringManagerUtil.DateToWeek(Integer.valueOf(s[0]), Integer.valueOf(s[1]) - 1, Integer.valueOf(s[2]));
+
+    }
+
+
+    public static String GetYearTime(String date){
+        Pattern pattern = Pattern.compile("^[0-9]{4}-[0-9]{2}-[0-9]{2}");
+        Matcher matcher = pattern.matcher(date);
+        if (matcher.find()) {
+            String NYR = matcher.group(0);
+            return NYR;
+        } else {
+            return "";
+        }
+    }
+
 }
