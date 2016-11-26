@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="ParentView">
+        <!--是否拦截事件-->
         <attr name="InterceptTouch" format="boolean"/>
         <attr name="canScroll" format="boolean"/>
         <attr name="content_not_scroll" format="boolean"/>

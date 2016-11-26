@@ -24,7 +24,6 @@ public class GetPhoneImgManager {
     };
 
     public static void GetAlbumList(Activity activity) {
-
     }
 
     /**

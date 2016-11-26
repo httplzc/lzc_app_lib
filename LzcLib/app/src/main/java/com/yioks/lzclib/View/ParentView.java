@@ -83,6 +83,8 @@ public class ParentView extends FrameLayout {
 
     private TextView null_textView;
 
+    private TextView error_textView;
+
 
     public Animation animation;
     public ToNormal toNormal;
@@ -140,12 +142,10 @@ public class ParentView extends FrameLayout {
      */
     protected void initLoadView() {
         loadView = LayoutInflater.from(context).inflate(R.layout.load_layout, this, false);
-        if(context.getResources().getConfiguration().orientation== Configuration.ORIENTATION_LANDSCAPE)
-        {
+        if (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             netFailLayout = LayoutInflater.from(context).inflate(R.layout.netfail_layout_heng, this, false);
 
-        }else
-        {
+        } else {
             netFailLayout = LayoutInflater.from(context).inflate(R.layout.netfail_layout, this, false);
 
         }
@@ -163,8 +163,8 @@ public class ParentView extends FrameLayout {
         this.addView(nullContentView);
         this.addView(loadView);
 
-        TextView textView = (TextView) netFailLayout.findViewById(R.id.net_faile);
-        textView.setText(error_text);
+        error_textView = (TextView) netFailLayout.findViewById(R.id.net_faile);
+        error_textView.setText(error_text);
         null_textView = (TextView) nullContentView.findViewById(R.id.null_content);
         null_textView.setText(null_text);
         loadding_textView = (TextView) findViewById(R.id.loadding_text);
@@ -174,7 +174,7 @@ public class ParentView extends FrameLayout {
         if (!is_show_progress) {
             loadding_progress.setVisibility(GONE);
         } else {
-          //  loadding_boll.setVisibility(GONE);
+            //  loadding_boll.setVisibility(GONE);
             loadding_progress.setIsShowSin(false);
         }
         if (isDebug) {
@@ -507,6 +507,8 @@ public class ParentView extends FrameLayout {
 
     public void setError_text(String error_text) {
         this.error_text = error_text;
+        if (error_textView != null)
+            error_textView.setText(error_text);
     }
 
     public void setProgress(int progress) {

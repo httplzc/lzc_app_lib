@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
-import com.yioks.lzclib.Activity.LunchActivity;
 import com.yioks.lzclib.Data.Bean;
 import com.yioks.lzclib.Data.GlobalVariable;
 import com.yioks.lzclib.Untils.DialogUtil;
@@ -98,8 +97,8 @@ public abstract class ResolveDataHelper {
                     if ((jsonManager.getCode() != null && (jsonManager.getCode().equals("0") || jsonManager.getCode().equals("-301")))) {
                         callbackData(jsonManager.getDataInfo(), jsonManager);
                     } else {
-                        if (jsonManager.getCode() != null && jsonManager.getCode().equals("-201") && !(context instanceof LunchActivity)) {
-                            Token_error();
+                        if (checkTokenError()) {
+                            tokenError();
                             return;
                         }
                         requestDataFail(jsonManager.getMsg(), jsonManager.getCode());
@@ -248,7 +247,6 @@ public abstract class ResolveDataHelper {
 
     }
 
-    protected abstract void Token_error();
 
     /**
      * //清除null
@@ -305,6 +303,10 @@ public abstract class ResolveDataHelper {
             e.printStackTrace();
         }
     }
+
+    public abstract boolean checkTokenError();
+
+    abstract void tokenError();
 
     public interface onProgresUpDate {
         void onProgress(int progress);

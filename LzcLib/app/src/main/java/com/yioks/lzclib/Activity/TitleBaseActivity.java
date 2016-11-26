@@ -18,11 +18,15 @@ import com.yioks.lzclib.Untils.HttpUtil;
  * Created by Administrator on 2016/8/2 0002.
  */
 public class TitleBaseActivity extends AppCompatActivity {
+    //左边返回按钮
     public ImageView left;
+    //标题栏
     public TextView title;
+    //右边图标
     public ImageView right;
     public View mStatusBarView;
     protected Context context;
+    //右边文字
     protected TextView title_text;
 
     /**

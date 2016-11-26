@@ -142,9 +142,12 @@ public abstract class TakePhoteBaseActivity extends TitleBaseActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    //裁剪后图片回调
     public abstract void onCutPicfinish(File file);
 
+    //未裁剪的图片回调
     public abstract void onCutPicfinish(Uri uri);
+
 
     public abstract void onCutPicfinish(Uri[] uris);
 

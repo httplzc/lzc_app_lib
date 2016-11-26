@@ -77,6 +77,8 @@ public class MyDialog {
      * @param isConfirm
      * @param title          传空则为图片
      */
+    /** 参数依次为 上下文  dialog内容  标题（可为空） 能否触摸屏幕外取消 能否点返回键取消
+    是否只有确定**/
     public MyDialog(Context context, String message, @Nullable String title, boolean canTouchCancel, boolean canBackCancel, boolean isConfirm) {
         this(context, message);
         if (canTouchCancel)
