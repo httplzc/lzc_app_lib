@@ -31,7 +31,7 @@ public abstract class ResolveDataHelper {
     protected Context context;
     private RequestDataBase requestData;
     private Object TAG;
-    private int dateType = 0;  //0 model 1 list 2 Hashmap
+    private int dateType = 0;  //0 model 1 list 2 Hashmap -1无特殊返回值
     private int requestType = 0; //0 post 1 get
     private String requestHTTP = GlobalVariable.HTTP;
     private RequestParams requestParams;
@@ -55,7 +55,13 @@ public abstract class ResolveDataHelper {
         }
         if (files == null) {
             try {
-                RequestData(requestData.SetParams(requestParams, dateType, strings));
+                if (requestData == null) {
+                    RequestData(requestParams);
+                } else {
+                    RequestData(requestData.SetParams(requestParams, dateType, strings));
+                }
+
+
             } catch (Exception e) {
                 e.printStackTrace();
                 requestDataFail("请求参数错误");
@@ -97,7 +103,7 @@ public abstract class ResolveDataHelper {
                     if ((jsonManager.getCode() != null && (jsonManager.getCode().equals("0") || jsonManager.getCode().equals("-301")))) {
                         callbackData(jsonManager.getDataInfo(), jsonManager);
                     } else {
-                        if (checkTokenError()) {
+                        if (jsonManager.getCode() != null && jsonManager.getCode().equals("-201") && checkTokenError()) {
                             tokenError();
                             return;
                         }
@@ -195,6 +201,8 @@ public abstract class ResolveDataHelper {
         try {
             //替换null为""
             removeEmptyValue(data);
+            if (data == null)
+                data = "";
             if (onResolveDataFinish != null) {
                 Object resolveData = null;
                 //model
@@ -222,6 +230,8 @@ public abstract class ResolveDataHelper {
                         requestDataFail("服务器出问题了~~");
                         return;
                     }
+                } else if (dateType == -1) {
+                    resolveData = null;
                 } else {
                     requestDataFail("请求内容错误");
                 }
@@ -237,8 +247,10 @@ public abstract class ResolveDataHelper {
 
     //清除null
     public void removeEmptyValue(Object data) {
-        if (data == null || data.equals(""))
+        if (data == null || data.equals("")) {
             return;
+        }
+
         if (data instanceof JSONArray) {
             removeJsonArrayEmpty((JSONArray) data);
         } else if (data instanceof JSONObject) {
@@ -306,7 +318,7 @@ public abstract class ResolveDataHelper {
 
     public abstract boolean checkTokenError();
 
-    abstract void tokenError();
+    public abstract void tokenError();
 
     public interface onProgresUpDate {
         void onProgress(int progress);

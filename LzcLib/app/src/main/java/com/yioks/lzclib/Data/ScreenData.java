@@ -27,26 +27,32 @@ public class ScreenData {
     }
 
     public static void DownScreenColor(Activity activity) {
-        WindowManager.LayoutParams lp = activity.getWindow().getAttributes();
-        lp.alpha = 0.4f;
-        activity.getWindow().setAttributes(lp);
+        DownScreenColor(activity, 0.4f);
     }
 
 
     public static void UpScreenColor(Activity activity) {
+        DownScreenColor(activity, 1f);
+    }
+
+    public static void DownScreenColor(Activity activity, float alpha) {
         WindowManager.LayoutParams lp = activity.getWindow().getAttributes();
-        lp.alpha = 1f;
+        lp.alpha = alpha;
+        if (alpha == 1) {
+            activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);//不移除该Flag的话,在有视频的页面上的视频会出现黑屏的bug
+        } else {
+            activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);//此行代码主要是解决在华为手机上半透明效果无效的bug
+        }
         activity.getWindow().setAttributes(lp);
     }
 
-    public static int PxToDp(int px)
-    {
-        return (int) (px/ScreenData.density);
+
+    public static int PxToDp(int px) {
+        return (int) (px / ScreenData.density);
     }
 
-    public static int DpToPx(int dp)
-    {
-        return (int) (dp*ScreenData.density);
+    public static int DpToPx(int dp) {
+        return (int) (dp * ScreenData.density);
     }
 
 }

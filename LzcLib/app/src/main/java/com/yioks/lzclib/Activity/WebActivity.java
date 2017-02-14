@@ -57,7 +57,7 @@ public class WebActivity extends TitleBaseActivity {
             }
         });
         webView.setDownloadListener(new DownLoadListener());
-      //  webView.addJavascriptInterface(this, "call_android");
+        //  webView.addJavascriptInterface(this, "call_android");
     }
 
 
@@ -76,6 +76,12 @@ public class WebActivity extends TitleBaseActivity {
         if (url != null && !url.equals("")) {
             webView.loadUrl(url);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        webView.destroy();
+        super.onDestroy();
     }
 
     public class MyWebViewClient extends WebViewClient {

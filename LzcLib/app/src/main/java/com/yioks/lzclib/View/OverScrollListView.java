@@ -274,11 +274,11 @@ public class OverScrollListView extends ListView {
         if (null == adapter || adapter.isEmpty()) {
             return true;
         } else {
-            Log.i("lzc","getchildcont"+this.getCount());
+//            Log.i("lzc","getchildcont"+this.getCount());
             if (this.getFirstVisiblePosition() <=0) {
                 final View firstVisibleChild = this.getChildAt(0);
                 if (firstVisibleChild != null) {
-                    Log.i("lzc", "isFirstVisable" + firstVisibleChild.getTop());
+//                    Log.i("lzc", "isFirstVisable" + firstVisibleChild.getTop());
                     return firstVisibleChild.getTop() == 0;
                 }
             }
@@ -370,7 +370,6 @@ public class OverScrollListView extends ListView {
     }
 
     protected void overScrollTop(int deltaY) {
-        Log.i("lzc", "overscrollHead");
         overscrollAnimator = ValueAnimator.ofInt(0, deltaY * 7, 0);
         overscrollAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override

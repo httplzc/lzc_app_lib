@@ -3,6 +3,8 @@ package com.yioks.lzclib.View;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Color;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -41,15 +43,17 @@ public class OverScrollScrollView extends ScrollView {
     private boolean dragOverScrollEnable = true;
     private boolean dragOverScrollHeadEnable = true;
     private boolean dragOverScrollFootEnable = true;
-    private final static float radio=0.45f;
-    private final static long back_time=500;
+    private final static float radio = 0.45f;
+    private final static long back_time = 400;
     //第一次电机的X坐标
     protected float firstX;
     //第一次电机的Y坐标
     protected float firstY;
 
     private VelocityTracker velocityTracker;
-    private int bottomHeight=0;
+    private int headColor= Color.WHITE;
+    private int footColor=Color.WHITE;
+    private int bottomHeight = 0;
 
     public OverScrollScrollView(Context context) {
         super(context);
@@ -58,22 +62,18 @@ public class OverScrollScrollView extends ScrollView {
 
     }
 
-    private void initUntil()
-    {
+    private void initUntil() {
         scroller = new Scroller(context, new OvershootInterpolator());
         this.setOverScrollMode(OVER_SCROLL_NEVER);
         this.setVerticalScrollBarEnabled(false);
-        if(velocityTracker==null)
-        {
+        if (velocityTracker == null) {
             initVelocity();
         }
     }
 
-    private void initVelocity()
-    {
+    private void initVelocity() {
         velocityTracker = VelocityTracker.obtain();
     }
-
 
 
     private void initdate(AttributeSet attrs) {
@@ -82,6 +82,8 @@ public class OverScrollScrollView extends ScrollView {
         dragOverScrollEnable = typedArray.getBoolean(R.styleable.OverScrollScrollView_dragOverScrollEnable_sv, true);
         dragOverScrollHeadEnable = typedArray.getBoolean(R.styleable.OverScrollScrollView_dragOverScrollHeadEnable_sv, true);
         dragOverScrollFootEnable = typedArray.getBoolean(R.styleable.OverScrollScrollView_dragOverScrollFootEnable_sv, true);
+        headColor = typedArray.getColor(R.styleable.OverScrollScrollView_OverScrollHeadColor, ContextCompat.getColor(context, R.color.white));
+        footColor = typedArray.getColor(R.styleable.OverScrollScrollView_OverScrollFootColor, ContextCompat.getColor(context, R.color.white));
         typedArray.recycle();
     }
 
@@ -89,7 +91,7 @@ public class OverScrollScrollView extends ScrollView {
     protected void onDetachedFromWindow() {
         try {
             velocityTracker.recycle();
-            velocityTracker=null;
+            velocityTracker = null;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -122,8 +124,7 @@ public class OverScrollScrollView extends ScrollView {
                 firstX = eventX;
                 firstY = eventY;
                 downY = eventY;
-                if(isLessData())
-                {
+                if (isLessData()) {
                     lessDataDo((ViewGroup) this.getChildAt(0));
                 }
                 return false;
@@ -157,25 +158,22 @@ public class OverScrollScrollView extends ScrollView {
         viewGroup.addView(footview);
         headview.setLayoutParams(layoutParams);
         footview.setLayoutParams(layoutParamsfoot);
-//        headview.setBackgroundResource(R.color.blue);
-//        footview.setBackgroundResource(R.color.orange);
+        headview.setBackgroundColor(headColor);
+        footview.setBackgroundColor(footColor);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-     //   Log.i("lzc", "scrollView");
-        if(velocityTracker==null)
-        {
+        //   Log.i("lzc", "scrollView");
+        if (velocityTracker == null) {
             initVelocity();
         }
 
 
-           ViewParent viewParent= getParent();
-        if(viewParent instanceof RefreshScrollParentViewBase)
-        {
-            RefreshScrollParentViewBase refreshScrollParentViewBase= (RefreshScrollParentViewBase) viewParent;
-            if(refreshScrollParentViewBase.reFreshSatus!= RefreshScrollParentViewBase.ReFreshSatus.NORMAL)
-            {
+        ViewParent viewParent = getParent();
+        if (viewParent instanceof RefreshScrollParentViewBase) {
+            RefreshScrollParentViewBase refreshScrollParentViewBase = (RefreshScrollParentViewBase) viewParent;
+            if (refreshScrollParentViewBase.reFreshSatus != RefreshScrollParentViewBase.ReFreshSatus.NORMAL) {
                 return super.onTouchEvent(ev);
             }
         }
@@ -198,20 +196,19 @@ public class OverScrollScrollView extends ScrollView {
                 velocityTracker.clear();
                 break;
             case MotionEvent.ACTION_MOVE:
-              //  Log.i("lzc", "move");
+                //  Log.i("lzc", "move");
                 velocityTracker.addMovement(ev);
                 if (isFirstItemVisible() || layoutParamsTop.height != 0) {
                     if (lastY != downY) {
-                   //     Log.i("lzc", "eventY - lastY" + (eventY - lastY));
+                        //     Log.i("lzc", "eventY - lastY" + (eventY - lastY));
                         if (eventY - lastY > 0 || layoutParamsTop.height != 0) {
 
                             layoutParamsTop.height += (eventY - lastY) * radio;
                             if (layoutParamsTop.height < 0) {
                                 layoutParamsTop.height = 0;
                             }
-                            if(!dragOverScrollHeadEnable)
-                            {
-                                layoutParamsTop.height=0;
+                            if (!dragOverScrollHeadEnable) {
+                                layoutParamsTop.height = 0;
                             }
                             headview.setLayoutParams(layoutParamsTop);
                             headview.invalidate();
@@ -243,13 +240,12 @@ public class OverScrollScrollView extends ScrollView {
                 }
                 if (isLastItemVisible() || layoutParamsFoot.height != 0) {
                     if (lastY != downY) {
-                        if ( eventY - lastY < 0 || layoutParamsFoot.height != 0) {
+                        if (eventY - lastY < 0 || layoutParamsFoot.height != 0) {
                             layoutParamsFoot.height += (lastY - eventY) * radio;
                             if (layoutParamsFoot.height < 0) {
                                 layoutParamsFoot.height = 0;
                             }
-                            if(!dragOverScrollFootEnable)
-                            {
+                            if (!dragOverScrollFootEnable) {
                                 layoutParamsFoot.height = 0;
                             }
                             footview.setLayoutParams(layoutParamsFoot);
@@ -322,11 +318,10 @@ public class OverScrollScrollView extends ScrollView {
         return false;
     }
 
-    private void lessDataDo(ViewGroup scrollViewChild)
-    {
+    private void lessDataDo(ViewGroup scrollViewChild) {
         LinearLayout.LayoutParams layoutParamsFoot = (LinearLayout.LayoutParams) footview.getLayoutParams();
-        layoutParamsFoot.height = getHeight() - scrollViewChild.getHeight()-scrollViewChild.getPaddingTop();
-        bottomHeight=getHeight() - scrollViewChild.getChildAt(scrollViewChild.getChildCount() - 1).getBottom()-scrollViewChild.getPaddingTop();
+        layoutParamsFoot.height = getHeight() - scrollViewChild.getHeight() - scrollViewChild.getPaddingTop();
+        bottomHeight = getHeight() - scrollViewChild.getChildAt(scrollViewChild.getChildCount() - 1).getBottom() - scrollViewChild.getPaddingTop();
     }
 
     private boolean isLastItemVisible() {
@@ -345,28 +340,27 @@ public class OverScrollScrollView extends ScrollView {
         if (!flingOverScrollEnable) {
             return super.overScrollBy(deltaX, deltaY, scrollX, scrollY, scrollRangeX, scrollRangeY, maxOverScrollX, maxOverScrollY, isTouchEvent);
         }
-        if(velocityTracker==null)
-        {
+        if (velocityTracker == null) {
             initVelocity();
         }
         velocityTracker.computeCurrentVelocity(1000);
-        int lastSpeed= (int) velocityTracker.getYVelocity();
+        int lastSpeed = (int) velocityTracker.getYVelocity();
         int newScrollY = scrollY + deltaY;
         final int bottom = maxOverScrollY + scrollRangeY;
         final int top = -maxOverScrollY;
 
         if (newScrollY > bottom) {
-         //   Log.i("lzc","isTouchEvent"+isTouchEvent+(valueAnimator == null)+"------"+(overscrollAnimator == null));
+            //   Log.i("lzc","isTouchEvent"+isTouchEvent+(valueAnimator == null)+"------"+(overscrollAnimator == null));
             if (!isTouchEvent && (valueAnimator == null || !valueAnimator.isRunning()) && (valueAnimator2 == null || !valueAnimator2.isRunning())) {
                 if (overscrollAnimator == null || !overscrollAnimator.isRunning()) {
-                   // Log.i("lzc","isTouchEvent"+isTouchEvent+"---"+lastSpeed);
-                    overScrollBottom((int) (lastSpeed/50f));
+                    // Log.i("lzc","isTouchEvent"+isTouchEvent+"---"+lastSpeed);
+                    overScrollBottom((int) (lastSpeed / 50f));
                 }
             }
         } else if (newScrollY < top) {
             if (!isTouchEvent && (valueAnimator == null || !valueAnimator.isRunning()) && (valueAnimator2 == null || !valueAnimator2.isRunning())) {
                 if (overscrollAnimator == null || !overscrollAnimator.isRunning()) {
-                            overScrollTop((int) (lastSpeed / 50f));
+                    overScrollTop((int) (lastSpeed / 50f));
                 }
             }
         }
@@ -376,19 +370,18 @@ public class OverScrollScrollView extends ScrollView {
 
 
     protected void overScrollBottom(int deltaY) {
-        deltaY=Math.abs(deltaY);
-        if(deltaY==0)
-        {
-            deltaY= (int) (30* ScreenData.density);
+        deltaY = Math.abs(deltaY);
+        if (deltaY == 0) {
+            deltaY = (int) (30 * ScreenData.density);
         }
         //  overscrollAnimator = ValueAnimator.ofInt(this.getScrollY(), scrollRangeY, this.getScrollY());
         overscrollAnimator = ValueAnimator.ofInt(0, deltaY, 0);
         overscrollAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-           //     Log.i("lzc", "scroll_bottom_animation" + animation.getAnimatedValue() + "----" + footview.getHeight());
+                //     Log.i("lzc", "scroll_bottom_animation" + animation.getAnimatedValue() + "----" + footview.getHeight());
                 LinearLayout.LayoutParams layoutParamsFoot = (LinearLayout.LayoutParams) footview.getLayoutParams();
-           //     Log.i("lzc", "" + "layoutParamsFoot.height" + layoutParamsFoot.height);
+                //     Log.i("lzc", "" + "layoutParamsFoot.height" + layoutParamsFoot.height);
                 layoutParamsFoot.height = (int) animation.getAnimatedValue();
                 footview.setLayoutParams(layoutParamsFoot);
                 footview.invalidate();
@@ -397,17 +390,16 @@ public class OverScrollScrollView extends ScrollView {
 //                OverScrollScrollView.this.scrollTo(0, (int) (animation.getAnimatedValue()));
             }
         });
-        overscrollAnimator.setDuration(700);
+        overscrollAnimator.setDuration(500);
         overscrollAnimator.setInterpolator(new DecelerateInterpolator());
         overscrollAnimator.start();
     }
 
     protected void overScrollTop(int deltaY) {
-        Log.i("lzc","deltaY"+deltaY);
-        deltaY=Math.abs(deltaY);
-        if(deltaY==0)
-        {
-            deltaY= (int) (30* ScreenData.density);
+        Log.i("lzc", "deltaY" + deltaY);
+        deltaY = Math.abs(deltaY);
+        if (deltaY == 0) {
+            deltaY = (int) (30 * ScreenData.density);
         }
         overscrollAnimator = ValueAnimator.ofInt(0, deltaY, 0);
         overscrollAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {

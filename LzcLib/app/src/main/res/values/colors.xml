@@ -21,5 +21,7 @@
     <color name="dialog_btn_normal_line">#EFEFEF</color>
     <color name="orange">#ff7144</color>
     <color name="main_cheng">#ff6929</color>
+    <color name="snack_background">#5dd0e0</color>
+
 
 </resources>

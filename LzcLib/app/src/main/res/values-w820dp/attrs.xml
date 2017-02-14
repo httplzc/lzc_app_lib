@@ -23,6 +23,8 @@
         <attr name="dragOverScrollEnable_sv" format="boolean"></attr>
         <attr name="dragOverScrollHeadEnable_sv" format="boolean"></attr>
         <attr name="dragOverScrollFootEnable_sv" format="boolean"></attr>
+        <attr name="OverScrollHeadColor" format="color"></attr>
+        <attr name="OverScrollFootColor" format="color"></attr>
     </declare-styleable>
 
     <declare-styleable name="OverScrollListView">
