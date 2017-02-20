@@ -215,7 +215,7 @@ public class StringManagerUtil {
             return false;
         }
         Pattern pattern = Pattern.compile("^\\w+([\\.-]?\\w+)*@\\w+([\\.-]?\\w+)*(\\.\\w{2,3})+$");
-        Matcher matcher = pattern.matcher(email);
+        Matcher matcher = pattern.matcher(email.trim());
         return matcher.matches();
     }
 
@@ -225,7 +225,7 @@ public class StringManagerUtil {
             return false;
         }
         Pattern pattern = Pattern.compile("[0-9]+");
-        Matcher matcher = pattern.matcher(number);
+        Matcher matcher = pattern.matcher(number.trim());
         return matcher.matches();
     }
 

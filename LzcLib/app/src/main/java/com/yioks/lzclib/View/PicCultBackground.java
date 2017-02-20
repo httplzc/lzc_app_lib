@@ -9,7 +9,6 @@ import android.graphics.PorterDuffXfermode;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.yioks.lzclib.Activity.PicCultActivity;
 import com.yioks.lzclib.Data.ScreenData;
 
 
@@ -22,8 +21,8 @@ public class PicCultBackground extends View {
     private float mright;
     private float mbottom;
 
-    private float width;
-    private float height;
+    private float realWidth;
+    private float realHeight;
     private boolean is_circle=false;
     public PicCultBackground(Context context) {
         super(context);
@@ -44,18 +43,18 @@ public class PicCultBackground extends View {
         super.onDraw(canvas);
         float ParentWidth=getWidth();
         float ParentHeight=getHeight();
-        width= PicCultActivity.backWidth;
-        height=PicCultActivity.bili*width;
+//        realWidth= PicCultActivity.backWidth;
+//        realHeight=PicCultActivity.bili*realWidth;
         mleft = 20* ScreenData.density+5;
-        mtop = (ParentHeight-height)/2f+5;
-        mright = mleft +width-5;
-        mbottom = mtop +height-5;
+        mtop = (ParentHeight- realHeight)/2f+5;
+        mright = mleft + realWidth -5;
+        mbottom = mtop + realHeight -5;
         Paint paint=new Paint();
         paint.setAntiAlias(true);
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.XOR));
-        if(is_circle&&PicCultActivity.bili-1f<=0.001)
+        if(is_circle)
         {
-            canvas.drawCircle((mleft+mright)/2f,(mtop+mbottom)/2f,width/2f,paint);
+            canvas.drawCircle((mleft+mright)/2f,(mtop+mbottom)/2f, realWidth /2f,paint);
         }
         else
         {
@@ -67,9 +66,9 @@ public class PicCultBackground extends View {
         paint.setStrokeWidth(2f);
         paint.setStrokeWidth(2f);
         paint.setStyle(Paint.Style.STROKE);
-        if(is_circle&&PicCultActivity.bili-1f<=0.001)
+        if(is_circle)
         {
-            canvas.drawCircle((mleft+mright)/2f,(mtop+mbottom)/2f,width/2f-2,paint);
+            canvas.drawCircle((mleft+mright)/2f,(mtop+mbottom)/2f, realWidth /2f-2,paint);
         } else {
             canvas.drawRect(mleft - 2, mtop - 2, mright + 2, mbottom + 2, paint);
         }
@@ -124,5 +123,21 @@ public class PicCultBackground extends View {
 
     public void setIs_circle(boolean is_circle) {
         this.is_circle = is_circle;
+    }
+
+    public float getRealWidth() {
+        return realWidth;
+    }
+
+    public void setRealWidth(float realWidth) {
+        this.realWidth = realWidth;
+    }
+
+    public float getRealHeight() {
+        return realHeight;
+    }
+
+    public void setRealHeight(float realHeight) {
+        this.realHeight = realHeight;
     }
 }

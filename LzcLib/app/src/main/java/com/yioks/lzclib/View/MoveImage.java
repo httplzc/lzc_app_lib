@@ -5,17 +5,15 @@ import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.ImageView;
-
-import com.yioks.lzclib.Activity.PicCultActivity;
-import com.yioks.lzclib.Data.ScreenData;
 
 
 /**
  * Created by Yioks on 2016/7/1.
  */
-public class MoveImage extends ImageView{
+public class MoveImage extends ImageView {
     private PointF startPoint = new PointF();
     //定义矩阵
     private Matrix matrix;
@@ -30,8 +28,6 @@ public class MoveImage extends ImageView{
     private float startDis = 0;
     //中心点
     private PointF midPoint;
-    private float offX;
-    private float offY;
     private float dx;
     private float dy;
 
@@ -40,12 +36,9 @@ public class MoveImage extends ImageView{
     private float maxright;
     private float maxtop;
     private float maxbottom;
-    private float lastscale=1;
-    private float upscale=1;
-    private boolean fromZoom=false;
+    private float bitmapWidth;
+    private float bitmapHeight;
     private Context context;
-    private Matrix lastMatrix=new Matrix();
-
 
 
     public MoveImage(Context context) {
@@ -55,7 +48,85 @@ public class MoveImage extends ImageView{
 
     public MoveImage(Context context, AttributeSet paramAttributeSet) {
         super(context, paramAttributeSet);
-        this.context=context;
+        this.context = context;
+    }
+
+    //拖动执行
+    private void dragDo(MotionEvent event) {
+        dx = event.getX() - startPoint.x;
+        dy = event.getY() - startPoint.y;
+
+        matrix = new Matrix(currentMaritx);
+
+
+        Matrix matrixteamp = new Matrix(currentMaritx);
+        matrixteamp.postTranslate(dx, dy);
+        RectF rectF = new RectF();
+        rectF.right = bitmapWidth;
+        rectF.bottom = bitmapHeight;
+        matrixteamp.mapRect(rectF);
+        float left = rectF.left;
+        float right = rectF.right;
+        float bottom = rectF.bottom;
+        float top = rectF.top;
+
+        //未变化的图片
+        RectF currentRect = new RectF();
+        currentRect.right = bitmapWidth;
+        currentRect.bottom = bitmapHeight;
+        currentMaritx.mapRect(currentRect);
+
+
+        if (maxleft > left && maxtop > top && right > maxright && bottom > maxbottom) {
+            matrix = matrixteamp;
+        } else {
+            transLateDragToRight(left, right, bottom, top, matrix,currentRect);
+        }
+    }
+
+    //矫正拖动位置
+    private void transLateDragToRight(float left, float right, float bottom, float top, Matrix matrix, RectF currentRect) {
+        float realdx = dx;
+        float realdy = dy;
+
+        if (maxleft < left) {
+            realdx = maxleft-currentRect.left;
+        }
+
+        if (maxtop < top) {
+            realdy = maxtop - currentRect.top;
+        }
+        if (right < maxright) {
+            realdx = maxright-currentRect.right;
+        }
+        if (bottom < maxbottom) {
+            realdy = maxbottom - currentRect.bottom;
+        }
+        matrix.postTranslate(realdx, realdy);
+
+    }
+
+
+    //矫正放大位置
+    private void transLateToRight(float left, float right, float bottom, float top, Matrix matrix) {
+        float realdx = dx;
+        float realdy = dy;
+
+        if (maxleft < left) {
+            realdx = maxleft - left;
+        }
+
+        if (maxtop < top) {
+            realdy = maxtop - top;
+        }
+        if (right < maxright) {
+            realdx = -right + maxright;
+        }
+        if (bottom < maxbottom) {
+            realdy = maxbottom - bottom;
+        }
+        matrix.postTranslate(realdx, realdy);
+
     }
 
     public boolean onTouchEvent(MotionEvent event) {
@@ -69,113 +140,23 @@ public class MoveImage extends ImageView{
                 startPoint.set(event.getX(), event.getY());
                 break;
             case MotionEvent.ACTION_MOVE:
+                //拖动
                 if (mode == DRAG) {
-                    dx = event.getX() - startPoint.x;
-                    dy = event.getY() - startPoint.y;
-
-                    matrix = new Matrix(currentMaritx);
-
-
-                    Matrix matrixteamp=new Matrix(currentMaritx);
-                    matrixteamp.postTranslate(dx, dy);
-                    RectF rectF=new RectF();
-                    PicCultActivity picCultActivity= (PicCultActivity) context;
-                    rectF.right=picCultActivity.getBitmapwidth();
-                    rectF.bottom=picCultActivity.getBitmapheight();
-                    matrixteamp.mapRect(rectF);
-                    float left=rectF.left;
-                    float right=rectF.right;
-                    float bottom=rectF.bottom;
-                    float top=rectF.top;
-
-                    RectF currentRect=new RectF();
-                    currentRect.right=picCultActivity.getBitmapwidth();
-                    currentRect.bottom=picCultActivity.getBitmapheight();
-                    currentMaritx.mapRect(currentRect);
-
-
-
-                    float litmatHeight=(PicCultActivity.PicRealHeight-PicCultActivity.backHeight)/2f;
-                    if (20* ScreenData.density>left&&litmatHeight>top&&right>(ScreenData.widthPX-20*ScreenData.density)&&bottom>(PicCultActivity.PicRealHeight-litmatHeight))
-                    {
-
-                        matrix=matrixteamp;
-                    }
-                    else
-                    {
-
-
-                        float realdx=dx;
-                        float realdy=dy;
-
-                        if(!(20*ScreenData.density>left))
-                        {
-                            realdx=20*ScreenData.density-currentRect.left;
-                            realdx=realdx+0.1f*realdx/Math.abs(realdx);
-                        }
-
-                        if(!(litmatHeight>top))
-                        {
-                            realdy=litmatHeight-currentRect.top;
-                            realdy=realdy+0.1f*realdy/Math.abs(realdy);
-                        }
-                        if(!(right>(ScreenData.widthPX-20*ScreenData.density)))
-                        {
-                            realdx=-(currentRect.right-(ScreenData.widthPX-20*ScreenData.density));
-                            realdx=realdx+0.1f*realdx/Math.abs(realdx);
-                        }
-                        if(!(bottom>(PicCultActivity.PicRealHeight-litmatHeight)))
-                        {
-                            realdy=-(currentRect.bottom-(PicCultActivity.PicRealHeight-litmatHeight));
-                            realdy=realdy+0.1f*realdy/Math.abs(realdy);
-                        }
-                        matrix.postTranslate(realdx, realdy);
-                    }
-
-
-
-
-                    //放大
-                } else if (mode == ZOOM) {
-                    float endDis = distance(event);
-                    if (endDis > 10f) {
-                        boolean flag=true;
-                        float scale = endDis / startDis;
-                        while(flag)
-                        {
-
-                            Matrix matrixteamp=moveLenlimit(scale);
-
-                            if (matrixteamp!=null)
-                            {
-                                matrix=matrixteamp;
-                                break;
-                            }
-                            else
-                            {
-                                scale+=0.001;
-
-                                if(scale>=1)
-                                {
-                                    break;
-                                }
-                            }
-                        }
-
-                    }
+                    dragDo(event);
+                }
+                //放大
+                else if (mode == ZOOM) {
+                    zoomDo(event);
                 }
                 break;
             case MotionEvent.ACTION_UP:
                 mode = 0;
-                if(!fromZoom)
-                {
-                    offX+=dx;
-                    offY+=dy;
-                }
-                else
-                {
-                    upscale=lastscale;
-                }
+//                if (!fromZoom) {
+////                    offX += dx;
+////                    offY += dy;
+//                } else {
+//                    upscale = lastscale;
+//                }
                 break;
 
             case MotionEvent.ACTION_POINTER_UP:
@@ -192,54 +173,111 @@ public class MoveImage extends ImageView{
                 }
                 break;
         }
-        if (matrix != null)
+        if (matrix != null) {
             this.setImageMatrix(matrix);
-        lastMatrix.set(matrix);
+        }
         return true;
     }
 
+    //放大执行
+    private void zoomDo(MotionEvent event) {
+        float endDis = distance(event);
+        if (endDis > 10f) {
+            boolean flag = true;
+            float scale = endDis / startDis;
+            midPoint = mid(event);
+            while (flag) {
 
-    private Matrix moveLenlimit(float scale)
-    {
+                Matrix matrixteamp = moveLenlimit(scale);
+
+                if (matrixteamp != null) {
+                    matrix = matrixteamp;
+                    break;
+                } else {
+                    scale += 0.001;
+                    if (scale >= 1) {
+                        break;
+                    }
+                }
+            }
+
+        }
+    }
+
+
+    //手势放大判断越界
+
+    private Matrix moveLenlimit(float scale) {
         matrix = new Matrix();
         matrix.set(currentMaritx);
-        float litmatHeight=(PicCultActivity.PicRealHeight-PicCultActivity.backHeight)/2f;
-        Matrix matrixteamp=new Matrix(currentMaritx);
-        matrixteamp.postScale(scale, scale,midPoint.x,midPoint.y);
-        RectF rectF=new RectF();
-        PicCultActivity picCultActivity= (PicCultActivity) context;
-        rectF.right=picCultActivity.getBitmapwidth();
-        rectF.bottom=picCultActivity.getBitmapheight();
+        Matrix matrixteamp = new Matrix(currentMaritx);
+        // setZoomCenter();
+        Log.i("lzc", "scale" + scale);
+        matrixteamp.postScale(scale, scale, midPoint.x, midPoint.y);
+        RectF rectF = new RectF();
+        rectF.right = bitmapWidth;
+        rectF.bottom = bitmapHeight;
         matrixteamp.mapRect(rectF);
-        float left=rectF.left;
-        float right=rectF.right;
-        float bottom=rectF.bottom;
-        float top=rectF.top;
-        if(!(20*ScreenData.density>left&&litmatHeight>top&&right>(ScreenData.widthPX-20*ScreenData.density)&&bottom>(PicCultActivity.PicRealHeight-litmatHeight)))
-        {
-            return null;
-        }
-        else
-        {
+        float left = rectF.left;
+        float right = rectF.right;
+        float bottom = rectF.bottom;
+        float top = rectF.top;
+        if (!(maxleft > left && maxtop > top && right > maxright && bottom > maxbottom)) {
+            if (right - left < maxright - maxleft || bottom - top < maxbottom - maxtop)
+                return null;
+            else {
+                transLateToRight(left, right, bottom, top, matrixteamp);
+                return matrixteamp;
+            }
+        } else {
             return matrixteamp;
         }
     }
 
-    private  float distance(MotionEvent event) {
+//    private void setZoomCenter() {
+//        RectF rectF = new RectF();
+//        float litmatHeight = (PicCultActivity.PicRealHeight - PicCultActivity.backHeight) / 2f;
+//        PicCultActivity picCultActivity = (PicCultActivity) context;
+//        rectF.right = picCultActivity.getBitmapwidth();
+//        rectF.bottom = picCultActivity.getBitmapheight();
+//        currentMaritx.mapRect(rectF);
+//        float left = rectF.left;
+//        float right = rectF.right;
+//        float bottom = rectF.bottom;
+//        float top = rectF.top;
+//
+//        if (cult_padding < left) {
+//            midPoint.x = cult_padding;
+//        }
+//
+//        if (litmatHeight < top) {
+//            midPoint.y = litmatHeight;
+//        }
+//
+//        if (right < (ScreenData.widthPX - cult_padding)) {
+//            midPoint.x = ScreenData.widthPX - cult_padding;
+//        }
+//
+//        if (PicCultActivity.PicRealHeight - litmatHeight > bottom) {
+//            midPoint.y = PicCultActivity.PicRealHeight - litmatHeight;
+//        }
+//
+//    }
+
+    private float distance(MotionEvent event) {
         //两根线的距离
         float dx = event.getX(1) - event.getX(0);
         float dy = event.getY(1) - event.getY(0);
         return (float) Math.sqrt(dx * dx + dy * dy);
     }
 
-
-    private  PointF mid(MotionEvent event) {
+    //获取手势中点
+    private PointF mid(MotionEvent event) {
         float midx = event.getX(1) + event.getX(0);
         float midy = event.getY(1) + event.getY(0);
-        return new PointF(ScreenData.widthPX / 2f, ScreenData.heightPX/ 2f);
-       // return new PointF(1500,1500);
+        //   return new PointF(20f*ScreenData.density,(PicCultActivity.PicRealHeight-PicCultActivity.backHeight) / 2f);
+        return new PointF(midx / 2f, midy / 2f);
     }
-
 
 
     public void setMaxleft(float maxleft) {
@@ -256,5 +294,37 @@ public class MoveImage extends ImageView{
 
     public void setMaxbottom(float maxbottom) {
         this.maxbottom = maxbottom;
+    }
+
+    public float getBitmapWidth() {
+        return bitmapWidth;
+    }
+
+    public void setBitmapWidth(float bitmapWidth) {
+        this.bitmapWidth = bitmapWidth;
+    }
+
+    public float getBitmapHeight() {
+        return bitmapHeight;
+    }
+
+    public void setBitmapHeight(float bitmapHeight) {
+        this.bitmapHeight = bitmapHeight;
+    }
+
+    public float getMaxbottom() {
+        return maxbottom;
+    }
+
+    public float getMaxtop() {
+        return maxtop;
+    }
+
+    public float getMaxright() {
+        return maxright;
+    }
+
+    public float getMaxleft() {
+        return maxleft;
     }
 }

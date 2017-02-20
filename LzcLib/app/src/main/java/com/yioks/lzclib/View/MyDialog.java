@@ -38,7 +38,7 @@ public class MyDialog {
         txtOK = (TextView) window.findViewById(R.id.mydialog_ok);
         dialog_waring_img = (ImageView) window.findViewById(R.id.dialog_waring_img);
         title_head = (TextView) window.findViewById(R.id.title_head);
-        confirm_cancel_lin= (LinearLayout) window.findViewById(R.id.confirm_cancel_lin);
+        confirm_cancel_lin = (LinearLayout) window.findViewById(R.id.confirm_cancel_lin);
         TextView mydialog_remind = (TextView) window.findViewById(R.id.mydialog_remind);
         mydialog_remind.setText(message);
         confirm = (TextView) window.findViewById(R.id.mydialog_confirm);
@@ -77,8 +77,10 @@ public class MyDialog {
      * @param isConfirm
      * @param title          传空则为图片
      */
-    /** 参数依次为 上下文  dialog内容  标题（可为空） 能否触摸屏幕外取消 能否点返回键取消
-    是否只有确定**/
+    /**
+     * 参数依次为 上下文  dialog内容  标题（可为空） 能否触摸屏幕外取消 能否点返回键取消
+     * 是否只有确定
+     **/
     public MyDialog(Context context, String message, @Nullable String title, boolean canTouchCancel, boolean canBackCancel, boolean isConfirm) {
         this(context, message);
         if (canTouchCancel)
@@ -112,6 +114,18 @@ public class MyDialog {
 
     }
 
+    public void setConfirmText(String string) {
+        confirm.setText(string);
+    }
+
+    public void setOKText(String string) {
+        txtOK.setText(string);
+    }
+
+    public void setCancelText(String string) {
+        txtcancle.setText(string);
+    }
+
 
     public void showDialog() {
         if (dialog.isShowing()) {
@@ -138,5 +152,43 @@ public class MyDialog {
 
     public void setCancel_button_click_listener(View.OnClickListener cancel_button_click_listener) {
         this.cancel_button_click_listener = cancel_button_click_listener;
+    }
+
+    public static class Builder {
+        private Context context;
+        private String message;
+        private String title;
+        private boolean canTouchCancel;
+        private boolean canBackCancel;
+        private boolean isConfirm;
+
+        public Builder(Context context) {
+            this.context = context;
+        }
+
+        public Builder message(String message) {
+            this.message = message;
+            return this;
+        }
+
+        public Builder canTouchCancel(boolean canTouchCancel) {
+            this.canTouchCancel = canTouchCancel;
+            return this;
+        }
+
+        public Builder canBackCancel(boolean canBackCancel) {
+            this.canBackCancel = canBackCancel;
+            return this;
+        }
+
+        public Builder isConfirm(boolean isConfirm) {
+            this.isConfirm = isConfirm;
+            return this;
+        }
+
+
+        public MyDialog build() {
+            return new MyDialog(context, message, title, canTouchCancel, canBackCancel, isConfirm);
+        }
     }
 }

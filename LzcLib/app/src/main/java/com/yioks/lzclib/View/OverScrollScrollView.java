@@ -189,79 +189,83 @@ public class OverScrollScrollView extends ScrollView {
         if (valueAnimator2 != null) {
             valueAnimator2.removeAllUpdateListeners();
         }
-        switch (ev.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                downY = eventY;
-                lastY = eventY;
-                velocityTracker.clear();
-                break;
-            case MotionEvent.ACTION_MOVE:
-                //  Log.i("lzc", "move");
-                velocityTracker.addMovement(ev);
-                if (isFirstItemVisible() || layoutParamsTop.height != 0) {
-                    if (lastY != downY) {
-                        //     Log.i("lzc", "eventY - lastY" + (eventY - lastY));
-                        if (eventY - lastY > 0 || layoutParamsTop.height != 0) {
+        try {
+            switch (ev.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    downY = eventY;
+                    lastY = eventY;
+                    velocityTracker.clear();
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    //  Log.i("lzc", "move");
+                    velocityTracker.addMovement(ev);
+                    if (isFirstItemVisible() || layoutParamsTop.height != 0) {
+                        if (lastY != downY) {
+                            //     Log.i("lzc", "eventY - lastY" + (eventY - lastY));
+                            if (eventY - lastY > 0 || layoutParamsTop.height != 0) {
 
-                            layoutParamsTop.height += (eventY - lastY) * radio;
-                            if (layoutParamsTop.height < 0) {
-                                layoutParamsTop.height = 0;
-                            }
-                            if (!dragOverScrollHeadEnable) {
-                                layoutParamsTop.height = 0;
-                            }
-                            headview.setLayoutParams(layoutParamsTop);
-                            headview.invalidate();
-                            if (eventY - lastY < 0) {
-
-                                Class aClass = this.getClass();
-                                while (!aClass.getName().equals(ScrollView.class.getName())) {
-                                    aClass = aClass.getSuperclass();
+                                layoutParamsTop.height += (eventY - lastY) * radio;
+                                if (layoutParamsTop.height < 0) {
+                                    layoutParamsTop.height = 0;
                                 }
-                                try {
-                                    final int activePointerIndex = ev.findPointerIndex(ev.getPointerId(0));
-                                    final int y = (int) ev.getY(activePointerIndex);
-                                    Field field = aClass.getDeclaredField("mLastMotionY");
-                                    field.setAccessible(true);
-                                    field.set(this, y);
-                                } catch (NoSuchFieldException e) {
-                                    e.printStackTrace();
-                                } catch (IllegalAccessException e) {
-                                    e.printStackTrace();
+                                if (!dragOverScrollHeadEnable) {
+                                    layoutParamsTop.height = 0;
+                                }
+                                headview.setLayoutParams(layoutParamsTop);
+                                headview.invalidate();
+                                if (eventY - lastY < 0) {
+
+                                    Class aClass = this.getClass();
+                                    while (!aClass.getName().equals(ScrollView.class.getName())) {
+                                        aClass = aClass.getSuperclass();
+                                    }
+                                    try {
+                                        final int activePointerIndex = ev.findPointerIndex(ev.getPointerId(0));
+                                        final int y = (int) ev.getY(activePointerIndex);
+                                        Field field = aClass.getDeclaredField("mLastMotionY");
+                                        field.setAccessible(true);
+                                        field.set(this, y);
+                                    } catch (NoSuchFieldException e) {
+                                        e.printStackTrace();
+                                    } catch (IllegalAccessException e) {
+                                        e.printStackTrace();
+                                    }
+                                    lastY = eventY;
+                                    return true;
                                 }
                                 lastY = eventY;
-                                return true;
-                            }
-                            lastY = eventY;
-                            return super.onTouchEvent(ev);
+                                return super.onTouchEvent(ev);
 
+                            }
                         }
                     }
-                }
-                if (isLastItemVisible() || layoutParamsFoot.height != 0) {
-                    if (lastY != downY) {
-                        if (eventY - lastY < 0 || layoutParamsFoot.height != 0) {
-                            layoutParamsFoot.height += (lastY - eventY) * radio;
-                            if (layoutParamsFoot.height < 0) {
-                                layoutParamsFoot.height = 0;
+                    if (isLastItemVisible() || layoutParamsFoot.height != 0) {
+                        if (lastY != downY) {
+                            if (eventY - lastY < 0 || layoutParamsFoot.height != 0) {
+                                layoutParamsFoot.height += (lastY - eventY) * radio;
+                                if (layoutParamsFoot.height < 0) {
+                                    layoutParamsFoot.height = 0;
+                                }
+                                if (!dragOverScrollFootEnable) {
+                                    layoutParamsFoot.height = 0;
+                                }
+                                footview.setLayoutParams(layoutParamsFoot);
+                                footview.invalidate();
+                                lastY = eventY;
+                                this.fullScroll(ScrollView.FOCUS_DOWN);
+                                return super.onTouchEvent(ev);
                             }
-                            if (!dragOverScrollFootEnable) {
-                                layoutParamsFoot.height = 0;
-                            }
-                            footview.setLayoutParams(layoutParamsFoot);
-                            footview.invalidate();
-                            lastY = eventY;
-                            this.fullScroll(ScrollView.FOCUS_DOWN);
-                            return super.onTouchEvent(ev);
                         }
                     }
-                }
-                break;
-            case MotionEvent.ACTION_UP:
-                velocityTracker.addMovement(ev);
-                back();
-                break;
+                    break;
+                case MotionEvent.ACTION_UP:
+                    velocityTracker.addMovement(ev);
+                    back();
+                    break;
 
+            }
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
         }
         lastY = eventY;
         return super.onTouchEvent(ev);

@@ -108,7 +108,7 @@ public class FileUntil {
         if (bitmap == null) {
             return null;
         }
-        bitmap = ThumbnailUtils.extractThumbnail(bitmap, 512, 512);
+        bitmap = ThumbnailUtils.extractThumbnail(bitmap, bitmap.getWidth(), bitmap.getHeight());
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         String fileNametemp = simpleDateFormat.format(new Date(System.currentTimeMillis()));
         fileName = fileNametemp + fileName;

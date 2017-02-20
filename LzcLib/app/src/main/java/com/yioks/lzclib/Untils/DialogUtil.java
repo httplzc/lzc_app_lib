@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import com.yioks.lzclib.Data.ScreenData;
 import com.yioks.lzclib.R;
+import com.yioks.lzclib.View.TopSnackView;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -67,6 +68,14 @@ public class DialogUtil {
             e.printStackTrace();
         }
 
+    }
+
+    public static void showTopSnack(Context context,String str)
+    {
+        if (context == null) {
+            return;
+        }
+        TopSnackView.make(context,str).show();
     }
 
     /**

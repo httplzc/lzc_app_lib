@@ -25,8 +25,12 @@ public class SharedPreferencesUtil {
      * @param object
      */
     public static void put(Context context, String key, Object object) {
+        put(context, key, object, FILE_NAME);
+    }
 
-        SharedPreferences sp = context.getSharedPreferences(FILE_NAME,
+
+    public static void put(Context context, String key, Object object, String name) {
+        SharedPreferences sp = context.getSharedPreferences(name,
                 Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
 
@@ -56,7 +60,11 @@ public class SharedPreferencesUtil {
      * @return
      */
     public static Object get(Context context, String key, Object defaultObject) {
-        SharedPreferences sp = context.getSharedPreferences(FILE_NAME,
+        return get(context, key, defaultObject, FILE_NAME);
+    }
+
+    public static Object get(Context context, String key, Object defaultObject, String name) {
+        SharedPreferences sp = context.getSharedPreferences(name,
                 Context.MODE_PRIVATE);
 
         if (defaultObject instanceof String) {
@@ -81,7 +89,11 @@ public class SharedPreferencesUtil {
      * @param key
      */
     public static void remove(Context context, String key) {
-        SharedPreferences sp = context.getSharedPreferences(FILE_NAME,
+        remove(context, key, FILE_NAME);
+    }
+
+    public static void remove(Context context, String key, String name) {
+        SharedPreferences sp = context.getSharedPreferences(name,
                 Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
         editor.remove(key);
@@ -94,7 +106,11 @@ public class SharedPreferencesUtil {
      * @param context
      */
     public static void clear(Context context) {
-        SharedPreferences sp = context.getSharedPreferences(FILE_NAME,
+        clear(context, FILE_NAME);
+    }
+
+    public static void clear(Context context, String name) {
+        SharedPreferences sp = context.getSharedPreferences(name,
                 Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
         editor.clear();

@@ -33,7 +33,7 @@ public class PicCultActivity extends AppCompatActivity {
     private MoveImage moveImage;
     private RelativeLayout relativeLayout;
     private float PicRealWidth;
-    public static float PicRealHeight;
+    public float PicRealHeight;
     public static final int CULT_PIC = 1320;
     private Bitmap bitmap;
     public float bitmapwidth;
@@ -41,10 +41,11 @@ public class PicCultActivity extends AppCompatActivity {
     private PressPicThread pressPicThread;
     private ProgressDialog progressDialog;
     private int finallyWidth;
-    public static float backWidth;
-    public static float backHeight;
-    public static float bili;
-    public static boolean is_circle = false;
+    public float backWidth;
+    public float backHeight;
+    //高度与宽度之比
+    public float bili;
+    public boolean is_circle = false;
 
 
     @Override
@@ -56,36 +57,21 @@ public class PicCultActivity extends AppCompatActivity {
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    relativeLayout.setDrawingCacheEnabled(true);
-                    relativeLayout.buildDrawingCache();
-                    Bitmap bitmap = relativeLayout.getDrawingCache();
-                    Bitmap realfinBitamp = Bitmap.createBitmap(bitmap, (int) (picCultBackground.getMleft()), (int) (picCultBackground.getMtop()), (int) (picCultBackground.getMwidth()), (int) (picCultBackground.getMheight()));
-                    PicCultActivity.this.bitmap.recycle();
-                    bitmap.recycle();
-                    relativeLayout.setDrawingCacheEnabled(false);
-                    SavePicThread savePicThread = new SavePicThread();
-                    savePicThread.realfinBitamp = realfinBitamp;
+                finishCultImg();
 
-                    savePicThread.start();
-                    showProgressBar();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Toast.makeText(PicCultActivity.this, "裁剪失败", Toast.LENGTH_SHORT).show();
-                    setResult(CULT_PIC, null);
-                    finish();
-                }
             }
         });
         picCultBackground = (PicCultBackground) findViewById(R.id.background);
-        picCultBackground.setIs_circle(is_circle);
+
         moveImage = (MoveImage) findViewById(R.id.moveImage);
         Uri uri = getIntent().getData();
 
+        //获取传过来的数据
         if (uri == null) {
             setResult(CULT_PIC, null);
             finish();
         } else {
+            //进入线程压缩图片
             finallyWidth = getIntent().getIntExtra("width", 1080);
             pressPicThread = new PressPicThread();
             pressPicThread.uri = uri;
@@ -93,6 +79,56 @@ public class PicCultActivity extends AppCompatActivity {
         }
         relativeLayout = (RelativeLayout) findViewById(R.id.finally_parent);
         showProgressBar();
+    }
+
+
+    //裁剪结束，保存图片
+    private void finishCultImg() {
+        try {
+            //获取图片
+            relativeLayout.setDrawingCacheEnabled(true);
+            relativeLayout.buildDrawingCache();
+            Bitmap bitmap = relativeLayout.getDrawingCache();
+            Log.i("lzc", "picCultBackground.getMwidth()" + picCultBackground.getMwidth() + "----" + picCultBackground.getMheight());
+            Bitmap realfinBitamp = Bitmap.createBitmap(bitmap, (int) (picCultBackground.getMleft()), (int) (picCultBackground.getMtop()), (int) (picCultBackground.getMwidth()), (int) (picCultBackground.getMheight()));
+            PicCultActivity.this.bitmap.recycle();
+            bitmap.recycle();
+            relativeLayout.setDrawingCacheEnabled(false);
+            //存储图片
+            SavePicThread savePicThread = new SavePicThread();
+            savePicThread.realfinBitamp = realfinBitamp;
+            savePicThread.start();
+            showProgressBar();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(PicCultActivity.this, "裁剪失败", Toast.LENGTH_SHORT).show();
+            setResult(CULT_PIC, null);
+            finish();
+        }
+    }
+
+    private void initMoveImg(MoveImage moveImage) {
+        //初始化图片裁剪视图属性
+        PicRealWidth = ScreenData.widthPX;
+        PicRealHeight = ScreenData.heightPX - 50 * ScreenData.density - getStatusBarHeight();
+        backWidth = PicRealWidth - 40 * ScreenData.density;
+        backHeight = bili * backWidth;
+        if (backHeight > PicRealHeight)
+            backHeight = PicRealHeight - 10 * ScreenData.density;
+        moveImage.setBitmapWidth(bitmapwidth);
+        moveImage.setBitmapHeight(bitmapheight);
+
+        moveImage.setMaxleft(20 * ScreenData.density);
+        moveImage.setMaxright(ScreenData.widthPX - ScreenData.density * 20f);
+
+        moveImage.setMaxtop((PicRealHeight - backHeight) / 2f);
+        moveImage.setMaxbottom(PicRealHeight - moveImage.getMaxtop());
+
+
+        //初始化背景属性
+        picCultBackground.setIs_circle(is_circle);
+        picCultBackground.setRealWidth(backWidth);
+        picCultBackground.setRealHeight(backHeight);
     }
 
     public void showProgressBar() {
@@ -112,12 +148,13 @@ public class PicCultActivity extends AppCompatActivity {
         progressDialog.show();
     }
 
-
+    //图片位置预制
     private void PreDealPic() {
         int bitmapWidth = bitmap.getWidth();
         int bitmapHeight = bitmap.getHeight();
         this.bitmapwidth = bitmapWidth;
         this.bitmapheight = bitmapHeight;
+        initMoveImg(moveImage);
         moveImage.setImageBitmap(bitmap);
 
         if ((float) (bitmapWidth) / bitmapHeight - (ScreenData.widthPX - 40 * ScreenData.density) / (float) PicRealHeight > 0) {
@@ -132,19 +169,19 @@ public class PicCultActivity extends AppCompatActivity {
                 matrix.postTranslate(20 * ScreenData.density - 0.1f, (PicRealHeight - (PicRealWidth - 40 * ScreenData.density)) / 2f - 0.1f);
                 moveImage.setScaleType(ImageView.ScaleType.MATRIX);
                 moveImage.setImageMatrix(matrix);
-                moveImage.setMaxright(0);
-                moveImage.setMaxtop(0);
-                moveImage.setMaxbottom(0);
-                moveImage.setMaxleft(bitmapWidth * bei - (PicRealWidth - 40 * ScreenData.density));
+//                moveImage.setMaxright(0);
+//                moveImage.setMaxtop(0);
+//                moveImage.setMaxbottom(0);
+//                moveImage.setMaxleft(bitmapWidth * bei - (PicRealWidth - 40 * ScreenData.density));
 
             } else {
                 float bei = ScreenData.widthPX / (float) bitmapWidth;
 
-                moveImage.setMaxleft(ScreenData.density * 20f);
-                moveImage.setMaxtop((bitmapHeight * bei - (PicRealWidth - 40 * ScreenData.density)) / 2);
-                moveImage.setMaxbottom((bitmapHeight * bei - (PicRealWidth - 40 * ScreenData.density)) / 2);
-
-                moveImage.setMaxright(ScreenData.density * 20f);
+//                moveImage.setMaxleft(ScreenData.density * 20f);
+//                moveImage.setMaxtop((bitmapHeight * bei - (PicRealWidth - 40 * ScreenData.density)) / 2);
+//                moveImage.setMaxbottom((bitmapHeight * bei - (PicRealWidth - 40 * ScreenData.density)) / 2);
+//
+//                moveImage.setMaxright(ScreenData.density * 20f);
             }
         } else {
             //高占满
@@ -160,16 +197,16 @@ public class PicCultActivity extends AppCompatActivity {
                 moveImage.setScaleType(ImageView.ScaleType.MATRIX);
                 moveImage.setImageMatrix(matrix);
 
-                moveImage.setMaxright(0);
-                moveImage.setMaxleft(0);
-                moveImage.setMaxbottom(0);
-                moveImage.setMaxtop(bitmapHeight * bei - (PicRealWidth - 40 * ScreenData.density));
+//                moveImage.setMaxright(0);
+//                moveImage.setMaxleft(0);
+//                moveImage.setMaxbottom(0);
+//                moveImage.setMaxtop(bitmapHeight * bei - (PicRealWidth - 40 * ScreenData.density));
             } else {
                 float bei = PicRealHeight / bitmapHeight;
-                moveImage.setMaxleft(ScreenData.density * 20f);
-                moveImage.setMaxtop((bitmapHeight * bei - (ScreenData.widthPX - 40 * ScreenData.density)) / 2);
-                moveImage.setMaxbottom((bitmapHeight * bei - (ScreenData.widthPX - 40 * ScreenData.density)) / 2);
-                moveImage.setMaxright(ScreenData.density * 20f);
+//                moveImage.setMaxleft(ScreenData.density * 20f);
+//                moveImage.setMaxtop((bitmapHeight * bei - (ScreenData.widthPX - 40 * ScreenData.density)) / 2);
+//                moveImage.setMaxbottom((bitmapHeight * bei - (ScreenData.widthPX - 40 * ScreenData.density)) / 2);
+//                moveImage.setMaxright(ScreenData.density * 20f);
             }
         }
     }
@@ -193,10 +230,10 @@ public class PicCultActivity extends AppCompatActivity {
                 Toast.makeText(PicCultActivity.this, "裁剪失败", Toast.LENGTH_SHORT).show();
                 finish();
             } else if (msg.what == 2) {
-                String s = (String) msg.obj;
-                if (s != null) {
+                Uri uri = (Uri) msg.obj;
+                if (uri != null) {
                     Intent intent = new Intent();
-                    intent.putExtra("filepath", s);
+                    intent.setData(uri);
                     setResult(CULT_PIC, intent);
                     progressDialog.dismiss();
                 }
@@ -214,7 +251,7 @@ public class PicCultActivity extends AppCompatActivity {
         PicRealHeight = ScreenData.heightPX - 50 * ScreenData.density - getStatusBarHeight();
         backWidth = PicRealWidth - 40 * ScreenData.density;
         backHeight = bili * backWidth;
-        Log.i("lzc","ddddd"+PicRealHeight+"---"+"backHeight"+backHeight+"---"+bili+"---"+PicRealWidth);
+        Log.i("lzc", "ddddd" + PicRealHeight + "---" + "backHeight" + backHeight + "---" + bili + "---" + PicRealWidth);
 
     }
 
@@ -238,23 +275,8 @@ public class PicCultActivity extends AppCompatActivity {
         return super.onKeyDown(keyCode, event);
     }
 
-    public float getBitmapheight() {
-        return bitmapheight;
-    }
 
-    public void setBitmapheight(float bitmapheight) {
-        this.bitmapheight = bitmapheight;
-    }
-
-    public float getBitmapwidth() {
-        return bitmapwidth;
-    }
-
-    public void setBitmapwidth(float bitmapwidth) {
-        this.bitmapwidth = bitmapwidth;
-    }
-
-
+    //压缩图片线程
     private class PressPicThread extends Thread {
         public Uri uri;
 
@@ -264,7 +286,7 @@ public class PicCultActivity extends AppCompatActivity {
                 bitmap = FileUntil.getBitmapFormUri(PicCultActivity.this, uri, 1080, 1920);
                 if (bitmap != null && !bitmap.isRecycled()) {
                     if (FileUntil.readPictureDegree(FileUntil.UriToFile(uri, PicCultActivity.this)) == 90) {
-                       bitmap = FileUntil.toturn(bitmap);
+                        bitmap = FileUntil.toturn(bitmap);
                     }
                 }
                 Message message = new Message();
@@ -280,22 +302,26 @@ public class PicCultActivity extends AppCompatActivity {
         }
     }
 
+
+    //保存图片线程
     private class SavePicThread extends Thread {
         public Bitmap realfinBitamp;
 
         @Override
         public void run() {
+            Log.i("lzc", "realfinBitamp" + realfinBitamp.getWidth() + "---" + realfinBitamp.getHeight());
             File file = FileUntil.WriteToTeamPic(PicCultActivity.this, realfinBitamp);
             realfinBitamp.recycle();
-            String filepath = null;
-            Log.i("lzc", "filepath" + (filepath == null));
-            if (file != null) {
-                filepath = file.getPath();
+            if (file == null) {
+                Message message = new Message();
+                message.what = 1;
+                handler.sendMessage(message);
+                return;
             }
 
             Message message = new Message();
             message.what = 2;
-            message.obj = filepath;
+            message.obj = Uri.fromFile(file);
             handler.sendMessage(message);
             progressDialog.dismiss();
 
