@@ -32,6 +32,8 @@
         <attr name="dragOverScrollEnable_lv" format="boolean"></attr>
         <attr name="dragOverScrollHeadEnable_lv" format="boolean"></attr>
         <attr name="dragOverScrollFootEnable_lv" format="boolean"></attr>
+        <attr name="OverScrollListHeadColor" format="color"></attr>
+        <attr name="OverScrollListFootColor" format="color"></attr>
     </declare-styleable>
 
     <declare-styleable name="LoadImg">
@@ -39,6 +41,8 @@
     </declare-styleable>
     <declare-styleable name="RefreshScrollParentViewBase">
         <attr name="postion" format="integer"></attr>
+        <attr name="headColor" format="color"></attr>
+        <attr name="bottomColor" format="color"></attr>
     </declare-styleable>
 
     <declare-styleable name="ViewPagerIndicator">

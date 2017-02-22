@@ -234,6 +234,7 @@ public class PicCultActivity extends AppCompatActivity {
                 if (uri != null) {
                     Intent intent = new Intent();
                     intent.setData(uri);
+                    intent.putExtra("filepath",uri.getPath());
                     setResult(CULT_PIC, intent);
                     progressDialog.dismiss();
                 }

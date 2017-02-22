@@ -156,10 +156,10 @@ public class MyDialog {
 
     public static class Builder {
         private Context context;
-        private String message;
-        private String title;
-        private boolean canTouchCancel;
-        private boolean canBackCancel;
+        private String message="";
+        private String title=null;
+        private boolean canTouchCancel=true;
+        private boolean canBackCancel=true;
         private boolean isConfirm;
 
         public Builder(Context context) {

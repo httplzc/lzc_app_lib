@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -51,6 +52,9 @@ public abstract class RefreshScrollParentViewBase<T extends View> extends Parent
     protected int refresh_position = 1;
     private boolean dispath = true;
 
+    protected int refreshColor;
+    protected int footColor;
+
     //刷新的状态  正在刷新 正常 下拉中  释放可以刷新
     public enum ReFreshSatus {
         ONREFRESH, NORMAL, PULL, PULLCANREFRESH
@@ -79,6 +83,8 @@ public abstract class RefreshScrollParentViewBase<T extends View> extends Parent
     protected void inittype(Context context, AttributeSet attrs) {
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.RefreshScrollParentViewBase);
         refresh_position = typedArray.getInt(R.styleable.RefreshScrollParentViewBase_postion, 1);
+        refreshColor=typedArray.getColor(R.styleable.RefreshScrollParentViewBase_headColor, ContextCompat.getColor(context,R.color.line_color));
+        footColor=typedArray.getColor(R.styleable.RefreshScrollParentViewBase_bottomColor, ContextCompat.getColor(context,R.color.line_color));
         typedArray.recycle();
     }
 

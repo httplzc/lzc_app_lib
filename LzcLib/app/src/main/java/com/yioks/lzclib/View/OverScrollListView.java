@@ -3,6 +3,7 @@ package com.yioks.lzclib.View;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -46,6 +47,9 @@ public class OverScrollListView extends ListView {
     private final static float radio = 0.45f;
     private final static long back_time = 500;
 
+    private int headColor= Color.TRANSPARENT;
+    private int footColor=Color.TRANSPARENT;
+
     public OverScrollListView(Context context) {
         super(context);
         this.context = context;
@@ -85,6 +89,8 @@ public class OverScrollListView extends ListView {
         dragOverScrollEnable = typedArray.getBoolean(R.styleable.OverScrollListView_dragOverScrollEnable_lv, true);
         dragOverScrollHeadEnable = typedArray.getBoolean(R.styleable.OverScrollListView_dragOverScrollHeadEnable_lv, true);
         dragOverScrollFootEnable = typedArray.getBoolean(R.styleable.OverScrollListView_dragOverScrollFootEnable_lv, true);
+        headColor = typedArray.getColor(R.styleable.OverScrollListView_OverScrollListHeadColor, Color.TRANSPARENT);
+        footColor = typedArray.getColor(R.styleable.OverScrollListView_OverScrollListFootColor, Color.TRANSPARENT);
         typedArray.recycle();
     }
 
@@ -119,6 +125,8 @@ public class OverScrollListView extends ListView {
         this.addFooterView(footview, null, false);
         footview.setLayoutParams(layoutParamsfoot);
 //        footview.setBackgroundResource(R.color.orange);
+        headview.setBackgroundColor(headColor);
+        footview.setBackgroundColor(footColor);
     }
 
     @Override

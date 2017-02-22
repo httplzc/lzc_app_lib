@@ -37,6 +37,7 @@ public class RefreshScrollParentView extends RefreshScrollParentViewBase<ScrollV
     protected void addExternView() {
         scrollChildView = (ViewGroup) scrollView.getChildAt(0);
         reFreshView = LayoutInflater.from(context).inflate(R.layout.refresh_view, null, false);
+        reFreshView.setBackgroundColor(refreshColor);
         reFreshBottom = (LinearLayout) scrollChildView.getChildAt(refresh_position);
         reFreshBottom.addView(reFreshView, 0);
         refreshText = (TextView) reFreshView.findViewById(R.id.refresh_text);

@@ -4,7 +4,6 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -51,8 +50,8 @@ public class OverScrollScrollView extends ScrollView {
     protected float firstY;
 
     private VelocityTracker velocityTracker;
-    private int headColor= Color.WHITE;
-    private int footColor=Color.WHITE;
+    private int headColor= Color.TRANSPARENT;
+    private int footColor=Color.TRANSPARENT;
     private int bottomHeight = 0;
 
     public OverScrollScrollView(Context context) {
@@ -82,8 +81,8 @@ public class OverScrollScrollView extends ScrollView {
         dragOverScrollEnable = typedArray.getBoolean(R.styleable.OverScrollScrollView_dragOverScrollEnable_sv, true);
         dragOverScrollHeadEnable = typedArray.getBoolean(R.styleable.OverScrollScrollView_dragOverScrollHeadEnable_sv, true);
         dragOverScrollFootEnable = typedArray.getBoolean(R.styleable.OverScrollScrollView_dragOverScrollFootEnable_sv, true);
-        headColor = typedArray.getColor(R.styleable.OverScrollScrollView_OverScrollHeadColor, ContextCompat.getColor(context, R.color.white));
-        footColor = typedArray.getColor(R.styleable.OverScrollScrollView_OverScrollFootColor, ContextCompat.getColor(context, R.color.white));
+        headColor = typedArray.getColor(R.styleable.OverScrollScrollView_OverScrollHeadColor, Color.TRANSPARENT);
+        footColor = typedArray.getColor(R.styleable.OverScrollScrollView_OverScrollFootColor, Color.TRANSPARENT);
         typedArray.recycle();
     }
 

@@ -42,9 +42,11 @@ public class ReFreshListViewParentView extends RefreshScrollParentViewBase<ListV
     @Override
     protected void addExternView() {
         reFreshMoreView = LayoutInflater.from(context).inflate(R.layout.refresh_more_view, scrollView, false);
+        reFreshMoreView.setBackgroundColor(footColor);
         load_more_text = (TextView) reFreshMoreView.findViewById(R.id.load_more_text);
         load_more_progress = (View) reFreshMoreView.findViewById(R.id.load_more_progress);
         reFreshView = LayoutInflater.from(context).inflate(R.layout.refresh_view, scrollView, false);
+        reFreshView.setBackgroundColor(refreshColor);
         reFreshView.setClickable(false);
         scrollView.addHeaderView(reFreshView, null, false);
         refreshText = (TextView) reFreshView.findViewById(R.id.refresh_text);
