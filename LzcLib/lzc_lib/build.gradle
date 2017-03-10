@@ -1,0 +1,168 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 25
+        versionCode 3
+        versionName "1.1"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+repositories {
+    flatDir { dirs 'libs' }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:25.2.0'
+    compile 'com.android.support:design:25.2.0'
+    compile 'com.nineoldandroids:library:2.4.0'
+    compile 'com.loopj.android:android-async-http:1.4.9'
+    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.android.support:support-v4:25.2.0'
+    compile 'com.facebook.fresco:fresco:1.1.0'
+    compile files('libs/unity-classes.jar')
+
+}
+
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+
+
+//publishing {
+//    publications {
+//        MyPublication(MavenPublication) {
+//            from components.java
+//            groupId 'com.yioks.lzc_lib'
+//            artifactId 'lzc_lib'
+//            version '0.0.1'
+//        }
+//    }
+//}
+
+//version = "0.0.1"
+//group = "com.yioks.lzc_lib"
+//artifactId="lzc_lib"
+
+group 'com.yioks.lzc_lib'
+version '0.0.5'
+
+def siteUrl = 'https://github.com/httplzc/lzc_app_lib'    // project homepage
+def gitUrl = 'https://github.com/httplzc/lzc_app_lib.git' // project git
+
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging 'aar'
+                // 项目描述，复制我的话，这里需要修改。
+                name 'lzcyioks'   //项目描述
+                url siteUrl
+                // 软件开源协议，现在一般都是Apache License2.0吧，复制我的，这里不需要修改。
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                //填写开发者基本信息，复制我的，这里需要修改。
+                developers {
+                    developer {
+                        id 'yioks'            //你公司的id
+                        name 'httplzc'      //你的用户名
+                        email 'httplzc@163.com' // 你的邮箱
+                    }
+                }
+
+                // SCM，复制我的，这里不需要修改。
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+                }
+            }
+        }
+    }
+}
+
+javadoc {
+    options {
+        encoding "UTF-8"
+        charSet 'UTF-8'
+        author true
+        version true
+        links "http://docs.oracle.com/javase/7/docs/api"
+        title 'A  Lib For Android'   // 文档标题
+    }
+}
+
+//artifacts {
+////    archives javadocJar
+//    archives sourcesJar
+//}
+
+// 生成jar包
+task releaseJar(type: Copy) {
+    from('build/intermediates/bundles/release')
+    into('../jar')
+    include('classes.jar')
+    rename('classes.jar', 'okgo-' + version + '.jar')
+}
+
+// 这里是读取Bintray相关的信息，我们上传项目到github上的时候会把gradle文件传上去，
+// 所以不要把帐号密码的信息直接写在这里，写在local.properties中，这里动态读取。
+//Properties properties = new Properties()
+//properties.load(project.rootProject.file('local.properties').newDataInputStream())
+bintray {
+    user = "httplzc"
+    key = "8c1d426c6ce3308d3aa4a0529b9fe8a5dab473a6"
+    configurations = ['archives']
+    pkg {
+        userOrg = "yioks-android-lzc"        //发布到JCenter的组织，注意新版本的bintray是需要手动创建的
+        repo = "yioks_android_lzclib"              //发布到JCenter上的仓库名称，注意新版本的bintray是需要手动创建的
+        // 发布到Bintray上的项目名字
+        name = "lzcyioks"
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = ["Apache-2.0"]
+        publish = true  // 是否是公开项目
+    }
+}

@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/LzcLib.iml" filepath="$PROJECT_DIR$/LzcLib.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lzc_lib/lzc_lib.iml" filepath="$PROJECT_DIR$/lzc_lib/lzc_lib.iml" />
     </modules>
   </component>
 </project>

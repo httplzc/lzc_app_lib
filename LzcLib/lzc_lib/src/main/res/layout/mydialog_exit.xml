@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="20dp"
+    android:paddingRight="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_centerInParent="true"
+        android:gravity="center_horizontal"
+        android:background="@drawable/mydialog_bg">
+
+        <LinearLayout
+            android:id="@+id/mydialog_head"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            >
+
+            <ImageView
+                android:id="@+id/dialog_waring_img"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/warning_bai"
+                android:layout_marginBottom="5dp"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:tint="@color/main_cheng"/>
+
+            <TextView
+                android:id="@+id/title_head"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="@android:color/black"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:visibility="visible"
+                android:layout_gravity="center"
+                android:layout_marginBottom="5dp"
+                tools:text="最新版本v1.1" />
+
+
+            <TextView
+                android:id="@+id/mydialog_remind"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textSize="16sp"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
+                tools:text="您确定要退出登录?" />
+        </LinearLayout>
+
+        <include layout="@layout/line_layout" />
+
+        <LinearLayout
+            android:id="@+id/confirm_cancel_lin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/mydialog_head"
+            android:layout_marginTop="1dp">
+
+            <TextView
+                android:id="@+id/mydialog_cancle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/mydialog_btn_selector_left"
+                android:gravity="center"
+                android:padding="13dp"
+                android:text="取消"
+                android:textColor="@color/pic_img_color"
+                android:textSize="15sp" />
+
+            <View
+                android:layout_width="0.8dp"
+                android:layout_height="match_parent"
+                android:background="@color/dialog_btn_normal_line"></View>
+
+            <TextView
+                android:id="@+id/mydialog_ok"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/mydialog_btn_selector_right"
+                android:gravity="center"
+                android:padding="13dp"
+                android:text="确定"
+                android:textColor="@color/pic_img_color"
+                android:textSize="15sp" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/mydialog_confirm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/mydialog_btn_selector_right"
+            android:gravity="center"
+            android:padding="13dp"
+            android:text="确定"
+            android:visibility="gone"
+            android:layout_below="@id/mydialog_head"
+            android:textColor="@color/pic_img_color"
+            android:textSize="15sp" />
+    </LinearLayout>
+
+</RelativeLayout>

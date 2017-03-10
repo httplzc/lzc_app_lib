@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.yioks.lzclib.View.FangLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    <com.facebook.drawee.view.SimpleDraweeView
+        android:id="@+id/pic_img"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        fresco:actualImageScaleType="focusCrop"
+        fresco:placeholderImage="@drawable/holder"
+        fresco:placeholderImageScaleType="centerCrop"
+        fresco:failureImage="@drawable/holder"
+        fresco:failureImageScaleType="centerCrop"
+        >
+    </com.facebook.drawee.view.SimpleDraweeView>
+    <com.yioks.lzclib.View.NumberCheckView
+        android:id="@+id/pic_check_box"
+        android:layout_width="23dp"
+        android:layout_height="23dp"
+        android:checked="true"
+        android:layout_margin="5dp"
+        android:focusable="false"
+        android:clickable="false"
+        />
+    </RelativeLayout>
+</com.yioks.lzclib.View.FangLinearLayout>
