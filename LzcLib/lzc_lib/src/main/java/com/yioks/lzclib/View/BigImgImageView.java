@@ -16,6 +16,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 
 import com.yioks.lzclib.Activity.ShowBigImgActivity;
+import com.yioks.lzclib.Data.BigImgShowData;
 import com.yioks.lzclib.Data.ScreenData;
 
 /**
@@ -43,7 +44,8 @@ public class BigImgImageView extends ImageView {
 
     private boolean isAnim = false;
 
-    private boolean canMove=true;
+    private boolean canMove = true;
+    private BigImgShowData.MessageUri messageUri;
 
     public BigImgImageView(Context context) {
         super(context);
@@ -65,6 +67,9 @@ public class BigImgImageView extends ImageView {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        Log.i("lzc", "----originMatrix" + originMatrix);
+        if (originMatrix == null&&canMove)
+            originMatrix = new Matrix(getImageMatrix());
     }
 
     @Override
@@ -81,9 +86,20 @@ public class BigImgImageView extends ImageView {
     }
 
 
+    public boolean backImageAnim() {
+        if (originMatrix != null) {
+            setScaleType(ScaleType.MATRIX);
+            animToOrigin(this.getImageMatrix(), true);
+            return true;
+        }
+        return false;
+
+    }
+
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if(!canMove)
+        if (!canMove)
             return true;
         if (isAnim)
             return true;
@@ -91,13 +107,13 @@ public class BigImgImageView extends ImageView {
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
                 //拖动
-                Log.i("lzc","ACTION_DOWN");
+                Log.i("lzc", "ACTION_DOWN");
                 originMatrix = new Matrix(getImageMatrix());
                 currentMaritx.set(this.getImageMatrix());
                 startPoint.set(event.getX(), event.getY());
                 break;
             case MotionEvent.ACTION_MOVE:
-                Log.i("lzc","ACTION_MOVE");
+                Log.i("lzc", "ACTION_MOVE");
                 //拖动
                 if (mode == DRAG) {
                     dragDo(event);
@@ -110,7 +126,7 @@ public class BigImgImageView extends ImageView {
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                Log.i("lzc","ACTION_UP");
+                Log.i("lzc", "ACTION_UP");
                 changeMode(false);
 //                if (!fromZoom) {
 ////                    offX += dx;
@@ -121,12 +137,12 @@ public class BigImgImageView extends ImageView {
                 break;
 
             case MotionEvent.ACTION_POINTER_UP:
-                Log.i("lzc","ACTION_POINTER_UP");
+                Log.i("lzc", "ACTION_POINTER_UP");
                 changeMode(false);
                 break;
 
             case MotionEvent.ACTION_POINTER_DOWN:
-                Log.i("lzc","ACTION_POINTER_DOWN");
+                Log.i("lzc", "ACTION_POINTER_DOWN");
                 if (mode == NORMAL) {
                     changeMode(true);
                     mode = ZOOM;
@@ -147,7 +163,7 @@ public class BigImgImageView extends ImageView {
     private void normalDo(MotionEvent event) {
         float dx = event.getX() - startPoint.x;
         float dy = event.getY() - startPoint.y;
-        if (Math.abs(dy) > 10 * ScreenData.density) {
+        if (Math.abs(dy) > 15 * ScreenData.density) {
             changeMode(true);
             mode = DRAG;
         }
@@ -167,7 +183,7 @@ public class BigImgImageView extends ImageView {
 
     //放大执行
     private void zoomDo(MotionEvent event) {
-        Log.i("lzc","zoomDo");
+        Log.i("lzc", "zoomDo");
         float endDis = distance(event);
         if (endDis > 10f) {
             float scale = endDis / startDis;
@@ -180,11 +196,17 @@ public class BigImgImageView extends ImageView {
 
     private void changeAlphaByScale(Matrix matrix) {
         RectF rectF = new RectF();
+        RectF rectFOrigin = new RectF();
         rectF.right = getDrawable().getIntrinsicWidth();
         rectF.bottom = getDrawable().getIntrinsicHeight();
-        currentMaritx.mapRect(rectF);
+        rectFOrigin.right = rectF.right;
+        rectFOrigin.left = rectF.left;
+        matrix.mapRect(rectF);
+        originMatrix.mapRect(rectFOrigin);
         float currentWidth = rectF.right - rectF.left;
-        setActivityAlpha(currentWidth / getDrawable().getIntrinsicWidth() + 0.15f);
+
+        Log.i("lzc","setActivityAlpha"+(currentWidth / (rectFOrigin.right - rectFOrigin.left) + 0.3f));
+        setActivityAlpha(currentWidth / (rectFOrigin.right - rectFOrigin.left) + 0.3f);
     }
 
     private float changeAlphaByTrans(Matrix matrix) {
@@ -198,7 +220,7 @@ public class BigImgImageView extends ImageView {
 
     //拖动执行
     private void dragDo(MotionEvent event) {
-        Log.i("lzc","dragDo");
+        Log.i("lzc", "dragDo");
         float dx = event.getX() - lastPoint.x;
         float dy = event.getY() - lastPoint.y;
         if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
@@ -292,19 +314,49 @@ public class BigImgImageView extends ImageView {
     }
 
     private void animToOrigin(Matrix matrix, final boolean finish) {
-        RectF rectFCur = getMatrixMapRect(currentMaritx);
-        RectF rectFPro = getMatrixMapRect(originMatrix);
-        float beilv = (rectFCur.right - rectFCur.left) / (rectFPro.right - rectFPro.left);
-      //  Log.i("lzc", "beilv" + beilv + "----" + (rectFCur.right - rectFCur.left) + "--" + (rectFPro.right - rectFPro.left));
+        float finallyDx = 0;
+        float finallyDy = 0;
 
+        float finallyBeilv = 0;
+        float finallyAlpha = 0;
+
+        RectF rectFCur = getMatrixMapRect(matrix);
+        RectF rectOrigin = getMatrixMapRect(originMatrix);
+        if (!finish) {
+            finallyAlpha = 1;
+            finallyDx = 0;
+            finallyDy = 0;
+            finallyBeilv = 1;
+
+        } else if (messageUri == null) {
+            Log.i("lzc", "---------");
+            finallyAlpha = 0;
+            finallyDx = 0;
+            finallyDy = 0;
+            finallyBeilv = 0;
+        } else {
+            finallyAlpha = 0;
+            finallyDx = messageUri.getCenterX() - getWidth() / 2;
+            finallyDy = messageUri.getCenterY() - getHeight() / 2;
+            finallyBeilv = messageUri.getWidth() / (rectOrigin.right - rectOrigin.left);
+            Log.i("lzc", "messageUri" + messageUri.getWidth() + "---" + messageUri.getHeight() + "---" + messageUri.getCenterX() + "---" + messageUri.getCenterY());
+        }
+
+        //现在的倍率
+        float beilv = (rectFCur.right - rectFCur.left) / (rectOrigin.right - rectOrigin.left);
+
+        Log.i("lzc", "finallyBeilv+" + finallyBeilv + "--" + beilv);
+
+
+        //现在的坐标
         PointF pointF = getMatrixCenter(matrix);
-      //  Log.i("lzc", "animPoint_before" + getMatrixCenter(matrix));
         float dx = pointF.x - getWidth() / 2;
         float dy = pointF.y - getHeight() / 2;
-        PropertyValuesHolder propertyValuesHolderDx = PropertyValuesHolder.ofFloat("dx", dx, 0);
-        PropertyValuesHolder propertyValuesHolderDy = PropertyValuesHolder.ofFloat("dy", dy, 0);
-        PropertyValuesHolder propertyValuesHolderAlpha = PropertyValuesHolder.ofFloat("alpha", currrentAlpha, 1);
-        PropertyValuesHolder propertyValuesHolderBeilv = PropertyValuesHolder.ofFloat("beilv", beilv, finish ? 0 : 1);
+
+        PropertyValuesHolder propertyValuesHolderDx = PropertyValuesHolder.ofFloat("dx", dx, finallyDx);
+        PropertyValuesHolder propertyValuesHolderDy = PropertyValuesHolder.ofFloat("dy", dy, finallyDy);
+        PropertyValuesHolder propertyValuesHolderAlpha = PropertyValuesHolder.ofFloat("alpha", currrentAlpha, finallyAlpha);
+        PropertyValuesHolder propertyValuesHolderBeilv = PropertyValuesHolder.ofFloat("beilv", beilv, finallyBeilv);
         ValueAnimator valueAnimator = ValueAnimator.ofPropertyValuesHolder(propertyValuesHolderDx, propertyValuesHolderDy, propertyValuesHolderBeilv, propertyValuesHolderAlpha);
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -317,10 +369,8 @@ public class BigImgImageView extends ImageView {
                 matrix.postTranslate(dx, dy);
                 PointF pointF1 = getMatrixCenter(matrix);
                 matrix.postScale(beilv, beilv, pointF1.x, pointF1.y);
-             //   Log.i("lzc", "animPoint" + getMatrixCenter(matrix));
                 BigImgImageView.this.setImageMatrix(matrix);
                 setActivityAlpha(alpha);
-              //  Log.i("lzc", " ---- " + dx + " ---- " + dy + " ---- " + beilv);
             }
         });
         valueAnimator.addListener(new Animator.AnimatorListener() {
@@ -337,14 +387,14 @@ public class BigImgImageView extends ImageView {
                     intent.setAction(ShowBigImgActivity.RECEIVER_NAME);
                     intent.putExtra("shutdown", true);
                     getContext().sendBroadcast(intent);
-                  //  BigImgImageView.this.setScaleType(ScaleType.FIT_CENTER);
+                    //  BigImgImageView.this.setScaleType(ScaleType.FIT_CENTER);
                     getParent().getParent().requestDisallowInterceptTouchEvent(false);
                     mode = NORMAL;
                 } else {
                     BigImgImageView.this.setScaleType(ScaleType.FIT_CENTER);
                     BigImgImageView.this.getParent().getParent().requestDisallowInterceptTouchEvent(false);
                     mode = NORMAL;
-                    currentMaritx=originMatrix;
+                    currentMaritx = originMatrix;
                 }
 
 
@@ -360,7 +410,10 @@ public class BigImgImageView extends ImageView {
 
             }
         });
-        valueAnimator.setDuration(200);
+        long time = 200;
+        if (finish)
+            time *= 1.5;
+        valueAnimator.setDuration(time);
         valueAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
         valueAnimator.start();
     }
@@ -371,5 +424,21 @@ public class BigImgImageView extends ImageView {
 
     public void setCanMove(boolean canMove) {
         this.canMove = canMove;
+    }
+
+    public BigImgShowData.MessageUri getMessageUri() {
+        return messageUri;
+    }
+
+    public void setMessageUri(BigImgShowData.MessageUri messageUri) {
+        this.messageUri = messageUri;
+    }
+
+    public boolean isAnim() {
+        return isAnim;
+    }
+
+    public void setAnim(boolean anim) {
+        isAnim = anim;
     }
 }

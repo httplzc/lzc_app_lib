@@ -9,7 +9,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -26,7 +25,7 @@ import com.yioks.lzclib.View.PicCultBackground;
 
 import java.io.File;
 
-public class PicCultActivity extends AppCompatActivity {
+public class PicCultActivity extends TitleBaseActivity {
 
     private TextView textView;
     private PicCultBackground picCultBackground;
@@ -50,7 +49,7 @@ public class PicCultActivity extends AppCompatActivity {
     public float bili;
     public boolean is_circle = false;
 
-// 选择框大小
+    // 选择框大小
     private float maxleft;
     private float maxright;
     private float maxtop;
@@ -63,7 +62,8 @@ public class PicCultActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cult_pic);
-        cult_padding= (int) getResources().getDimension(R.dimen.cult_padding);
+        setTitleState();
+        cult_padding = (int) getResources().getDimension(R.dimen.cult_padding);
         initData();
         textView = (TextView) findViewById(R.id.title_txt_right);
         textView.setOnClickListener(new View.OnClickListener() {
@@ -101,7 +101,6 @@ public class PicCultActivity extends AppCompatActivity {
             relativeLayout.setDrawingCacheEnabled(true);
             relativeLayout.buildDrawingCache();
             Bitmap bitmap = relativeLayout.getDrawingCache();
-            Log.i("lzc", "picCultBackground.getMwidth()" + picCultBackground.getMwidth() + "----" + picCultBackground.getMheight());
             Bitmap realfinBitamp = Bitmap.createBitmap(bitmap, (int) (picCultBackground.getMleft()), (int) (picCultBackground.getMtop()), (int) (picCultBackground.getMwidth()), (int) (picCultBackground.getMheight()));
             PicCultActivity.this.bitmap.recycle();
             bitmap.recycle();
@@ -110,7 +109,7 @@ public class PicCultActivity extends AppCompatActivity {
             SavePicThread savePicThread = new SavePicThread();
             savePicThread.realfinBitamp = realfinBitamp;
             savePicThread.start();
-            showProgressBar();
+            //    showProgressBar();
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(PicCultActivity.this, "裁剪失败", Toast.LENGTH_SHORT).show();
@@ -123,7 +122,7 @@ public class PicCultActivity extends AppCompatActivity {
         //初始化图片裁剪视图属性
         PicRealWidth = ScreenData.widthPX;
         PicRealHeight = ScreenData.heightPX - 50 * ScreenData.density - getStatusBarHeight();
-        backWidth = PicRealWidth - cult_padding*2;
+        backWidth = PicRealWidth - cult_padding * 2;
         backHeight = bili * backWidth;
         if (backHeight > PicRealHeight)
             backHeight = PicRealHeight - 10 * ScreenData.density;
@@ -301,7 +300,7 @@ public class PicCultActivity extends AppCompatActivity {
         @Override
         public void run() {
             try {
-                bitmap = FileUntil.getBitmapFormUri(PicCultActivity.this, uri, 1080, 1920);
+                bitmap = FileUntil.getBitmapFromUri(PicCultActivity.this, uri, PicRealWidth, PicRealHeight);
                 if (bitmap != null && !bitmap.isRecycled()) {
                     if (FileUntil.readPictureDegree(FileUntil.UriToFile(uri, PicCultActivity.this)) == 90) {
                         bitmap = FileUntil.toturn(bitmap);
@@ -327,8 +326,7 @@ public class PicCultActivity extends AppCompatActivity {
 
         @Override
         public void run() {
-            Log.i("lzc", "realfinBitamp" + realfinBitamp.getWidth() + "---" + realfinBitamp.getHeight());
-            File file = FileUntil.WriteToTeamPic(PicCultActivity.this, realfinBitamp);
+            File file = FileUntil.saveImageAndGetFile(realfinBitamp, "cult_pic", -1);
             realfinBitamp.recycle();
             if (file == null) {
                 Message message = new Message();

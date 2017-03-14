@@ -89,8 +89,11 @@ public class OverScrollScrollView extends ScrollView {
     @Override
     protected void onDetachedFromWindow() {
         try {
-            velocityTracker.recycle();
-            velocityTracker = null;
+            if(velocityTracker!=null)
+            {
+                velocityTracker.recycle();
+                velocityTracker = null;
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

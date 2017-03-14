@@ -1,5 +1,6 @@
 package com.yioks.lzclib.Untils;
 
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -81,10 +82,10 @@ public class FunUntil {
 
     /**
      * 显示推送
+     *
      * @param content
      */
-    public static void showNotification(Context context,String title,String content,String ticker,int smallIco,int largeIco)
-    {
+    public static void showNotification(Context context, String title, String content, String ticker, int smallIco, int largeIco) {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         Intent intent = new Intent();
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
@@ -95,13 +96,27 @@ public class FunUntil {
                 .setContentTitle(title)
                 .setContentText(content)
                 .setContentIntent(pendingIntent)
-                .setDefaults( Notification.DEFAULT_SOUND|Notification.DEFAULT_VIBRATE)
+                .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE)
                 .setSmallIcon(smallIco)
-                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(),largeIco))
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), largeIco))
                 .setAutoCancel(true)
                 .setWhen(System.currentTimeMillis());
-        Notification notification=builder.build();
+        Notification notification = builder.build();
         notificationManager.notify(8024, notification);
+    }
+
+
+    public static String getProcessName(Context context, int pid) {
+        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningAppProcessInfo> runningApps = am.getRunningAppProcesses();
+        if (runningApps != null && !runningApps.isEmpty()) {
+            for (ActivityManager.RunningAppProcessInfo procInfo : runningApps) {
+                if (procInfo.pid == pid) {
+                    return procInfo.processName;
+                }
+            }
+        }
+        return null;
     }
 
 

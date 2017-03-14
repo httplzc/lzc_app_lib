@@ -65,6 +65,7 @@ public class ShowBigImgViewPagerAdapter extends PagerAdapter implements ViewPage
         View view = viewList.get(position % maxView);
         BigImgImageView imageView = (BigImgImageView) view.findViewById(R.id.img);
         Uri uri = bigImgShowData.getData(position);
+        imageView.setMessageUri(bigImgShowData.getMessageUri(position));
         // imageView.setImageURI((Uri) bigImgShowData.getData(position));
         Bitmap bitmap = data.get(uri);
         if (bitmap == null || bitmap.isRecycled()) {
@@ -177,6 +178,20 @@ public class ShowBigImgViewPagerAdapter extends PagerAdapter implements ViewPage
 
     @Override
     public void onPageScrollStateChanged(int state) {
+
+    }
+
+    public boolean back()
+    {
+        View view = viewList.get(position % maxView);
+        BigImgImageView imageView = (BigImgImageView) view.findViewById(R.id.img);
+       return imageView.backImageAnim();
+
+    }
+
+    public void setIsanim(boolean isAnim) {
+            BigImgImageView imageView = (BigImgImageView) viewList.get(position % maxView).findViewById(R.id.img);
+            imageView.setAnim(isAnim);
 
     }
 }

@@ -34,7 +34,7 @@ public class DialogUtil {
      * @param context
      * @param content
      */
-    public static void showDialog(Context context, String content) {
+    public static ProgressDialog showDialog(Context context, String content) {
         progressDialog = new ProgressDialog(context);
         DialogUtil.context = context;
         progressDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
@@ -49,8 +49,10 @@ public class DialogUtil {
         progressDialog.setCanceledOnTouchOutside(false);
         progressDialog.setMessage(content);
         progressDialog.show();
-
+        return progressDialog;
     }
+
+
 
     /**
      * 取消对话框显示
@@ -70,12 +72,11 @@ public class DialogUtil {
 
     }
 
-    public static void showTopSnack(Context context,String str)
-    {
+    public static void showTopSnack(Context context, String str) {
         if (context == null) {
             return;
         }
-        TopSnackView.make(context,str).show();
+        TopSnackView.make(context, str).show();
     }
 
     /**
@@ -112,13 +113,12 @@ public class DialogUtil {
                         timer = null;
                     }
                 };
-                timer.schedule(timerTask, 3000);
+                timer.schedule(timerTask, Toast.LENGTH_SHORT);
             } else {
                 if (!ToastString.equals(str)) {
                     mToast.setText(str);
-                    mToast.setDuration(Toast.LENGTH_SHORT);
+                   // mToast.setDuration(Toast.LENGTH_SHORT);
                     ToastString = str;
-                    mToast.show();
                     TimerTask timerTask = new TimerTask() {
                         @Override
                         public void run() {
@@ -128,7 +128,7 @@ public class DialogUtil {
                             timer = null;
                         }
                     };
-                    timer.schedule(timerTask, 3000);
+                    timer.schedule(timerTask, Toast.LENGTH_SHORT);
                 }
             }
 

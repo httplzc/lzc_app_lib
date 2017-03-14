@@ -92,7 +92,7 @@ public abstract class RefreshListFragment<T extends Bean> extends Fragment imple
             parentView.setHaveFinishLoadMore(teamList.size() < REQUEST_COUNT);
         } else {
             listAdapter.getList().addAll(teamList);
-            parentView.loaddingMoreComplete(teamList.size() < REQUEST_COUNT);
+            parentView.loaddingMoreComplete(teamList.size() < REQUEST_COUNT,true);
         }
         parentView.setstaus(ParentView.Staus.Normal);
         listAdapter.notifyDataSetChanged();
@@ -101,7 +101,7 @@ public abstract class RefreshListFragment<T extends Bean> extends Fragment imple
     //数据请求失败调用
     public void onFailDeal() {
         if (isMore) {
-            parentView.loaddingMoreComplete(false);
+            parentView.loaddingMoreComplete(false,false);
         } else {
             parentView.completeLoad(false);
         }

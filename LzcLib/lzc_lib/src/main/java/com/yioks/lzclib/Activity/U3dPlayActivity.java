@@ -14,8 +14,8 @@ import android.view.View;
 import android.view.Window;
 import android.widget.FrameLayout;
 
-import com.loopj.android.http.FileAsyncHttpResponseHandler;
 import com.unity3d.player.UnityPlayer;
+import com.yioks.lzclib.Helper.FileDownloadCallBack;
 import com.yioks.lzclib.R;
 import com.yioks.lzclib.Untils.HttpUtil;
 import com.yioks.lzclib.Untils.StringManagerUtil;
@@ -24,8 +24,6 @@ import com.yioks.lzclib.View.ParentView;
 
 import java.io.File;
 import java.io.Serializable;
-
-import cz.msebera.android.httpclient.Header;
 
 /**
  * Created by Administrator on 2016/8/5 0005.
@@ -191,15 +189,15 @@ public class U3dPlayActivity extends AppCompatActivity {
         }
         file.createNewFile();
         Log.i("lzc", "url" + data.url);
-        HttpUtil.download(data.url, new FileAsyncHttpResponseHandler(file) {
+        HttpUtil.download(data.url, new FileDownloadCallBack(file,U3dPlayActivity.this) {
             @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, File file) {
+            public void onFailure(int statusCode, File file) {
                 parentView.setstaus(ParentView.Staus.Error);
                 net_dowfile = false;
             }
 
             @Override
-            public void onSuccess(int statusCode, Header[] headers, File file) {
+            public void onSuccess(File file) {
                 Log.i("lzc", "filename" + file.getPath());
                 if (is_res_start) {
                     parentView.setProgress(80);
@@ -212,6 +210,11 @@ public class U3dPlayActivity extends AppCompatActivity {
                 if (mUnityPlayer.getParent() == null) {
                     frameLayout.addView(mUnityPlayer);
                 }
+            }
+
+            @Override
+            public void onProgress(int progress) {
+                Log.i("lzc","u3d_print:文件下载进度"+progress);
             }
         });
     }
@@ -314,7 +317,7 @@ public class U3dPlayActivity extends AppCompatActivity {
 
     private void callU3dClose() {
         HttpUtil.cancelAllClient(U3dPlayActivity.this);
-        UnityPlayer.UnitySendMessage(play_name, "API_StopLoadXml", "");
+       // UnityPlayer.UnitySendMessage(play_name, "API_StopLoadXml", "");
         moveTaskToBack(true);
     }
 

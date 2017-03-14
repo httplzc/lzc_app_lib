@@ -2,209 +2,230 @@ package com.yioks.lzclib.Untils;
 
 import android.content.Context;
 
-import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.AsyncHttpResponseHandler;
-import com.loopj.android.http.BinaryHttpResponseHandler;
-import com.loopj.android.http.FileAsyncHttpResponseHandler;
-import com.loopj.android.http.JsonHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
+import com.yioks.lzclib.Data.OkHttpInstance;
+import com.yioks.lzclib.Helper.FileDownloadCallBack;
+import com.yioks.lzclib.Helper.HandlerCallBack;
+import com.yioks.lzclib.Helper.RequestParams;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.HttpUrl;
+import okhttp3.MultipartBody;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+
+import static android.R.attr.tag;
 
 
 /**
  * 网络访问工具类
- * Created by Yioks-ZhangMengzhen on 2016/4/13.
  */
 public class HttpUtil {
-    private static AsyncHttpClient client = new AsyncHttpClient();//实例化对象
-
-    static {
-        //设置链接超时，如果不设置，默认为30s
-        client.setTimeout(30000);
-    }
 
     /**
-     * 用一个完整的url获取一个string对象
+     * get 无参数
      *
      * @param urlString
      * @param responseHandler
      */
-    public static void get(Context context, String urlString, AsyncHttpResponseHandler responseHandler) {
-        client.get(context, urlString, responseHandler);
+    public static void get(String urlString, Callback responseHandler) {
+        get(urlString, responseHandler, tag);
 
     }
 
     /**
-     * url里面带参数获取一个string对象
-     *
-     * @param urlString
-     * @param params
-     * @param responseHandler
-     */
-    public static void get(Context context, String urlString, RequestParams params, AsyncHttpResponseHandler responseHandler) {
-        client.get(context, urlString, params, responseHandler);
-    }
-
-
-
-    /**
-     * 不带参数，获取json对象或者数组
+     * get 无参数
      *
      * @param urlString
      * @param responseHandler
      */
-    public static void get(Context context, String urlString, JsonHttpResponseHandler responseHandler) {
-        client.get(context, urlString, responseHandler);
+    public static void get(String urlString, Callback responseHandler, Object tag) {
+        Request request = new Request.Builder().url(urlString).tag(tag).build();
+        OkHttpInstance.getClient().newCall(request).enqueue(responseHandler);
+
     }
 
+
     /**
-     * 带参数，获取json对象或者数组
+     * post
      *
      * @param urlString
      * @param params
      * @param responseHandler
      */
-    public static void get(Context context, String urlString, RequestParams params, JsonHttpResponseHandler responseHandler) {
-        client.get(context, urlString, params, responseHandler);
+    public static void post(String urlString, RequestParams params, Callback responseHandler) {
+        post(urlString, params, responseHandler, tag);
     }
 
 
     /**
-     * 下载数据使用，会返回byte数据
+     * post
      *
      * @param urlString
-     * @param responseHandler
-     */
-    public static void get(Context context, String urlString, BinaryHttpResponseHandler responseHandler) {
-        client.get(context, urlString, responseHandler);
-    }
-
-    /**
-     * 用一个完整的url获取一个string对象
-     *
-     * @param url
-     * @param responseHandler
-     */
-    public static void post(Context context,String url, AsyncHttpResponseHandler responseHandler) {
-        client.post(url, responseHandler);
-    }
-
-    /**
-     * url里面带参数获取一个string对象
-     *
-     * @param url
      * @param params
      * @param responseHandler
      */
-    public static void post(Context context, String url, RequestParams params, AsyncHttpResponseHandler responseHandler) {
-        client.post(context, url, params, responseHandler);
-
+    public static void post(String urlString, RequestParams params, Callback responseHandler, Object tag) {
+        RequestBody requestBody = paramsToRequest(params);
+        Request request = new Request.Builder().url(urlString).post(requestBody).tag(tag).build();
+        OkHttpInstance.getClient().newCall(request).enqueue(responseHandler);
     }
 
 
-    public static void postAndHead(Context context, String url, RequestParams params, AsyncHttpResponseHandler responseHandler,HashMap<String,String> headParams) {
-        for(Map.Entry<String,String>entry:headParams.entrySet())
-        {
-            client.addHeader(entry.getKey(),entry.getValue());
+    /**
+     * get 有参数
+     *
+     * @param urlString
+     * @param params
+     * @param responseHandler
+     */
+    public static void get(String urlString, RequestParams params, Callback responseHandler) {
+        get(urlString, params, responseHandler, null);
+    }
+
+
+    /**
+     * get 有参数
+     *
+     * @param urlString
+     * @param params
+     * @param responseHandler
+     */
+    public static void get(String urlString, RequestParams params, Callback responseHandler, Object tag) {
+        Request request = new Request.Builder().url(formatUrl(params, urlString)).tag(tag).build();
+        OkHttpInstance.getClient().newCall(request).enqueue(responseHandler);
+    }
+
+
+    //head 有参数
+    public static void Head(String urlString, RequestParams params, Callback responseHandler) {
+        Request request = new Request.Builder().url(formatUrl(params, urlString)).head().build();
+        OkHttpInstance.getClient().newCall(request).enqueue(responseHandler);
+    }
+
+
+    /**
+     * 格式化url
+     *
+     * @param params
+     * @param urlString
+     * @return
+     */
+    private static HttpUrl formatUrl(RequestParams params, String urlString) {
+        String scheme;
+        String host;
+        scheme = urlString.contains("https://") ? "https://" : "http://";
+        String content = urlString.substring(urlString.indexOf(scheme) + scheme.length());
+        String temp[] = content.split("/");
+        host = temp[0];
+        HttpUrl.Builder builder = new HttpUrl.Builder();
+        builder.scheme(urlString);
+        builder.host(host);
+        for (int i = 1; i < temp.length; i++) {
+            builder.addPathSegment(temp[i]);
         }
-        client.post(context, url, params, responseHandler);
+        for (Map.Entry<String, String> entry : params.getUrlParamsEntry()) {
+            builder.addEncodedQueryParameter(entry.getKey(), entry.getValue());
+        }
+        return builder.build();
+    }
 
+    public static void cancelAllClient() {
+        OkHttpInstance.getClient().dispatcher().cancelAll();
+        for (Call call : OkHttpInstance.getClient().dispatcher().queuedCalls()) {
+            if (call instanceof HandlerCallBack)
+                ((HandlerCallBack) call).cancelAllRequest();
+        }
+        for (Call call : OkHttpInstance.getClient().dispatcher().runningCalls()) {
+            if (call instanceof HandlerCallBack)
+                ((HandlerCallBack) call).cancelAllRequest();
+        }
     }
 
 
-
-    /**
-     * 不带参数，获取json对象或者数组
-     *
-     * @param urlString
-     * @param responseHandler
-     */
-    public static void post(String urlString, JsonHttpResponseHandler responseHandler) {
-        client.post(urlString, responseHandler);
-    }
-
-    /**
-     * 带参数，获取json对象或者数组
-     *
-     * @param urlString
-     * @param params
-     * @param responseHandler
-     */
-    public static void post(Context context, String urlString, RequestParams params, JsonHttpResponseHandler responseHandler) {
-        client.post(context, urlString, params, responseHandler);
-    }
-
-    /**
-     * 下载文件
-     *
-     * @param url
-     * @param params
-     * @param fileAsyncHttpResponseHandler
-     */
-    public static void download(String url, RequestParams params, FileAsyncHttpResponseHandler fileAsyncHttpResponseHandler) {
-        client.get(url, params, fileAsyncHttpResponseHandler);
-    }
-
-    public static void download(String url,FileAsyncHttpResponseHandler fileAsyncHttpResponseHandler)
-    {
-        client.get(url,fileAsyncHttpResponseHandler);
-    }
-
-    public static void Head(String url,AsyncHttpResponseHandler asyncHttpResponseHandler)
-    {
-        client.head(url,asyncHttpResponseHandler);
-    }
-
-    public static void cancelAllClient()
-    {
-
-        client.cancelAllRequests(true);
-    }
-
-
-    public static void cancelAllClient(Context context)
-    {
-
-        client.cancelRequests(context, true);
-    }
-
-    public static void cancelAllClient(Object tag)
-    {
-
-        client.cancelRequestsByTAG(tag,true);
-    }
-
-
-    public static AsyncHttpClient getClient() {
-        return client;
-    }
-
-
-
-    public static String getMD5(byte[] src) {
-        StringBuffer sb = new StringBuffer();
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(src);
-            for (byte b : md.digest()) {
-                sb.append(Integer.toString(b >>> 4 & 0xF, 16)).append(Integer.toString(b & 0xF, 16));
+    public static void cancelAllClient(Context context) {
+        for (Call call : OkHttpInstance.getClient().dispatcher().queuedCalls()) {
+            if (call.request().tag() instanceof String && call.request().tag().equals(context.getPackageName() + context.getClass().getName())) {
+                call.cancel();
+                if (call instanceof HandlerCallBack)
+                    ((HandlerCallBack) call).cancelAllRequest();
             }
-        } catch (NoSuchAlgorithmException e) {
+
         }
-        return sb.toString();
+
+        for (Call call : OkHttpInstance.getClient().dispatcher().runningCalls()) {
+            if (call.request().tag() instanceof String && call.request().tag().equals(context.getPackageName() + context.getClass().getName())) {
+                call.cancel();
+                if (call instanceof HandlerCallBack)
+                    ((HandlerCallBack) call).cancelAllRequest();
+            }
+
+
+        }
     }
 
-    public static void setChaoshiTime(int time)
-    {
-        client.setTimeout(time);
+    public static void cancelAllClient(Object tag) {
+        for (Call call : OkHttpInstance.getClient().dispatcher().queuedCalls()) {
+            if (call.request().tag() == tag)
+                call.cancel();
+        }
+
+        for (Call call : OkHttpInstance.getClient().dispatcher().runningCalls()) {
+            if (call.request().tag() == tag)
+                call.cancel();
+        }
     }
 
-    public static void setChaoshiTime()
-    {
-        client.setTimeout(30000);
+
+    /**
+     * 参数转为请求
+     *
+     * @param params
+     * @return
+     */
+    private static RequestBody paramsToRequest(RequestParams params) {
+        RequestBody requestBody = null;
+        if (!params.fileIsEmpty()) {
+            MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
+
+            for (Map.Entry<String, String> entry : params.getUrlParamsEntry()) {
+                builder.addFormDataPart(entry.getKey(), entry.getValue());
+            }
+            for (Map.Entry<String, RequestParams.FileWrapper> entry : params.getFileParams()) {
+                builder.addFormDataPart(entry.getKey(), entry.getValue().customFileName, RequestBody.create(entry.getValue().contentType, entry.getValue().file));
+            }
+            for (Map.Entry<String, List<RequestParams.FileWrapper>> entry : params.getFileListParams()) {
+                for (RequestParams.FileWrapper fileWrapper : entry.getValue()) {
+                    builder.addFormDataPart(entry.getKey(), fileWrapper.customFileName, RequestBody.create(fileWrapper.contentType, fileWrapper.customFileName));
+                }
+
+            }
+            requestBody = builder.build();
+        } else {
+            FormBody.Builder builder = new FormBody.Builder();
+            for (Map.Entry<String, String> entry : params.getUrlParamsEntry()) {
+                builder.add(entry.getKey(), entry.getValue());
+            }
+            requestBody = builder.build();
+        }
+        return requestBody;
     }
+
+
+    //下载文件
+    public static void download(String url, RequestParams params, FileDownloadCallBack fileDownloadCallBack) {
+        Request request = new Request.Builder().url(formatUrl(params, url)).tag(tag).build();
+        OkHttpInstance.getClient().newCall(request).enqueue(fileDownloadCallBack);
+    }
+
+    //下载文件
+    public static void download(String url, FileDownloadCallBack fileDownloadCallBack) {
+        Request request = new Request.Builder().url(url).tag(tag).build();
+        OkHttpInstance.getClient().newCall(request).enqueue(fileDownloadCallBack);
+    }
+
 }

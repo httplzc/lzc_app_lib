@@ -25,6 +25,7 @@ public class ReFreshListViewParentView extends RefreshScrollParentViewBase<ListV
     private View load_more_progress;
     private LoaddingMoreListener loaddingMoreListener;
     private int footcount = 1;
+    private boolean isLoaddingMoreFailure = false;
 
 
     public ReFreshListViewParentView(Context context) {
@@ -43,6 +44,19 @@ public class ReFreshListViewParentView extends RefreshScrollParentViewBase<ListV
     protected void addExternView() {
         reFreshMoreView = LayoutInflater.from(context).inflate(R.layout.refresh_more_view, scrollView, false);
         reFreshMoreView.setBackgroundColor(footColor);
+        reFreshMoreFailureView = LayoutInflater.from(context).inflate(R.layout.refresh_more_failure_view, scrollView, false);
+        reFreshMoreFailureView.setBackgroundColor(footColor);
+        reFreshMoreFailureView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                scrollView.removeFooterView(reFreshMoreFailureView);
+                scrollView.addFooterView(reFreshMoreView);
+                isLoaddingMore = true;
+                isLoaddingMoreFailure=false;
+                if (loaddingMoreListener != null)
+                    loaddingMoreListener.loadMore();
+            }
+        });
         load_more_text = (TextView) reFreshMoreView.findViewById(R.id.load_more_text);
         load_more_progress = (View) reFreshMoreView.findViewById(R.id.load_more_progress);
         reFreshView = LayoutInflater.from(context).inflate(R.layout.refresh_view, scrollView, false);
@@ -66,17 +80,18 @@ public class ReFreshListViewParentView extends RefreshScrollParentViewBase<ListV
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                if (scrollState == SCROLL_STATE_IDLE) {
-                    return;
-                }
+//                if (scrollState == SCROLL_STATE_IDLE) {
+//                    return;
+//                }
                 if (isReadyForPullEnd()) {
-                    if (isLoaddingMore || isHaveFinishLoadMore() || reFreshSatus != ReFreshSatus.NORMAL) {
+                    if (isLoaddingMore || isHaveFinishLoadMore() || reFreshSatus != ReFreshSatus.NORMAL || isLoaddingMoreFailure) {
                         if (isHaveFinishLoadMore() && scrollView.getFooterViewsCount() == footcount) {
                             scrollView.addFooterView(reFreshMoreView, null, false);
                         }
                         return;
                     }
                     isLoaddingMore = true;
+                    isLoaddingMoreFailure=false;
                     load_more_text.setText("正在加载中……");
                     load_more_progress.setVisibility(VISIBLE);
                     scrollView.addFooterView(reFreshMoreView, null, false);
@@ -106,14 +121,29 @@ public class ReFreshListViewParentView extends RefreshScrollParentViewBase<ListV
     }
 
 
-    public void loaddingMoreComplete(boolean isFinish) {
-        if (!isFinish) {
-            scrollView.removeFooterView(reFreshMoreView);
-            haveFinishLoadMore=false;
+    public void loaddingMoreComplete(boolean isFinish, boolean succeed) {
+        if (succeed) {
+            if (isLoaddingMoreFailure) {
+                scrollView.removeFooterView(reFreshMoreFailureView);
+            }
+            isLoaddingMoreFailure = false;
+            if (!isFinish) {
+                scrollView.removeFooterView(reFreshMoreView);
+                haveFinishLoadMore = false;
+            } else {
+                setHaveFinishLoadMore(true);
+            }
+            isLoaddingMore = false;
         } else {
-            setHaveFinishLoadMore(true);
+            if (isLoaddingMoreFailure)
+                return;
+            isLoaddingMore = false;
+            isLoaddingMoreFailure = true;
+            scrollView.removeFooterView(reFreshMoreView);
+            scrollView.addFooterView(reFreshMoreFailureView);
+            haveFinishLoadMore = false;
         }
-        isLoaddingMore = false;
+
     }
 
 

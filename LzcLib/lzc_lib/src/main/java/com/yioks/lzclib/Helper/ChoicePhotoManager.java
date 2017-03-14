@@ -2,8 +2,11 @@ package com.yioks.lzclib.Helper;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Environment;
@@ -25,9 +28,12 @@ import com.yioks.lzclib.Activity.PicCultActivity;
 import com.yioks.lzclib.Activity.PickImgActivity;
 import com.yioks.lzclib.Data.ScreenData;
 import com.yioks.lzclib.R;
+import com.yioks.lzclib.Service.PressImgService;
+import com.yioks.lzclib.Untils.DialogUtil;
 import com.yioks.lzclib.Untils.FileUntil;
 
 import java.io.File;
+import java.io.Serializable;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -39,12 +45,16 @@ import static android.app.Activity.RESULT_OK;
  */
 
 public class ChoicePhotoManager {
+
+    private final static int maxWidth = 720;
+    private final static int maxHeight = 1280;
+    private final static float pressRadio = 0.2f;
     private ChoicePhotoManager choicePhotoManager;
     //底部弹窗
     public PopupWindow popupWindow;
     //选取图片值
     public static final int Pick_Pic = 1024;
-    public float bili = 1f;
+    //    public float bili = 1f;
     //选择相机值
     public static final int Choice_Cameia = 2000;
     private File file;
@@ -55,12 +65,53 @@ public class ChoicePhotoManager {
     private Activity activity;
 
 
-    private boolean needToCult = true;
+//    private boolean needToCult = true;
+
+    private Option option;
 
     private onChoiceFinishListener onChoiceFinishListener;
 
+    private Context context;
+
+    private BroadcastReceiver registerReceiver;
+
+
+    public static class Option implements Serializable {
+        public boolean needToPress = true;
+        public boolean needToCult = true;
+        public float bili = 1;
+        public int maxWidth = ChoicePhotoManager.maxWidth;
+        public int maxHeight = ChoicePhotoManager.maxHeight;
+        public float pressRadio = ChoicePhotoManager.pressRadio;
+    }
+
+    public void unRegisterReceiver() {
+        context.unregisterReceiver(registerReceiver);
+        FileUntil.ClearTempFile();
+    }
+
 
     public ChoicePhotoManager(Activity context) {
+        this.context = context;
+        registerReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Object datas[] = intent.getParcelableArrayExtra("data");
+                Uri uris[]=new Uri[datas.length];
+                for (int i = 0; i < datas.length; i++) {
+                    uris[i]= (Uri) datas[i];
+                }
+                DialogUtil.dismissDialog();
+                if (onChoiceFinishListener != null) {
+                    if (uris.length == 1)
+                        onChoiceFinishListener.onCutPicFinish(uris[0]);
+                    else
+                        onChoiceFinishListener.onCutPicFinish(uris);
+                }
+
+            }
+        };
+        context.registerReceiver(registerReceiver, new IntentFilter(PressImgService.callbackReceiver));
     }
 
 //    public ChoicePhotoManager getInstance(Activity context)
@@ -89,23 +140,27 @@ public class ChoicePhotoManager {
         if (uri == null) {
             return;
         }
-        if (needToCult)
+        if (option.needToCult)
             startCult(uri);
         else {
-            if (onChoiceFinishListener != null)
-                onChoiceFinishListener.onCutPicFinish(uri);
+            if (option.needToPress) {
+                pressImage(uri);
+            } else {
+                if (onChoiceFinishListener != null)
+                    onChoiceFinishListener.onCutPicFinish(uri);
+            }
         }
     }
 
-    private void startCult(Uri uri) {
-        if (bili == -1) {
+    public void startCult(Uri uri) {
+        if (option.bili == -1) {
             return;
         }
         //调用裁剪图片activity
         Intent intent = new Intent();
         intent.setClass(activity, PicCultActivity.class);
         intent.setData(uri);
-        intent.putExtra("bili", bili);//设置裁剪比例
+        intent.putExtra("bili", option.bili);//设置裁剪比例
         intent.putExtra("is_circle", is_circle);
         activity.startActivityForResult(intent, PicCultActivity.CULT_PIC);
     }
@@ -128,8 +183,12 @@ public class ChoicePhotoManager {
                 return;
             }
             if (limit != 1) {
-                if (onChoiceFinishListener != null)
-                    onChoiceFinishListener.onCutPicFinish(uris);
+                if (option.needToPress) {
+                    pressImage(uris);
+                } else {
+                    if (onChoiceFinishListener != null)
+                        onChoiceFinishListener.onCutPicFinish(uris);
+                }
             } else {
                 Uri uri = uris[0];
                 DealCultPic(uri);
@@ -153,12 +212,40 @@ public class ChoicePhotoManager {
         } else if (requestCode == PicCultActivity.CULT_PIC) {
             if (data != null) {
                 Uri uri = data.getData();
-                if (uri != null) {
-                    if (onChoiceFinishListener != null)
-                        onChoiceFinishListener.onCutPicFinish(uri);
+                if (option.needToPress) {
+                    pressImage(uri);
+                } else {
+                    if (uri != null) {
+                        if (onChoiceFinishListener != null)
+                            onChoiceFinishListener.onCutPicFinish(uri);
+                    }
                 }
             }
         }
+    }
+
+
+
+    /**
+     * 压缩图片
+     *
+     * @param uris
+     */
+    private void pressImage(Uri[] uris) {
+        DialogUtil.showDialog(context,"正在压缩图片……");
+        for (int i = 0; i < uris.length; i++) {
+            PressImgService.startActionPress(context, uris[i], option, uris.length,i);
+        }
+    }
+
+    /**
+     * 压缩图片
+     *
+     * @param uri
+     */
+    private void pressImage(Uri uri) {
+        DialogUtil.showDialog(context,"正在压缩图片……");
+        PressImgService.startActionPress(context, uri, option, 1,0);
     }
 
 
@@ -297,14 +384,13 @@ public class ChoicePhotoManager {
      * 显示底部弹窗
      *
      * @param activity
-     * @param bili
+     * @param
      * @return
      */
-    public PopupWindow showChoiceWindow(Activity activity, float bili, int limitCount, boolean needToCult) {
+    public PopupWindow showChoiceWindow(Activity activity, int limitCount, Option option) {
         //判断有没有继承本类
-        this.needToCult = needToCult;
-        this.bili = bili;
-        this.activity=activity;
+        this.option = option;
+        this.activity = activity;
         this.limit = limitCount;
         CreatePopWindow();
         //降低屏幕颜色
@@ -314,11 +400,13 @@ public class ChoicePhotoManager {
     }
 
 
-    public PopupWindow showChoiceWindow(Activity activity, float bili, int limitCount) {
-        this.is_circle = false;
-        return showChoiceWindow(activity, bili, limitCount, true);
+    public Option getOption() {
+        return option;
     }
 
+    public void setOption(Option option) {
+        this.option = option;
+    }
 
     /**
      * 选择相片
@@ -374,13 +462,5 @@ public class ChoicePhotoManager {
 
     public void setLimit(int limit) {
         this.limit = limit;
-    }
-
-    public boolean isNeedToCult() {
-        return needToCult;
-    }
-
-    public void setNeedToCult(boolean needToCult) {
-        this.needToCult = needToCult;
     }
 }

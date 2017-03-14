@@ -3,7 +3,6 @@ package com.yioks.lzclib.Helper;
 import android.content.Context;
 import android.util.Log;
 
-import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.yioks.lzclib.Data.Bean;
 import com.yioks.lzclib.Data.GlobalVariable;
 import com.yioks.lzclib.Untils.DialogUtil;
@@ -14,11 +13,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
-
-import cz.msebera.android.httpclient.Header;
 
 /**
  * Created by Administrator on 2016/8/3 0003.
@@ -32,11 +28,11 @@ public abstract class ResolveDataHelper {
     protected Context context;
     private RequestDataBase requestData;
     private Object TAG;
-    private int dateType = 0;  //0 model 1 list 2 Hashmap -1无特殊返回值
+    private int dateType = 0;  //0 model 1 list  -1无特殊返回值
+    private int requestFlag = 0;  //用于区分不同传参
     private int requestType = 0; //0 post 1 get
     private String requestHTTP;
     private RequestParams requestParams;
-    private File[] files;
 
 
     public ResolveDataHelper(Context context, RequestDataBase requestData) {
@@ -54,31 +50,19 @@ public abstract class ResolveDataHelper {
         if (requestParams == null) {
             requestParams = new RequestParams();
         }
-        if (files == null) {
-            try {
-                if (requestData == null) {
-                    RequestData(requestParams);
-                } else {
-                    RequestData(requestData.SetParams(requestParams, dateType, strings));
-                }
-
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                requestDataFail("请求参数错误");
-            }
-        } else {
-            if (requestData instanceof RequestDataFile) {
-                try {
-                    RequestData(((RequestDataFile) requestData).setFileParams(requestParams, files, strings));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    requestDataFail("请求参数错误");
-                }
+        try {
+            if (requestData == null) {
+                RequestData(requestParams);
             } else {
-                requestDataFail("请求参数错误");
+                RequestData(requestData.SetParams(requestParams, requestFlag, strings));
             }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            requestDataFail("请求参数错误");
         }
+
     }
 
     protected void initMd5(RequestParams params) throws Exception {
@@ -100,10 +84,14 @@ public abstract class ResolveDataHelper {
         }
         try {
             initMd5(params);
-            AsyncHttpResponseHandler asyncHttpResponseHandler = new AsyncHttpResponseHandler() {
+            HandlerCallBack callback = new HandlerCallBack(context) {
                 @Override
-                public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                    String string = new String(responseBody);
+                public void onFailure(int statusCode) {
+                    requestDataFail();
+                }
+
+                @Override
+                public void onSuccess(String string) {
                     Log.i("date_print", "data" + string);
                     JsonManager jsonManager = new JsonManager();
                     try {
@@ -123,34 +111,19 @@ public abstract class ResolveDataHelper {
                         requestDataFail(jsonManager.getMsg(), jsonManager.getCode());
                     }
                 }
-
-                @Override
-                public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                    requestDataFail();
-                }
-
-                @Override
-                public void onProgress(long bytesWritten, long totalSize) {
-                    super.onProgress(bytesWritten, totalSize);
-                    //回调进度
-                    if (onProgresUpDate != null) {
-                        int progress = (int) (((float) bytesWritten / (float) totalSize) * 100);
-                        onProgresUpDate.onProgress(progress);
-                    }
-                }
             };
             //为请求设置TAG
-            if (TAG != null) {
-                asyncHttpResponseHandler.setTag(TAG);
+            if (TAG == null) {
+                TAG = context.getPackageName() + context.getClass().getName();
             }
             printParams(params);
 
             //  区分post和get请求
-            requestHTTP=GlobalVariable.getHTTP(context);
+            requestHTTP = GlobalVariable.getHTTP(context);
             if (requestType == 0) {
-                HttpUtil.post(context, requestHTTP, params, asyncHttpResponseHandler);
+                HttpUtil.post(requestHTTP, params, callback, TAG);
             } else {
-                HttpUtil.get(context, requestHTTP, params, asyncHttpResponseHandler);
+                HttpUtil.get(requestHTTP, params, callback, TAG);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -238,8 +211,8 @@ public abstract class ResolveDataHelper {
                     }
                 } else if (dateType == 2) {
                     //hashmap
-                    RequestDataByHashMap requestDataByHashMap = (RequestDataByHashMap) requestData;
-                    resolveData = requestDataByHashMap.resolveDataByHashMap(data);
+                    RequestDataByMap requestDataByMap = (RequestDataByMap) requestData;
+                    resolveData = requestDataByMap.resolveDataByHashMap(data);
                     if (resolveData == null) {
                         requestDataFail("服务器出问题了~~");
                         return;
@@ -395,11 +368,12 @@ public abstract class ResolveDataHelper {
         this.requestParams = requestParams;
     }
 
-    public File[] getFiles() {
-        return files;
+
+    public int getRequestFlag() {
+        return requestFlag;
     }
 
-    public void setFiles(File[] files) {
-        this.files = files;
+    public void setRequestFlag(int requestFlag) {
+        this.requestFlag = requestFlag;
     }
 }

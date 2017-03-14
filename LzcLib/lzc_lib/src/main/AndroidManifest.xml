@@ -15,6 +15,7 @@
     <uses-permission android:name="android.permission.GET_TASKS" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <application >
         <!--<activity-->
             <!--android:name=".Activity.TextActivity"-->
@@ -26,44 +27,51 @@
             <!--</intent-filter>-->
         <!--</activity>-->
         <activity
-            android:name="com.yioks.lzclib.Activity.U3dPlayActivity"
+            android:name=".Activity.U3dPlayActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:exported="true"
             android:label=""
             android:launchMode="singleInstance"
-            android:screenOrientation="landscape"
-            android:theme="@style/AppTheme.NoActionBar"
             android:process=":u3d_play"
-            android:exported="true"
-            >
+            android:screenOrientation="landscape"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:host="yioks_u3d" android:scheme="yioks" android:path="/data"/>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="yioks_u3d"
+                    android:path="/data"
+                    android:scheme="yioks" />
             </intent-filter>
         </activity>
-
-        <activity android:name="com.yioks.lzclib.Activity.WebActivity"
-            android:label=""
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:process=":webView">
-        </activity>
-
         <activity
-            android:name="com.yioks.lzclib.Activity.PicCultActivity"
+            android:name=".Activity.WebActivity"
+            android:label=""
+            android:process=":webView"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
+            android:name=".Activity.PicCultActivity"
             android:label=""
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="com.yioks.lzclib.Activity.PickImgActivity"
+            android:name=".Activity.PickImgActivity"
             android:label=""
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
-
-        <activity android:name=".Activity.ShowBigImgActivity"
+        <activity
+            android:name=".Activity.ShowBigImgActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/FullActivityDialogTheme"/>
+            android:theme="@style/FullActivityDialogTheme" />
+
+        <service
+            android:name=".Service.PressImgService"
+            android:exported="false"
+            android:process=":pressImg"></service>
     </application>
 
 </manifest>

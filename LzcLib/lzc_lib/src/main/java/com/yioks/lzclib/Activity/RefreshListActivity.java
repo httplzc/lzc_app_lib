@@ -102,7 +102,7 @@ public abstract class RefreshListActivity<T extends Bean> extends ReceiverTitleB
             parentView.setHaveFinishLoadMore(teamList.size() < REQUEST_COUNT);
         } else {
             listAdapter.getList().addAll(teamList);
-            parentView.loaddingMoreComplete(teamList.size() < REQUEST_COUNT);
+            parentView.loaddingMoreComplete(teamList.size() < REQUEST_COUNT, true);
         }
         parentView.setstaus(ParentView.Staus.Normal);
         listAdapter.notifyDataSetChanged();
@@ -111,7 +111,7 @@ public abstract class RefreshListActivity<T extends Bean> extends ReceiverTitleB
     //数据请求失败调用
     public void onFailDeal() {
         if (isMore) {
-            parentView.loaddingMoreComplete(false);
+            parentView.loaddingMoreComplete(false, false);
         } else {
             parentView.completeLoad(false);
         }

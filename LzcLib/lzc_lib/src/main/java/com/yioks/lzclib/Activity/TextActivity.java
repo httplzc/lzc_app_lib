@@ -1,13 +1,8 @@
 package com.yioks.lzclib.Activity;
 
-import android.app.IntentService;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
-import android.os.Message;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.Button;
@@ -36,55 +31,30 @@ public class TextActivity extends TitleBaseActivity implements ChoicePhotoManage
         bindTitle(true, "asd", -1);
         ScreenData.init_srceen_data(this);
         xiangPian = (ImageView) findViewById(R.id.xiangPian);
+
         button = (Button) findViewById(R.id.xiangji);
         choicePhotoManager = new ChoicePhotoManager(this);
         choicePhotoManager.setOnChoiceFinishListener(this);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                choicePhotoManager.showChoiceWindow(TextActivity.this, 1f, 9, true);
+                ChoicePhotoManager.Option option = new ChoicePhotoManager.Option();
+                choicePhotoManager.showChoiceWindow(TextActivity.this, 9, option);
 //                WebActivity.showWeb(context,new WebActivity.Data("http://www.hao123.com","测试"));
 //                pressPic();
             }
         });
     }
 
-    private void pressPic() {
-        HandlerThread handlerThread=new HandlerThread("name");
-        handlerThread.start();
-        MyHandler myHandler=new MyHandler(handlerThread.getLooper());
-        Message message=myHandler.obtainMessage();
-        myHandler.sendMessage(message);
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        choicePhotoManager.unRegisterReceiver();
     }
 
-    public class MyHandler extends Handler
-    {
-        public MyHandler(Looper looper) {
-            super(looper);
-        }
 
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-        }
-    }
 
-    public class PressService extends IntentService {
-        /**
-         * Creates an IntentService.  Invoked by your subclass's constructor.
-         *
-         * @param name Used to name the worker thread, important only for debugging.
-         */
-        public PressService(String name) {
-            super(name);
-        }
 
-        @Override
-        protected void onHandleIntent(Intent intent) {
-
-        }
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -99,8 +69,16 @@ public class TextActivity extends TitleBaseActivity implements ChoicePhotoManage
     }
 
     @Override
-    public void onCutPicFinish(Uri uri) {
+    public void onCutPicFinish(final Uri uri) {
         Picasso.with(context).load(uri).into(xiangPian);
+        xiangPian.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BigImgShowData bigImgShowData = new BigImgShowData();
+                bigImgShowData.setData(uri, new BigImgShowData.MessageUri(xiangPian));
+                ShowBigImgActivity.showBigImg(context, bigImgShowData);
+            }
+        });
     }
 
     @Override
@@ -119,7 +97,7 @@ public class TextActivity extends TitleBaseActivity implements ChoicePhotoManage
 //        Intent intent=new Intent();
 //        intent.setClass(this,ShowBigImgActivity.class);
 //        startActivity(intent);
-        ShowBigImgActivity.showBigImg(context,bigImgShowData);
+        ShowBigImgActivity.showBigImg(context, bigImgShowData);
     }
 
 

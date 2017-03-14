@@ -42,6 +42,7 @@ public abstract class RefreshScrollParentViewBase<T extends View> extends Parent
     protected ValueAnimator valueAnimator;
     protected T scrollView;
     protected View reFreshMoreView;
+    protected View reFreshMoreFailureView;
 
     protected LinearLayout refresh_succeed;
 
