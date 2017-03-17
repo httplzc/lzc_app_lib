@@ -1,10 +1,10 @@
 package com.yioks.lzclib.Untils;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.yioks.lzclib.Data.OkHttpInstance;
 import com.yioks.lzclib.Helper.FileDownloadCallBack;
-import com.yioks.lzclib.Helper.HandlerCallBack;
 import com.yioks.lzclib.Helper.RequestParams;
 
 import java.util.List;
@@ -118,12 +118,13 @@ public class HttpUtil {
     private static HttpUrl formatUrl(RequestParams params, String urlString) {
         String scheme;
         String host;
-        scheme = urlString.contains("https://") ? "https://" : "http://";
-        String content = urlString.substring(urlString.indexOf(scheme) + scheme.length());
+        urlString=urlString.replaceAll("\\?","");
+        scheme = urlString.contains("https://") ? "https" : "http";
+        String content = urlString.substring(urlString.indexOf(scheme) + scheme.length()+"://".length());
         String temp[] = content.split("/");
         host = temp[0];
         HttpUrl.Builder builder = new HttpUrl.Builder();
-        builder.scheme(urlString);
+        builder.scheme(scheme);
         builder.host(host);
         for (int i = 1; i < temp.length; i++) {
             builder.addPathSegment(temp[i]);
@@ -131,19 +132,20 @@ public class HttpUtil {
         for (Map.Entry<String, String> entry : params.getUrlParamsEntry()) {
             builder.addEncodedQueryParameter(entry.getKey(), entry.getValue());
         }
+        Log.i("lzc","builder+url"+builder.toString());
         return builder.build();
     }
 
     public static void cancelAllClient() {
         OkHttpInstance.getClient().dispatcher().cancelAll();
-        for (Call call : OkHttpInstance.getClient().dispatcher().queuedCalls()) {
-            if (call instanceof HandlerCallBack)
-                ((HandlerCallBack) call).cancelAllRequest();
-        }
-        for (Call call : OkHttpInstance.getClient().dispatcher().runningCalls()) {
-            if (call instanceof HandlerCallBack)
-                ((HandlerCallBack) call).cancelAllRequest();
-        }
+//        for (Call call : OkHttpInstance.getClient().dispatcher().queuedCalls()) {
+//            if (call instanceof HandlerCallBack)
+//                ((HandlerCallBack) call).cancelAllRequest();
+//        }
+//        for (Call call : OkHttpInstance.getClient().dispatcher().runningCalls()) {
+//            if (call instanceof HandlerCallBack)
+//                ((HandlerCallBack) call).cancelAllRequest();
+//        }
     }
 
 
@@ -151,8 +153,8 @@ public class HttpUtil {
         for (Call call : OkHttpInstance.getClient().dispatcher().queuedCalls()) {
             if (call.request().tag() instanceof String && call.request().tag().equals(context.getPackageName() + context.getClass().getName())) {
                 call.cancel();
-                if (call instanceof HandlerCallBack)
-                    ((HandlerCallBack) call).cancelAllRequest();
+//                if (call instanceof HandlerCallBack)
+//                    ((HandlerCallBack) call).cancelAllRequest();
             }
 
         }
@@ -160,8 +162,8 @@ public class HttpUtil {
         for (Call call : OkHttpInstance.getClient().dispatcher().runningCalls()) {
             if (call.request().tag() instanceof String && call.request().tag().equals(context.getPackageName() + context.getClass().getName())) {
                 call.cancel();
-                if (call instanceof HandlerCallBack)
-                    ((HandlerCallBack) call).cancelAllRequest();
+//                if (call instanceof HandlerCallBack)
+//                    ((HandlerCallBack) call).cancelAllRequest();
             }
 
 

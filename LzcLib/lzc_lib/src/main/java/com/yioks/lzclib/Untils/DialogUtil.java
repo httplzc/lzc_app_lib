@@ -35,23 +35,72 @@ public class DialogUtil {
      * @param content
      */
     public static ProgressDialog showDialog(Context context, String content) {
-        progressDialog = new ProgressDialog(context);
-        DialogUtil.context = context;
-        progressDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialog) {
-                progressDialog = null;
-                HttpUtil.cancelAllClient(DialogUtil.context);
-                DialogUtil.context = null;
-            }
-        });
-        progressDialog.setIndeterminate(true);
-        progressDialog.setCanceledOnTouchOutside(false);
-        progressDialog.setMessage(content);
-        progressDialog.show();
+        return showDialog(context, content, null);
+    }
+
+    public interface CancelDialogDo {
+        void onCancelDialogDo();
+    }
+
+    /**
+     * 加载提示框
+     *
+     * @param context
+     * @param content
+     */
+    public static ProgressDialog showDialog(Context context, String content, final CancelDialogDo cancelDialogDo) {
+
+            progressDialog = new ProgressDialog(context);
+            DialogUtil.context = context;
+            progressDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialog) {
+                    //  HttpUtil.cancelAllClient(DialogUtil.context);
+                    DialogUtil.context = null;
+                    if (cancelDialogDo != null)
+                        cancelDialogDo.onCancelDialogDo();
+                }
+            });
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCanceledOnTouchOutside(false);
+            progressDialog.setMessage(content);
+            progressDialog.show();
+
         return progressDialog;
     }
 
+
+    /**
+     * 加载提示框
+     *
+     * @param context
+     * @param content
+     */
+    public static ProgressDialog showDialog(Context context, String content, final Object cancelTag) {
+
+            progressDialog = new ProgressDialog(context);
+            DialogUtil.context = context;
+            progressDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialog) {
+                    if (cancelTag instanceof Context)
+                        HttpUtil.cancelAllClient((Context) cancelTag);
+                    else
+                        HttpUtil.cancelAllClient(cancelTag);
+                    DialogUtil.context = null;
+                }
+            });
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCanceledOnTouchOutside(false);
+            progressDialog.setMessage(content);
+            progressDialog.show();
+        progressDialog.setCancelMessage(null);
+        return progressDialog;
+    }
+
+    public static boolean dialogIsShow() {
+        return progressDialog != null && progressDialog.isShowing();
+    }
 
 
     /**
@@ -117,7 +166,7 @@ public class DialogUtil {
             } else {
                 if (!ToastString.equals(str)) {
                     mToast.setText(str);
-                   // mToast.setDuration(Toast.LENGTH_SHORT);
+                    // mToast.setDuration(Toast.LENGTH_SHORT);
                     ToastString = str;
                     TimerTask timerTask = new TimerTask() {
                         @Override
@@ -135,6 +184,11 @@ public class DialogUtil {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static void cancelToast() {
+        if (mToast != null)
+            mToast.cancel();
     }
 
 //    private static void PlayVideo(Context context, String url, String name) {

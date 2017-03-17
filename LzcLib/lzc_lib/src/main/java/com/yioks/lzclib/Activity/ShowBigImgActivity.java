@@ -153,10 +153,15 @@ public class ShowBigImgActivity extends AppCompatActivity {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if (showBigImgViewPagerAdapter != null) {
                 boolean complic = showBigImgViewPagerAdapter.back();
-                if (!complic)
+                if (!complic) {
                     finish();
+                    overridePendingTransition(Animation.INFINITE, Animation.INFINITE);
+                }
+
+
             } else {
                 finish();
+                overridePendingTransition(Animation.INFINITE, Animation.INFINITE);
             }
 
             return true;

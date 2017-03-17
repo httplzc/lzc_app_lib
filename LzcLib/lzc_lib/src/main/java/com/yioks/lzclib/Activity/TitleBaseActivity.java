@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.yioks.lzclib.Data.ScreenData;
 import com.yioks.lzclib.R;
+import com.yioks.lzclib.Untils.DialogUtil;
 import com.yioks.lzclib.Untils.HttpUtil;
 
 
@@ -153,6 +154,7 @@ public class TitleBaseActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         HttpUtil.cancelAllClient(this);
+        DialogUtil.cancelToast();
         super.onDestroy();
     }
 }
