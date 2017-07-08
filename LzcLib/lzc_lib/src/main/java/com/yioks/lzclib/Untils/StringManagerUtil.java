@@ -6,10 +6,11 @@ import android.content.res.Resources;
 import android.net.Uri;
 import android.widget.ImageView;
 
-import com.squareup.picasso.Picasso;
-import com.yioks.lzclib.R;
-
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -57,6 +58,31 @@ public class StringManagerUtil {
             hex.append(Integer.toHexString(b & 0xFF));
         }
         return hex.toString();// toUpperCase() 把小写字符串改为大写
+    }
+
+    public static String getStringFromRaw(Context context, int id) {
+        InputStream inputStream = context.getResources().openRawResource(id);
+        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+        StringBuilder stringBuilder = new StringBuilder();
+        String line;
+        try {
+            while ((line = bufferedReader.readLine()) != null) {
+                stringBuilder.append(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return stringBuilder.toString();
+    }
+
+    public static String trimEmpty(String string) {
+        if (string == null)
+            return null;
+        Pattern pattern = Pattern.compile(" ");
+        Matcher matcher = pattern.matcher(string);
+        return matcher.replaceAll("");
     }
 
 
@@ -182,7 +208,7 @@ public class StringManagerUtil {
     public static boolean checkImgEmpty(Context context, String url, ImageView imageView) {
         if (url == null || url.trim().equals("")) {
 
-            Picasso.with(context).load(R.drawable.holder).centerCrop().fit().into(imageView);
+            //   Picasso.with(context).load(R.drawable.holder).centerCrop().fit().into(imageView);
             return false;
         }
         return true;
@@ -190,7 +216,7 @@ public class StringManagerUtil {
 
     public static String CheckEmpty(String string) {
         if (string == null || string.trim().equals("")) {
-            return "未知";
+            return "";
         }
         return string;
     }
@@ -200,6 +226,11 @@ public class StringManagerUtil {
                 + r.getResourcePackageName(res) + "/"
                 + r.getResourceTypeName(res) + "/"
                 + r.getResourceEntryName(res));
+    }
+
+    public static Uri resToUriFresco(int res, Resources r) {
+        return Uri.parse("res://"
+                + r.getResourcePackageName(res) + "/" + res);
     }
 
     public static Uri fileToUri(File file) {
@@ -266,5 +297,74 @@ public class StringManagerUtil {
             return "";
         }
     }
+
+    private static String ChinaNumbers[] = {"一", "二", "三", "四", "五", "六", "七", "八", "九"};
+    private static String ChinaNumbersWei[] = {"十", "百", "千", "万", "亿", "兆"};
+
+    public static String formatNumberToChina(int number) {
+        if (number <= 0)
+            return "";
+        else if (number < 10) {
+            return ChinaNumbers[number - 1];
+        } else if (number < 20) {
+            if (number == 10)
+                return ChinaNumbersWei[0];
+            else {
+                return ChinaNumbersWei[0] + ChinaNumbers[number % 10 - 1];
+            }
+
+        } else if (number < 100) {
+            return ChinaNumbers[number / 10 - 1] + ChinaNumbersWei[0] + (number % 10 == 0 ? "" : ChinaNumbers[number % 10 - 1]);
+        } else if (number < 100000) {
+            int length = String.valueOf(number).length();
+            String key = ChinaNumbersWei[length - 2];
+            int a = number / (int) (Math.pow(10, length - 1));
+            int b = number % (int) (Math.pow(10, length - 1));
+            return ChinaNumbers[a - 1] + key +
+                    (b < 10 ? "零" : b < 20 ? "一" : "") + formatNumberToChina(b);
+        } else {
+            int length = String.valueOf(number).length();
+            int i = 5 + (length - 5) / 4;
+            String key = ChinaNumbersWei[i - 2];
+            int c = 5 + (length - 5) / 4 * 4;
+            int a = number / (int) (Math.pow(10, c - 1));
+            int b = number % (int) (Math.pow(10, c - 1));
+            return formatNumberToChina(a) + key + (b < 10 ? "零" : "") + formatNumberToChina(b);
+        }
+    }
+
+
+    public static String formatNumberToChinaLong(long number) {
+        if (number <= 0)
+            return "";
+        else if (number < 10) {
+            return ChinaNumbers[(int) (number - 1)];
+        } else if (number < 20) {
+            if (number == 10)
+                return ChinaNumbersWei[0];
+            else {
+                return ChinaNumbersWei[0] + ChinaNumbers[(int) (number % 10 - 1)];
+            }
+
+        } else if (number < 100) {
+            return ChinaNumbers[(int) (number / 10 - 1)] + ChinaNumbersWei[0] + (number % 10 == 0 ? "" : ChinaNumbers[(int) (number % 10 - 1)]);
+        } else if (number < 100000) {
+            long length = String.valueOf(number).length();
+            String key = ChinaNumbersWei[(int) (length - 2)];
+            long a = number / (int) (Math.pow(10, length - 1));
+            long b = number % (int) (Math.pow(10, length - 1));
+            return ChinaNumbers[(int) (a - 1)] + key +
+                    (b < 10 ? "零" : b < 20 ? "一" : "") + formatNumberToChinaLong(b);
+        } else {
+            long length = String.valueOf(number).length();
+            long i = 5 + (length - 5) / 4;
+            String key = ChinaNumbersWei[(int) (i - 2)];
+            long c = 5 + (length - 5) / 4 * 4;
+            long a = number / (long) (Math.pow(10, c - 1));
+            long b = number % (long) (Math.pow(10, c - 1));
+            return formatNumberToChinaLong(a) + key + (b < 10 ? "零" : "") + formatNumberToChinaLong(b);
+        }
+    }
+
 
 }

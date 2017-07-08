@@ -57,4 +57,40 @@
     <declare-styleable name="DrawableCenterButton">
         <attr name="fangxiang" format="integer"/>
     </declare-styleable>
+
+    <declare-styleable name="ArcImgView">
+        <attr name="maxScrollHeight" format="dimension"/>
+        <attr name="minScrollHeight" format="dimension"/>
+        <attr name="arc_ratio" format="float"/>
+        <attr name="img_ratio" format="float"/>
+    </declare-styleable>
+
+    <declare-styleable name="HeadScrollView">
+        <attr name="head_layout" format="reference"/>
+    </declare-styleable>
+
+    <declare-styleable name="LoopViewPager">
+        <attr name="enable_auto_scroll" format="boolean"/>
+        <attr name="indicator_size" format="dimension"/>
+    </declare-styleable>
+
+    <declare-styleable name="VideoPlayer">
+        <attr name="video_aspect_ratio" format="float"/>
+    </declare-styleable>
+
+    <declare-styleable name="CircleTextView">
+        <attr name="full_color" format="color"></attr>
+        <attr name="line_width" format="dimension"/>
+        <attr name="line_color" format="color"/>
+    </declare-styleable>
+    
+    <declare-styleable name="TabView">
+        <attr name="padding_landscape" format="dimension"/>
+        <attr name="padding_vertical" format="dimension"/>
+    </declare-styleable>
+
+    <declare-styleable name="ImgListView">
+        <attr name="img_list_padding_landscape" format="dimension"/>
+        <attr name="img_list_padding_vertical" format="dimension"/>
+    </declare-styleable>
 </resources>

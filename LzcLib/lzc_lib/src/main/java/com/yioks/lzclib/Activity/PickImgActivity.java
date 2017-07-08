@@ -102,13 +102,13 @@ public class PickImgActivity extends TitleBaseActivity {
                 // DialogUtil.ShowToast(PickImgActivity.this,"22222222");
                 if (scrollState == SCROLL_STATE_IDLE) {
                     for (int i = 0; i < picImgGridAdapter.getUriList().size(); i++) {
-                     //   Picasso.with(PickImgActivity.this).resumeTag("picimg" + i);
+                        //   Picasso.with(PickImgActivity.this).resumeTag("picimg" + i);
                     }
 
                 } else {
                     //    DialogUtil.ShowToast(PickImgActivity.this,"asdhjgashjdqeeklqheikhqw");
                     for (int i = 0; i < picImgGridAdapter.getUriList().size(); i++) {
-                      //  Picasso.with(PickImgActivity.this).pauseTag("picimg" + i);
+                        //  Picasso.with(PickImgActivity.this).pauseTag("picimg" + i);
                     }
                 }
             }
@@ -208,7 +208,7 @@ public class PickImgActivity extends TitleBaseActivity {
 //
 //        }
 
-        HashMap<String, XiangceData> xiangceDatas= GetPhoneImgManager.GetXiangCeHash(getContentResolver());
+        HashMap<String, XiangceData> xiangceDatas = GetPhoneImgManager.GetXiangCeHash(getContentResolver());
 
         List<XiangceData> xiangceDataList = new ArrayList<>();
         //为相册基础类赋值
@@ -293,6 +293,7 @@ public class PickImgActivity extends TitleBaseActivity {
         });
     }
 
+    //修改UI状态
     public void setCheck(View view, int postion) {
         try {
             PicImgGridAdapter.ViewHoler viewHoler = (PicImgGridAdapter.ViewHoler) view.getTag();
@@ -305,8 +306,9 @@ public class PickImgActivity extends TitleBaseActivity {
             } else {
                 int cancelNumber = numberCheckView.getNumber();
                 numberCheckView.setChecked(false);
+                numberCheckView.invalidate();
                 for (int i = 0; i < gridView.getCount(); i++) {
-                    if(gridView.getChildAt(i)==numberCheckView)
+                    if (gridView.getChildAt(i) == null || gridView.getChildAt(i).getTag() == null || gridView.getChildAt(i) == view)
                         continue;
                     PicImgGridAdapter.ViewHoler viewHolertemp = (PicImgGridAdapter.ViewHoler) gridView.getChildAt(i).getTag();
                     NumberCheckView numberCheckViewTemp = (NumberCheckView) viewHolertemp.checkBox;

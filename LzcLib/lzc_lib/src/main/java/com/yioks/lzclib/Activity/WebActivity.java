@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.webkit.DownloadListener;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -16,8 +17,10 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.yioks.lzclib.Data.BigImgShowData;
 import com.yioks.lzclib.Data.WebViewJavascriptInterface;
 import com.yioks.lzclib.R;
+import com.yioks.lzclib.Untils.StringManagerUtil;
 import com.yioks.lzclib.View.ParentView;
 
 import java.io.Serializable;
@@ -27,9 +30,6 @@ import java.util.Map;
 
 /**
  * Created by ${User} on 2016/8/18 0018.
- *
- *
- *
  */
 public class WebActivity extends TitleBaseActivity {
     private WebView webView;
@@ -61,6 +61,7 @@ public class WebActivity extends TitleBaseActivity {
         public String title = "";
         private HashMap<String, WebViewJavascriptInterface> interfaceMap = new HashMap<>();
         public String html;
+        public HashMap<String, Integer> cssMap = new HashMap<>();
 
         public Data(String url, String title) {
             this.url = url;
@@ -71,9 +72,16 @@ public class WebActivity extends TitleBaseActivity {
         public Data() {
         }
 
-        public void put(String name,WebViewJavascriptInterface interFace)
-        {
-            interfaceMap.put(name,interFace);
+        public void put(String name, WebViewJavascriptInterface interFace) {
+            interfaceMap.put(name, interFace);
+        }
+
+        public HashMap<String, Integer> getCssMap() {
+            return cssMap;
+        }
+
+        public void setCssMap(HashMap<String, Integer> cssMap) {
+            this.cssMap = cssMap;
         }
     }
 
@@ -118,40 +126,55 @@ public class WebActivity extends TitleBaseActivity {
     }
 
     private void addInterface(WebView webView) {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR1)
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR1) {
             if (data.interfaceMap != null) {
                 for (Object entry : data.interfaceMap.entrySet()) {
                     Map.Entry<String, WebViewJavascriptInterface> objectEntry = (Map.Entry<String, WebViewJavascriptInterface>) entry;
-                    WebViewJavascriptInterface anInterface=objectEntry.getValue();
+                    WebViewJavascriptInterface anInterface = objectEntry.getValue();
                     anInterface.setContext(context);
-                    webView.addJavascriptInterface(anInterface,objectEntry.getKey());
+                    webView.addJavascriptInterface(anInterface, objectEntry.getKey());
                 }
             }
-
+            webView.addJavascriptInterface(new OnClickImgListener(), "ImageClickListener");
+        }
     }
 
 
-
-
-private class DownLoadListener implements DownloadListener {
-
-    @Override
-    public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
-        Uri uri = Uri.parse(url);
-        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-        startActivity(intent);
+    /**
+     * 注入js函数监听
+     */
+    private void addImageClickListener() {
+        webView.loadUrl("javascript:" + StringManagerUtil.getStringFromRaw(context, R.raw.show_bigimg));
     }
-}
+
+
+    private class OnClickImgListener {
+        @JavascriptInterface
+        public void onImgClick(String path) {
+//            BigImgShowData bigImgShowData = new BigImgShowData();
+//            bigImgShowData.setData(path);
+//            ShowBigImgActivity.showBigImg(context, bigImgShowData);
+        }
+    }
+
+
+    private class DownLoadListener implements DownloadListener {
+
+        @Override
+        public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
+            Uri uri = Uri.parse(url);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            startActivity(intent);
+        }
+    }
 
 
     public void loadData() {
         Log.i("lzc", "loadUrl" + data.url);
-        if(data.html!=null)
-        {
-            webView.loadDataWithBaseURL(null,data.html,"text/html","utf-8",null);
-        }
-        else
-        {
+        if (data.html != null) {
+            //   String realHtmlData = "<link rel=\"stylesheet\" href=\"file:///android_asset/style.css\" type=\"text/css\" " + data.html;
+            webView.loadDataWithBaseURL(null, data.html, "text/html", "utf-8", null);
+        } else {
             if (data.url != null && !data.url.equals("")) {
                 webView.loadUrl(data.url);
             } else {
@@ -167,76 +190,94 @@ private class DownLoadListener implements DownloadListener {
         super.onDestroy();
     }
 
-public class MyWebViewClient extends WebViewClient {
+    public class MyWebViewClient extends WebViewClient {
 
-    private boolean error = false;
+        private boolean error = false;
 
-    @Override
-    public void onPageCommitVisible(WebView view, String url) {
-        Log.i("lzc", "onPageCommitVisible");
-        super.onPageCommitVisible(view, url);
-        if (!error) {
-            parentView.setstaus(ParentView.Staus.Normal);
+        @Override
+        public void onPageCommitVisible(WebView view, String url) {
+            Log.i("lzc", "onPageCommitVisible");
+            super.onPageCommitVisible(view, url);
+
         }
-    }
 
 
-    public boolean shouldOverrideUrlLoading(WebView view, String url) {
-        Log.i("lzc", "url___depa" + url);
-        try {
-            String last = url.substring(url.lastIndexOf("/"));
-            if (last.contains("doc") || last.contains("txt") || last.contains("pdf") || last.contains("xlsx") || last.contains("docx") || last.contains("TXT")) {
-                Intent intent = new Intent();
-                intent.setAction(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse(url));
-                startActivity(intent);
-                return true;
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            try {
+                String last = url.substring(url.lastIndexOf("/"));
+                if (last.contains("doc") || last.contains("txt") || last.contains("pdf") || last.contains("xlsx") || last.contains("docx") || last.contains("TXT")) {
+                    Intent intent = new Intent();
+                    intent.setAction(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse(url));
+                    startActivity(intent);
+                    return true;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            view.loadUrl(url);
+            return true;
         }
-        view.loadUrl(url);
-        return true;
+
+        public void onPageStarted(WebView view, String url, Bitmap favicon) {
+            Log.i("lzc", "onPageStarted");
+            error = false;
+            parentView.setstaus(ParentView.Staus.Loading);
+            super.onPageStarted(view, url, favicon);
+        }
+
+        public void onPageFinished(WebView view, String url) {
+            //  Log.i("lzc", "-MyWebViewClient->onPageFinished()--");
+            Log.i("lzc", "onPageFinished " + url);
+            addImageClickListener();
+            if (data.cssMap.get(url) != null)
+                addCss(data.cssMap.get(url));
+            if (!error) {
+                parentView.setstaus(ParentView.Staus.Normal);
+            }
+            super.onPageFinished(view, url);
+
+
+        }
+
+        @Override
+        public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+            super.onReceivedError(view, errorCode, description, failingUrl);
+            Log.i("lzc", "onReceivedErrorOld " + errorCode + "    " + description + " --- " + failingUrl);
+            //    this.error = true;
+            //   parentView.setstaus(ParentView.Staus.Error);
+        }
+
+        @Override
+        public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+            Log.i("lzc", "onReceivedError ");
+            super.onReceivedError(view, request, error);
+
+        }
+
+        @Override
+        public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                Log.i("lzc", "onReceivedHttpError " + error + "---" + request.getUrl() + "---" + errorResponse.getStatusCode() + "---"
+                        + errorResponse.getMimeType() + "---"+errorResponse.getReasonPhrase()+request.getUrl());
+//            this.error = true;
+//            parentView.setstaus(ParentView.Staus.Error);
+            super.onReceivedHttpError(view, request, errorResponse);
+        }
+
+        @Override
+        public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+            return super.shouldInterceptRequest(view, url);
+        }
     }
 
-    public void onPageStarted(WebView view, String url, Bitmap favicon) {
-        Log.i("lzc", "onPageStarted");
-        error = false;
-        parentView.setstaus(ParentView.Staus.Loading);
-        super.onPageStarted(view, url, favicon);
+    private void addCss(int cssId) {
+        webView.loadUrl("JavaScript:(function() {" + "var parent = document.getElementsByTagName('head').item(0);"
+                + "var style = document.createElement('style');"
+                + "style.type = 'text/css';"
+                + "style.innerHTML = window.atob('" + StringManagerUtil.getStringFromRaw(context, cssId) + "');"
+                + "parent.appendChild(style)" + "})();");
     }
-
-    public void onPageFinished(WebView view, String url) {
-        //  Log.i("lzc", "-MyWebViewClient->onPageFinished()--");
-        Log.i("lzc", "onPageFinished");
-        super.onPageFinished(view, url);
-
-
-    }
-
-    @Override
-    public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-        super.onReceivedError(view, errorCode, description, failingUrl);
-        this.error = true;
-        parentView.setstaus(ParentView.Staus.Error);
-    }
-
-    @Override
-    public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-        Log.i("lzc", "onReceivedError");
-        super.onReceivedError(view, request, error);
-
-    }
-
-    @Override
-    public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
-        Log.i("lzc", "onReceivedError");
-        this.error = true;
-        parentView.setstaus(ParentView.Staus.Error);
-        super.onReceivedHttpError(view, request, errorResponse);
-    }
-
-}
 
     @Override
     protected void onPause() {

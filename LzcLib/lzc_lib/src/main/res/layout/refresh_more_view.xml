@@ -13,10 +13,11 @@
         android:paddingTop="5dp"
         android:orientation="horizontal">
 
-        <com.yioks.lzclib.View.LoaddingBollView
+        <com.yioks.lzclib.View.LoadImg
             android:id="@+id/load_more_progress"
-            android:layout_width="40dp"
-            android:layout_height="60dp"/>
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:visibility="visible"/>
 
         <TextView
             android:id="@+id/load_more_text"

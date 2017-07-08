@@ -3,22 +3,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/line_color"
+    android:background="@color/white"
     android:gravity="center"
     android:orientation="vertical">
 
     <LinearLayout
+        android:id="@+id/net_fail_real"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="100dp"
+        android:layout_marginBottom="20dp"
         android:gravity="center"
         android:orientation="vertical">
 
         <ImageView
-            android:layout_width="150dp"
-            android:layout_height="150dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
-            android:src="@drawable/error_pic" />
+            android:src="@drawable/error_pic_img" />
 
         <TextView
             android:id="@+id/net_faile"
@@ -28,6 +29,7 @@
             android:textColor="@color/gray"
             android:textSize="16sp" />
         <TextView
+            android:id="@+id/net_faile_refresh_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="下拉刷新"

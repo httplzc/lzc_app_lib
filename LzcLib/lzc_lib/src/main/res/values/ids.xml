@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item type="id" name="parent_view"/>
-    <item type="id" name="listview"/>
+    <item name="parent_view" type="id" />
+    <item name="listview" type="id" />
+    <item name="recycle_view" type="id" />
+    <item name="arcImgView" type="id" />
+    <item name="content" type="id" />
+    <item name="pagerScrollView" type="id" />
 </resources>

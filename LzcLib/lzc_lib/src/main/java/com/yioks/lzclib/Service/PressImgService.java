@@ -6,11 +6,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.IBinder;
+import android.os.Process;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.yioks.lzclib.Helper.ChoicePhotoManager;
 import com.yioks.lzclib.Untils.FileUntil;
+import com.yioks.lzclib.Untils.FunUntil;
 
 import java.io.File;
 import java.util.Hashtable;
@@ -35,6 +37,7 @@ public class PressImgService extends Service {
     private static final String EXTRA_PARAM2 = "com.yioks.lzclib.Service.extra.pressImgOption";
     private static final String EXTRA_PARAM3 = "com.yioks.lzclib.Service.extra.pressImgCount";
     private static final String EXTRA_PARAM4 = "com.yioks.lzclib.Service.extra.pressImgPosition";
+    private static final String EXTRA_PARAM5 = "com.yioks.lzclib.Service.extra.tag";
     private int count = 0;
     private volatile int realCount;
     private static final String FileName = "pressPic";
@@ -42,6 +45,7 @@ public class PressImgService extends Service {
     //    public Vector<File> fileList = new Vector<>();
     private Hashtable<Integer, File> fileHashtable = new Hashtable<>();
     private ExecutorService executorService;
+    private String tag="";
 
 
     public PressImgService() {
@@ -85,6 +89,7 @@ public class PressImgService extends Service {
         intent.putExtra(EXTRA_PARAM2, option);
         intent.putExtra(EXTRA_PARAM3, realCount);
         intent.putExtra(EXTRA_PARAM4, position);
+        intent.putExtra(EXTRA_PARAM5, context.hashCode());
         context.startService(intent);
     }
 
@@ -105,6 +110,7 @@ public class PressImgService extends Service {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_FOO.equals(action)) {
+                tag = intent.getIntExtra(EXTRA_PARAM5,0)+"";
                 final Uri uri = intent.getParcelableExtra(EXTRA_PARAM1);
                 final ChoicePhotoManager.Option option = (ChoicePhotoManager.Option) intent.getSerializableExtra(EXTRA_PARAM2);
                 realCount = intent.getIntExtra(EXTRA_PARAM3, 1);
@@ -116,19 +122,24 @@ public class PressImgService extends Service {
 
     private void callFinish() {
         Intent intent = new Intent();
-        intent.setAction(callbackReceiver);
+        intent.setAction(callbackReceiver+tag);
+        Log.i("lzc", "action  " + callbackReceiver+tag);
         Uri[] uris = new Uri[fileHashtable.keySet().size()];
         for (Map.Entry<Integer, File> integerFileEntry : fileHashtable.entrySet()) {
             uris[integerFileEntry.getKey()] = Uri.fromFile(integerFileEntry.getValue());
-        }
-        for (int i = 0; i < realCount; i++) {
-            Log.i("lzc", "position---asd" + i);
         }
         intent.putExtra("data", uris);
         sendBroadcast(intent);
         fileHashtable.clear();
         count = 0;
         stopSelf();
+    }
+
+
+    public static void StopProcess(Context context) {
+        int pid = FunUntil.getProcessIdByProcessName(context, context.getPackageName() + ":pressImg");
+        if (pid != -1)
+            Process.killProcess(pid);
     }
 
     /**
@@ -140,7 +151,7 @@ public class PressImgService extends Service {
         if (!file.exists())
             return;
         File newFile = FileUntil.createTempFile(FileName + UUID.randomUUID() + ".jpg");
-        FileUntil.compressImg(this, file, newFile, option.pressRadio, option.maxWidth, option.maxHeight);
+        FileUntil.compressImg(this, file, newFile, option.pressRadio, option.maxWidth, option.maxHeight, option.longImgRatio);
         FileUntil.setFilePictureDegree(newFile, FileUntil.readPictureDegree(file.getPath()));
         Log.i("lzc", "position" + position);
         fileHashtable.put(position, newFile);

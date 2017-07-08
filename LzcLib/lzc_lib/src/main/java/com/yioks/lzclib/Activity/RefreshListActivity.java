@@ -24,7 +24,7 @@ public abstract class RefreshListActivity<T extends Bean> extends ReceiverTitleB
     public ListView listView;
     public ListAdapter listAdapter;
     public boolean isMore = false;
-    public int REQUEST_COUNT = 15;
+    public int REQUEST_COUNT = 10;
 
     public void initView() {
         parentView = (ReFreshListViewParentView) findViewById(R.id.parent_view);
@@ -120,6 +120,7 @@ public abstract class RefreshListActivity<T extends Bean> extends ReceiverTitleB
             parentView.setstaus(ParentView.Staus.Error);
         }
     }
+
 
 
 }

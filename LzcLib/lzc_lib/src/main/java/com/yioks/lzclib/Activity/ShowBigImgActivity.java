@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -20,17 +19,18 @@ import android.view.animation.TranslateAnimation;
 
 import com.yioks.lzclib.Adapter.ShowBigImgViewPagerAdapter;
 import com.yioks.lzclib.Data.BigImgShowData;
+import com.yioks.lzclib.Data.ScreenData;
 import com.yioks.lzclib.R;
 import com.yioks.lzclib.View.ViewPagerIndicator;
 
-public class ShowBigImgActivity extends AppCompatActivity {
+public class ShowBigImgActivity extends TitleBaseActivity {
     private View backGround;
     private ViewPager viewPager;
     private ViewPagerIndicator viewPagerIndicator;
     private ShowBigImgViewPagerAdapter showBigImgViewPagerAdapter;
     private BigImgShowData bigImgShowData;
     protected BroadcastReceiver broadcastReceiver;
-    public static final String RECEIVER_NAME = "com.yioks.lzclib.showBigImg.alpha.callBack";
+    public static final String RECEIVER_NAME = "com.yioks.lzclib.show_bigimg.alpha.callBack";
     private int startPosition;
     private View anim;
     private static final int aninTime = 300;
@@ -40,6 +40,8 @@ public class ShowBigImgActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.show_big_img_dialog_layout);
+        ScreenData.init_srceen_data(this);
+        changeStatusBarView(true);
         bigImgShowData = (BigImgShowData) getIntent().getParcelableExtra("data");
         startPosition = getIntent().getIntExtra("startPosition", 0);
         initView();
@@ -58,8 +60,11 @@ public class ShowBigImgActivity extends AppCompatActivity {
         showBigImgViewPagerAdapter.setIsanim(true);
         AnimationSet animationSet = new AnimationSet(true);
         BigImgShowData.MessageUri messageUri = bigImgShowData.getMessageUri(startPosition);
-        if (messageUri == null)
+        if (messageUri == null) {
+            showBigImgViewPagerAdapter.setIsanim(false);
             return;
+        }
+
         Animation animation = new ScaleAnimation(messageUri.getWidth() / anim.getWidth(), 1
                 , messageUri.getHeight() / anim.getHeight(), 1, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
         Animation animationTrans = new TranslateAnimation(messageUri.getCenterX() - messageUri.getWidth() / 2 - anim.getWidth() / 2, 0,
@@ -95,6 +100,7 @@ public class ShowBigImgActivity extends AppCompatActivity {
             public void onReceive(Context context, Intent intent) {
 
                 if (intent.getBooleanExtra("shutdown", false)) {
+
                     finish();
                     overridePendingTransition(Animation.INFINITE, Animation.INFINITE);
                 } else {
@@ -131,10 +137,10 @@ public class ShowBigImgActivity extends AppCompatActivity {
             @Override
             public void onPageScrollStateChanged(int state) {
 //                if (state == ViewPager.SCROLL_STATE_IDLE) {
-//                    Picasso.with(ShowBigImgActivity.this).resumeTag("showBigImg");
+//                    Picasso.with(ShowBigImgActivity.this).resumeTag("show_bigimg");
 //
 //                } else {
-//                    Picasso.with(ShowBigImgActivity.this).pauseTag("showBigImg");
+//                    Picasso.with(ShowBigImgActivity.this).pauseTag("show_bigimg");
 //                }
             }
         });
@@ -148,6 +154,15 @@ public class ShowBigImgActivity extends AppCompatActivity {
 
     }
 
+    public static void showBigImg(Context context, BigImgShowData bigImgShowData, int startPosition) {
+        Intent intent = new Intent(context, ShowBigImgActivity.class);
+        intent.putExtra("data", bigImgShowData);
+        intent.putExtra("startPosition", startPosition);
+        context.startActivity(intent);
+
+    }
+
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -157,8 +172,6 @@ public class ShowBigImgActivity extends AppCompatActivity {
                     finish();
                     overridePendingTransition(Animation.INFINITE, Animation.INFINITE);
                 }
-
-
             } else {
                 finish();
                 overridePendingTransition(Animation.INFINITE, Animation.INFINITE);

@@ -17,10 +17,10 @@
         <!--android:layout_width="35dp"-->
         <!--android:layout_height="35dp"-->
         <!--android:layout_gravity="center" />-->
-        <com.yioks.lzclib.View.LoaddingBollView
+        <com.yioks.lzclib.View.LoadImg
             android:id="@+id/loadding_effect"
-            android:layout_width="45dp"
-            android:layout_height="35dp"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
             android:layout_gravity="center" />
 
         <LinearLayout

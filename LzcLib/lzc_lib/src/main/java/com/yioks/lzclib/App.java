@@ -2,6 +2,7 @@ package com.yioks.lzclib;
 
 import android.app.Application;
 
+import com.yioks.lzclib.Data.OkHttpInstance;
 import com.yioks.lzclib.Helper.LzcLibInit;
 
 /**
@@ -13,6 +14,7 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         LzcLibInit.initApp(this);
+        OkHttpInstance.InitOkHttpClient(this);
 
     }
 }

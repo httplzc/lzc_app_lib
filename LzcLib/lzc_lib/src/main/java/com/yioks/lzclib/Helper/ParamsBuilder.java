@@ -63,8 +63,8 @@ public class ParamsBuilder {
         }
 
         params.put("_t", time);//时间戳
-        params.put("dataKey", data_md5);//数据的MD5标识
-        params.put("codeKey", key);//指纹校验KEY
+//        params.put("dataKey", data_md5);//数据的MD5标识
+//        params.put("codeKey", key);//指纹校验KEY
         params.put("flag", flag);
         return params;
     }

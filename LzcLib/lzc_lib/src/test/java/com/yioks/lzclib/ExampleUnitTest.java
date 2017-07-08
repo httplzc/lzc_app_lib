@@ -10,6 +10,11 @@ import static org.junit.Assert.*;
 public class ExampleUnitTest {
     @Test
     public void addition_isCorrect() throws Exception {
+        int i=2147483647;
+        i++;
+        i++;
+        System.out.print(Integer.MAX_VALUE);
+        System.out.print(i);
         assertEquals(4, 2 + 2);
     }
 }

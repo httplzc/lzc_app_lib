@@ -71,6 +71,12 @@ public class ViewPagerIndicator extends View {
         circle_foreground_color = ContextCompat.getColor(context, R.color.yindao_circle_b);
     }
 
+    //单位像素
+    public void setRatio(float ratio) {
+        this.ratio = ratio;
+        invalidate();
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (count != 0) {
@@ -110,6 +116,7 @@ public class ViewPagerIndicator extends View {
     public void setOffX(int position, float offset) {
         this.position = position;
         this.offset = offset;
+        this.invalidate();
     }
 
     public int getCount() {

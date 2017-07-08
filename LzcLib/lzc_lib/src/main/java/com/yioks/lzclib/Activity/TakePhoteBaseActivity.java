@@ -31,6 +31,11 @@ public abstract class TakePhoteBaseActivity extends TitleBaseActivity {
             public void onCutPicFinish(Uri[] uris) {
                 onCutPicfinish(uris);
             }
+
+            @Override
+            public void cancel() {
+
+            }
         });
     }
 

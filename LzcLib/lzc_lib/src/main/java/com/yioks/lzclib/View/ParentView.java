@@ -57,6 +57,8 @@ public class ParentView extends FrameLayout {
     //内容全部是按钮
     protected boolean is_all_button = false;
 
+    private int centerViewOffY = 0;
+
 
     //状态枚举  正在加载中  普通  内容错误 ，内容为空
     public enum Staus {
@@ -73,7 +75,7 @@ public class ParentView extends FrameLayout {
     //加载中显示的信息
     private List<String> loadding_list = new ArrayList<>();
     //没有数据时显示的文字
-    private String null_text = getResources().getString(R.string.no_data) ;
+    private String null_text = getResources().getString(R.string.no_data);
     //正在加载中的进度条
     private ProgressTextView loadding_progress;
     //是否加载中
@@ -86,11 +88,19 @@ public class ParentView extends FrameLayout {
     private TextView error_textView;
 
 
+    private TextView netFailRefreshTextView;
+    private TextView nullRefreshTextView;
+
+    private String netFailRefreshText = "下拉刷新";
+    private String nullRefreshText = "下拉刷新";
+
     public Animation animation;
     public ToNormal toNormal;
 
+    private View net_fail_real;
+    private View null_content_real;
+    private View loading_real;
 
-    ;
 
     public ParentView(Context context) {
         super(context);
@@ -107,6 +117,11 @@ public class ParentView extends FrameLayout {
         super(context, attrs, defStyleAttr);
         initView(context);
         initData(attrs);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
     /**
@@ -163,14 +178,26 @@ public class ParentView extends FrameLayout {
         this.addView(nullContentView);
         this.addView(loadView);
 
+        net_fail_real = netFailLayout.findViewById(R.id.net_fail_real);
+        null_content_real = nullContentView.findViewById(R.id.null_content_real);
+        loading_real = loadView.findViewById(R.id.loading_real);
+        setOffY(centerViewOffY);
+
         error_textView = (TextView) netFailLayout.findViewById(R.id.net_faile);
         error_textView.setText(error_text);
         null_textView = (TextView) nullContentView.findViewById(R.id.null_content);
         null_textView.setText(null_text);
+        nullRefreshTextView = (TextView) nullContentView.findViewById(R.id.null_refresh_text);
+        nullRefreshTextView.setText(nullRefreshText);
+
+        netFailRefreshTextView = (TextView) netFailLayout.findViewById(R.id.net_faile_refresh_text);
+        nullRefreshTextView.setText(netFailRefreshText);
+
+
         loadding_textView = (TextView) findViewById(R.id.loadding_text);
         loadding_textView.setText(loadding_list.get(0));
         loadding_progress = (ProgressTextView) loadView.findViewById(R.id.progress_text);
-        LoaddingBollView loadding_boll = (LoaddingBollView) loadView.findViewById(R.id.loadding_boll);
+       // LoaddingBollView loadding_boll = (LoaddingBollView) loadView.findViewById(R.id.loadding_boll);
         if (!is_show_progress) {
             loadding_progress.setVisibility(GONE);
         } else {
@@ -186,6 +213,7 @@ public class ParentView extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        super.onInterceptTouchEvent(ev);
         if (staus != Staus.Normal) {
             return true;
         }
@@ -236,6 +264,8 @@ public class ParentView extends FrameLayout {
         if (!canScroll) {
             return false;
         }
+        if (staus == Staus.Normal||staus==Staus.Loading)
+            return false;
         float eventX = event.getX();
         float eventY = event.getY();
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
@@ -555,4 +585,73 @@ public class ParentView extends FrameLayout {
         return staus;
     }
 
+    public TextView getNetFailRefreshTextView() {
+        return netFailRefreshTextView;
+    }
+
+    public void setNetFailRefreshTextView(TextView netFailRefreshTextView) {
+        this.netFailRefreshTextView = netFailRefreshTextView;
+    }
+
+    public TextView getNullRefreshTextView() {
+        return nullRefreshTextView;
+    }
+
+    public void setNullRefreshTextView(TextView nullRefreshTextView) {
+        this.nullRefreshTextView = nullRefreshTextView;
+    }
+
+    public String getNetFailRefreshText() {
+        return netFailRefreshText;
+    }
+
+    public void setNetFailRefreshText(String netFailRefreshText) {
+        this.netFailRefreshText = netFailRefreshText;
+        if (netFailRefreshTextView != null)
+            netFailRefreshTextView.setText(netFailRefreshText);
+    }
+
+    public String getNullRefreshText() {
+        return nullRefreshText;
+    }
+
+    public void setNullRefreshText(String nullRefreshText) {
+        this.nullRefreshText = nullRefreshText;
+        if (nullRefreshTextView != null)
+            nullRefreshTextView.setText(nullRefreshText);
+    }
+
+    public View getNet_fail_real() {
+        return net_fail_real;
+    }
+
+    public void setNet_fail_real(View net_fail_real) {
+        this.net_fail_real = net_fail_real;
+    }
+
+    public View getNull_content_real() {
+        return null_content_real;
+    }
+
+    public void setNull_content_real(View null_content_real) {
+        this.null_content_real = null_content_real;
+    }
+
+    public View getLoading_real() {
+        return loading_real;
+    }
+
+    public void setLoading_real(View loading_real) {
+        this.loading_real = loading_real;
+    }
+
+    public void setOffY(int y) {
+        this.centerViewOffY = y;
+        if (net_fail_real != null)
+            net_fail_real.setTranslationY(y);
+        if (null_content_real != null)
+            null_content_real.setTranslationY(y);
+        if (loading_real != null)
+            loading_real.setTranslationY(y);
+    }
 }

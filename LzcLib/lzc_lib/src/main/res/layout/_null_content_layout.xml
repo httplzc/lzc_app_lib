@@ -5,22 +5,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    android:background="@color/line_color"
+    android:background="@color/white"
     android:layout_gravity="center"
-    android:clickable="false"
     >
     <LinearLayout
+        android:id="@+id/null_content_real"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginBottom="100dp"
+        android:layout_marginBottom="20dp"
         android:gravity="center">
 
         <ImageView
-            android:layout_width="150dp"
-            android:layout_height="150dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
-            android:src="@drawable/null_content_pic" />
+            android:src="@drawable/null_content_pic_img" />
         <TextView
             android:id="@+id/null_content"
             android:layout_width="wrap_content"
@@ -30,6 +30,7 @@
             android:textSize="16sp"/>
 
         <TextView
+            android:id="@+id/null_refresh_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="下拉刷新"

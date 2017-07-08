@@ -14,6 +14,8 @@ import android.widget.TextView;
 import com.yioks.lzclib.Data.ScreenData;
 import com.yioks.lzclib.R;
 
+import java.util.Map;
+
 
 /**
  * Created by ${User} on 2016/9/1 0001.
@@ -21,6 +23,7 @@ import com.yioks.lzclib.R;
 public class RefreshScrollParentView extends RefreshScrollParentViewBase<ScrollView> {
     protected ViewGroup scrollChildView;
     protected LinearLayout reFreshBottom;
+
     public RefreshScrollParentView(Context context) {
         super(context);
     }
@@ -34,6 +37,13 @@ public class RefreshScrollParentView extends RefreshScrollParentViewBase<ScrollV
     }
 
     @Override
+    protected void checkOnScroll() {
+        for (Map.Entry<View, View> viewViewEntry : groupViews.entrySet()) {
+            dealReplace(viewViewEntry.getKey(), viewViewEntry.getValue());
+        }
+    }
+
+    @Override
     protected void addExternView() {
         scrollChildView = (ViewGroup) scrollView.getChildAt(0);
         reFreshView = LayoutInflater.from(context).inflate(R.layout.refresh_view, null, false);
@@ -44,14 +54,24 @@ public class RefreshScrollParentView extends RefreshScrollParentViewBase<ScrollV
         reFreshImg = (ImageView) reFreshView.findViewById(R.id.refresh_img);
         pull = (LinearLayout) reFreshView.findViewById(R.id.pull);
         loadding = (FrameLayout) reFreshView.findViewById(R.id.loadding);
-        refresh_succeed= (LinearLayout) reFreshView.findViewById(R.id.refresh_succeed);
-        loadding_effect=reFreshView.findViewById(R.id.loadding_effect);
+        refresh_succeed = (LinearLayout) reFreshView.findViewById(R.id.refresh_succeed);
+        loadding_effect = reFreshView.findViewById(R.id.loadding_effect);
         reFreshBottom.setPadding(reFreshBottom.getPaddingLeft(), (int) (-60 * ScreenData.density), reFreshBottom.getPaddingRight(), reFreshBottom.getPaddingBottom());
+        if (scrollView instanceof com.yioks.lzclib.View.ScrollView) {
+            com.yioks.lzclib.View.ScrollView wrapperScroll = (com.yioks.lzclib.View.ScrollView) scrollView;
+            wrapperScroll.setOnScrollListener(new com.yioks.lzclib.View.ScrollView.onScrollListener() {
+                @Override
+                public void onScroll() {
+                    checkOnScroll();
+                }
+            });
+        }
     }
 
 
     /**
      * 是否到达顶部
+     *
      * @return
      */
     public boolean isReadyForPullStart() {
@@ -61,6 +81,7 @@ public class RefreshScrollParentView extends RefreshScrollParentViewBase<ScrollV
 
     /**
      * 是否到达底部
+     *
      * @return
      */
     public boolean isReadyForPullEnd() {

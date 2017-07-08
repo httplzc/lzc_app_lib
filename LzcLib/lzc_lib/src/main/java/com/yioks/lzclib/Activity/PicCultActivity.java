@@ -145,6 +145,7 @@ public class PicCultActivity extends TitleBaseActivity {
         picCultBackground.setIs_circle(is_circle);
         picCultBackground.setRealWidth(backWidth);
         picCultBackground.setRealHeight(backHeight);
+        picCultBackground.invalidate();
     }
 
     public void showProgressBar() {
@@ -300,7 +301,7 @@ public class PicCultActivity extends TitleBaseActivity {
         @Override
         public void run() {
             try {
-                bitmap = FileUntil.getBitmapFromUri(PicCultActivity.this, uri, PicRealWidth, PicRealHeight);
+                bitmap = FileUntil.getBitmapFromUri(PicCultActivity.this, uri, PicRealWidth, PicRealHeight,3f);
                 if (bitmap != null && !bitmap.isRecycled()) {
                     if (FileUntil.readPictureDegree(FileUntil.UriToFile(uri, PicCultActivity.this)) == 90) {
                         bitmap = FileUntil.toturn(bitmap);

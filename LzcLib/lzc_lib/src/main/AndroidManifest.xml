@@ -16,16 +16,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
-    <application >
-        <!--<activity-->
-            <!--android:name=".Activity.TextActivity"-->
-            <!--android:theme="@style/AppTheme.NoActionBar">-->
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.MAIN" />-->
-
-                <!--<category android:name="android.intent.category.LAUNCHER" />-->
-            <!--</intent-filter>-->
-        <!--</activity>-->
+    <application>
         <activity
             android:name=".Activity.U3dPlayActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
@@ -52,7 +43,8 @@
             android:label=""
             android:process=":webView"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".Activity.PicCultActivity"
             android:label=""
@@ -66,12 +58,29 @@
         <activity
             android:name=".Activity.ShowBigImgActivity"
             android:screenOrientation="portrait"
+            android:process=":show_big_img"
             android:theme="@style/FullActivityDialogTheme" />
 
         <service
             android:name=".Service.PressImgService"
             android:exported="false"
-            android:process=":pressImg"></service>
-    </application>
+            android:process=":pressImg" />
+        <service
+            android:name=".Service.Download_service"
+            android:process=":downLoad" />
 
+        <activity
+            android:name=".Activity.PlayVideoActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label=""
+            android:screenOrientation="portrait"
+            android:theme="@style/FullWindow" />
+
+        <activity
+            android:name=".Activity.LunchActivity"
+            android:theme="@style/FullWindow">
+
+        </activity>
+
+    </application>
 </manifest>

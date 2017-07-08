@@ -22,11 +22,28 @@ public class BigImgShowData implements Parcelable {
     private List<Uri> uriList = new ArrayList<>();
     //    private List<Integer> resList = new ArrayList<>();
     private HashMap<Integer, MessageUri> uriSparseArray = new HashMap<>();
+    private HashMap<Integer, Integer> rotateHashMap = new HashMap<>();
+    private boolean needShowReal = false;
 
 
     public void setData(Uri uri) {
         uriList.clear();
         uriList.add(uri);
+    }
+
+    public void setData(Uri uri, int rotate) {
+        uriList.clear();
+        uriList.add(uri);
+        rotateHashMap.clear();
+        rotateHashMap.put(0, rotate);
+    }
+
+    public void setData(Uri uri, MessageUri messageUri, int rotate) {
+        uriList.clear();
+        uriList.add(uri);
+        uriSparseArray.put(0, messageUri);
+        rotateHashMap.clear();
+        rotateHashMap.put(0, rotate);
     }
 
     public void setData(Uri uri, MessageUri messageUri) {
@@ -80,14 +97,13 @@ public class BigImgShowData implements Parcelable {
             this.centerY = centerY;
         }
 
-        public MessageUri(View xiangPian)
-        {
+        public MessageUri(View xiangPian) {
             this.setWidth(xiangPian.getWidth());
             this.setHeight(xiangPian.getHeight());
-            int  location[]=new int[2];
+            int location[] = new int[2];
             xiangPian.getLocationOnScreen(location);
-            this.setCenterX(location[0]+xiangPian.getWidth()/2);
-            this.setCenterY(location[1]+xiangPian.getHeight()/2);
+            this.setCenterX(location[0] + xiangPian.getWidth() / 2);
+            this.setCenterY(location[1] + xiangPian.getHeight() / 2);
         }
 
         public MessageUri() {
@@ -119,6 +135,7 @@ public class BigImgShowData implements Parcelable {
         this.uriList = uriList;
     }
 
+
     public void setUriList(List<Uri> uriList, List<MessageUri> messageUriList) {
         this.uriList = uriList;
         uriSparseArray.clear();
@@ -127,10 +144,22 @@ public class BigImgShowData implements Parcelable {
         }
     }
 
+    public void setUriList(List<Uri> uriList, List<MessageUri> messageUriList, List<Integer> rotateList) {
+        this.uriList = uriList;
+        uriSparseArray.clear();
+        for (int i = 0; i < messageUriList.size(); i++) {
+            uriSparseArray.put(i, messageUriList.get(i));
+        }
+        for (int i = 0; i < rotateList.size(); i++) {
+            rotateHashMap.put(i, rotateList.get(i));
+        }
+    }
+
+
     public void setResList(List<Integer> resList, Resources resources) {
         uriList.clear();
         for (Integer integer : resList) {
-            uriList.add(StringManagerUtil.resToUri(integer, resources));
+            uriList.add(StringManagerUtil.resToUriFresco(integer, resources));
         }
     }
 
@@ -138,7 +167,7 @@ public class BigImgShowData implements Parcelable {
         uriList.clear();
         messageUriList.clear();
         for (int i = 0; i < resList.size(); i++) {
-            uriList.add(StringManagerUtil.resToUri(resList.get(i), resources));
+            uriList.add(StringManagerUtil.resToUriFresco(resList.get(i), resources));
             uriSparseArray.put(i, messageUriList.get(i));
         }
     }
@@ -161,13 +190,13 @@ public class BigImgShowData implements Parcelable {
 
     public void setData(Integer res, Resources resources) {
         uriList.clear();
-        uriList.add(StringManagerUtil.resToUri(res, resources));
+        uriList.add(StringManagerUtil.resToUriFresco(res, resources));
     }
 
     public void setData(Integer res, Resources resources, MessageUri messageUri) {
         uriList.clear();
         uriSparseArray.clear();
-        uriList.add(StringManagerUtil.resToUri(res, resources));
+        uriList.add(StringManagerUtil.resToUriFresco(res, resources));
         uriSparseArray.put(0, messageUri);
     }
 
@@ -230,6 +259,8 @@ public class BigImgShowData implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeList(dealBefore());
         dest.writeMap(uriSparseArray);
+        dest.writeInt(needShowReal ? 0 : 1);
+        dest.writeMap(rotateHashMap);
     }
 
     public static final Creator<BigImgShowData> CREATOR = new Creator<BigImgShowData>() {
@@ -251,14 +282,37 @@ public class BigImgShowData implements Parcelable {
             HashMap<Integer, MessageUri> uriSparseArray = new HashMap<>();
             source.readList(stringList, getClass().getClassLoader());
             source.readMap(uriSparseArray, getClass().getClassLoader());
+            boolean loadReal = source.readInt() == 0;
+            HashMap<Integer, Integer> rotateHashMap = new HashMap<>();
+            source.readMap(rotateHashMap, getClass().getClassLoader());
             BigImgShowData bigImgShowData = dealAfter(stringList, new BigImgShowData());
             bigImgShowData.uriSparseArray = uriSparseArray;
+            bigImgShowData.setNeedShowReal(loadReal);
+            bigImgShowData.rotateHashMap = rotateHashMap;
             return bigImgShowData;
         }
     };
 
 
+    public HashMap<Integer, Integer> getRotateHashMap() {
+        return rotateHashMap;
+    }
+
+    public void setRotateHashMap(HashMap<Integer, Integer> rotateHashMap) {
+        this.rotateHashMap = rotateHashMap;
+    }
+
     public MessageUri getMessageUri(Integer integer) {
         return uriSparseArray.get(integer);
     }
+
+    public boolean isNeedShowReal() {
+        return needShowReal;
+    }
+
+    public void setNeedShowReal(boolean needShowReal) {
+        this.needShowReal = needShowReal;
+    }
+
+
 }

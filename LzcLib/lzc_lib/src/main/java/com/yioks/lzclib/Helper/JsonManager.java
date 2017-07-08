@@ -47,6 +47,8 @@ public class JsonManager implements Serializable{
     }
 
     public Object getDataInfo() {
+        if(dataInfo==null||dataInfo.equals(""))
+            return new JSONObject();
         return dataInfo;
     }
 

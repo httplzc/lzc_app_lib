@@ -1,17 +1,20 @@
 package com.yioks.lzclib.Activity;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Build;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.squareup.picasso.Picasso;
 import com.yioks.lzclib.Data.ScreenData;
 import com.yioks.lzclib.R;
+import com.yioks.lzclib.Untils.DeviceUtil;
 import com.yioks.lzclib.Untils.DialogUtil;
 import com.yioks.lzclib.Untils.HttpUtil;
 
@@ -30,6 +33,7 @@ public class TitleBaseActivity extends AppCompatActivity {
     protected Context context;
     //右边文字
     protected TextView title_text;
+    private View statusBarView;
 
     /**
      * 绑定控件，并预制回调
@@ -38,51 +42,49 @@ public class TitleBaseActivity extends AppCompatActivity {
      * @param titleString
      * @param rightRes
      */
+
     public void bindTitle(boolean leftRes, String titleString, int rightRes) {
 
         initTitleView();
         title.setText(titleString);
         if (leftRes) {
             left.setVisibility(View.VISIBLE);
-            Picasso.with(TitleBaseActivity.this).load(R.drawable.common_back).fit().into(left);
+            //  Picasso.with(TitleBaseActivity.this).load(R.drawable.common_back).fit().into(left);
+            left.setImageResource(R.drawable.common_back);
             left.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     finish();
                 }
             });
-        }
-        else
-        {
+        } else {
             left.setVisibility(View.GONE);
         }
 
         if (rightRes != -1) {
             right.setVisibility(View.VISIBLE);
-            Picasso.with(TitleBaseActivity.this).load(rightRes).fit().into(right);
-        }
-        else
-        {
+            //  Picasso.with(TitleBaseActivity.this).load(rightRes).fit().into(right);
+            right.setImageResource(rightRes);
+        } else {
             right.setVisibility(View.GONE);
         }
     }
 
-    public void bindTitle(boolean leftRes, String titleString, String rightRes)
-    {
+
+    public void bindTitle(boolean leftRes, String titleString, String rightRes) {
         initTitleView();
         title.setText(titleString);
         if (leftRes) {
             left.setVisibility(View.VISIBLE);
-            Picasso.with(TitleBaseActivity.this).load(R.drawable.common_back).fit().into(left);
+            //Picasso.with(TitleBaseActivity.this).load(R.drawable.common_back).fit().into(left);
+            left.setImageResource(R.drawable.common_back);
             left.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     finish();
                 }
             });
-        }
-        else
-        {
+        } else {
             left.setVisibility(View.GONE);
         }
         right.setVisibility(View.GONE);
@@ -90,71 +92,95 @@ public class TitleBaseActivity extends AppCompatActivity {
         title_text.setText(rightRes);
     }
 
-    private void initTitleView()
-    {
+    private void initTitleView() {
         left = (ImageView) findViewById(R.id.left_img);
         title = (TextView) findViewById(R.id.title);
         right = (ImageView) findViewById(R.id.right_img);
-        title_text= (TextView) findViewById(R.id.title_text);
+        title_text = (TextView) findViewById(R.id.title_text);
     }
 
+
     public void setTitleState() {
-        context=this;
+        context = this;
         ScreenData.init_srceen_data(this);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            //透明状态栏
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        }
-        else
-        {
-            return;
-        }
-
-//        final int sdk = Build.VERSION.SDK_INT;
-//        Window window = this.getWindow();
-//        WindowManager.LayoutParams params = window.getAttributes();
-//
-//        if (sdk == Build.VERSION_CODES.KITKAT) {
-//            int bits = WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
-//            // 设置透明状态栏
-//            if ((params.flags & bits) == 0) {
-//                params.flags |= bits;
-//                window.setAttributes(params);
-//            }
-
-        // 设置状态栏颜色
         ViewGroup contentLayout = (ViewGroup) findViewById(android.R.id.content);
-        setupStatusBarView(contentLayout, R.color.colorPrimary);
-        View contentChild = contentLayout.getChildAt(0);
-        contentChild.setFitsSystemWindows(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+            window.setStatusBarColor(ContextCompat.getColor(context, R.color.colorPrimary));
+
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+            setupStatusBarView(contentLayout, R.color.colorPrimary);
+
+        }
 
     }
 
 
     private void setupStatusBarView(ViewGroup contentLayout, int color) {
-        if (mStatusBarView == null) {
-            View statusBarView = new View(this);
-            ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, getStatusBarHeight(this));
-            contentLayout.addView(statusBarView, lp);
 
-            mStatusBarView = statusBarView;
-        }
+        statusBarView = new View(this);
+        ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, DeviceUtil.getStatusBarHeight(this));
+        contentLayout.addView(statusBarView, lp);
+        mStatusBarView = statusBarView;
         mStatusBarView.setBackgroundResource(color);
+        changeMargin(true, contentLayout);
     }
 
-    /**
-     * 获得状态栏高度
-     */
-    private static int getStatusBarHeight(Context context) {
-        int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
-        return context.getResources().getDimensionPixelSize(resourceId);
+    private void changeMargin(boolean isPadding, ViewGroup contentLayout) {
+        View contentChild = contentLayout.getChildAt(0);
+//        if(contentChild instanceof LinearLayout)
+//            return;
+//        int a = getStatusBarHeight(context);
+//        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) contentChild.getLayoutParams();
+//        lp.topMargin = isPadding ? a : 0;
+//        contentChild.setLayoutParams(lp);
+        contentChild.setFitsSystemWindows(isPadding);
+        //  contentChild.setPadding(contentChild.getLeft(),, contentChild.getRight(), contentChild.getBottom());
+        //contentChild.requestLayout();
+    }
+
+    protected void changeStatusBarView(boolean hide) {
+        if (hide) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                Window window = getWindow();
+                window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+                window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                window.setStatusBarColor(Color.TRANSPARENT);
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                ViewGroup contentLayout = (ViewGroup) findViewById(android.R.id.content);
+                contentLayout.removeView(statusBarView);
+                changeMargin(false, contentLayout);
+
+            }
+        } else {
+            setTitleState();
+        }
+    }
+
+
+
+    protected void cancelRequest() {
+        HttpUtil.cancelAllClient(this);
+        DialogUtil.cancelToast();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        DialogUtil.cancelToast();
+        DialogUtil.dismissDialog();
     }
 
     @Override
     protected void onDestroy() {
-        HttpUtil.cancelAllClient(this);
-        DialogUtil.cancelToast();
+        cancelRequest();
         super.onDestroy();
     }
 }

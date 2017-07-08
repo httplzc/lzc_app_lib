@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.Log;
 
 import com.yioks.lzclib.Data.Bean;
-import com.yioks.lzclib.Data.GlobalVariable;
 import com.yioks.lzclib.Untils.DialogUtil;
 import com.yioks.lzclib.Untils.HttpUtil;
 import com.yioks.lzclib.Untils.StringManagerUtil;
@@ -14,14 +13,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Iterator;
-import java.util.Map;
 
 /**
  * Created by Administrator on 2016/8/3 0003.
  */
 public abstract class ResolveDataHelper {
-
-
     //完成解析的回调方法
     protected onResolveDataFinish onResolveDataFinish;
     protected onProgresUpDate onProgresUpDate;
@@ -52,9 +48,9 @@ public abstract class ResolveDataHelper {
         }
         try {
             if (requestData == null) {
-                RequestData(requestParams);
+                SignData(requestParams);
             } else {
-                RequestData(requestData.SetParams(requestParams, requestFlag, strings));
+                SignData(requestData.SetParams(requestParams, requestFlag, strings));
             }
 
 
@@ -65,25 +61,37 @@ public abstract class ResolveDataHelper {
 
     }
 
-    protected void initMd5(RequestParams params) throws Exception {
-        StringBuilder data_md5 = new StringBuilder();
-        Iterator it = params.getUrlParamsEntry().iterator();
-        while (it.hasNext()) {
-            Map.Entry<String, String> entry = (Map.Entry<String, String>) it.next();
-            String value = entry.getValue();
-            data_md5.append(value);
+
+    protected void SignData(final RequestParams params) throws Exception {
+        if (params == null) {
+            requestDataFail("请求错误");
+            return;
         }
-        params.put("dataKey", StringManagerUtil.md5(data_md5.toString()));
+        params.put("codeKey", "0");
+        params.put("dataKey", "0");
+        RequestData(params);
+//        ParamsSignHelper signHelper = new ParamsSignHelper(context);
+//        signHelper.setOnFinishSignListener(new ParamsSignHelper.onFinishSignListener() {
+//            @Override
+//            public void signFinish(String sign) {
+//                String codeKey = UUID.randomUUID().toString();
+//
+//            }
+//
+//            @Override
+//            public void signFailure() {
+//                requestDataFail("请求错误");
+//            }
+//        });
+//        signHelper.startSignParams(params);
     }
+
 
     //请求数据的方法
     protected void RequestData(RequestParams params) {
 
-        if (params == null) {
-            requestDataFail("请求错误");
-        }
+
         try {
-            initMd5(params);
             HandlerCallBack callback = new HandlerCallBack(context) {
                 @Override
                 public void onFailure(int statusCode) {
@@ -101,7 +109,7 @@ public abstract class ResolveDataHelper {
                         e.printStackTrace();
                         return;
                     }
-                    if ((jsonManager.getCode() != null && (jsonManager.getCode().equals("0") || jsonManager.getCode().equals("-301")))) {
+                    if ((jsonManager.getCode() != null && StringManagerUtil.VerifyNumber(jsonManager.getCode()) && (Integer.valueOf(jsonManager.getCode()) >= 0 || jsonManager.getCode().equals("-301")))) {
                         callbackData(jsonManager.getDataInfo(), jsonManager);
                     } else {
                         if (jsonManager.getCode() != null && jsonManager.getCode().equals("-201") && checkTokenError()) {
@@ -114,12 +122,15 @@ public abstract class ResolveDataHelper {
             };
             //为请求设置TAG
             if (TAG == null) {
-                TAG = context.getPackageName() + context.getClass().getName();
+                TAG = context.getPackageName() + context.getClass().getName() + context.hashCode();
             }
-            printParams(params);
+
 
             //  区分post和get请求
-            requestHTTP = GlobalVariable.getHTTP(context);
+            if (requestHTTP == null)
+                requestHTTP = getHTTP(context);
+
+            printParams(params);
             if (requestType == 0) {
                 HttpUtil.post(requestHTTP, params, callback, TAG);
             } else {
@@ -134,8 +145,10 @@ public abstract class ResolveDataHelper {
     private void printParams(RequestParams params) {
         if (params == null)
             return;
-        Log.i("date_print", "request" + params.toString() + "----" + GlobalVariable.getHTTP(context));
+        Log.i("date_print", "request" + params.toString() + "\n" + requestHTTP);
     }
+
+    protected abstract String getHTTP(Context context);
 
 
     /**
@@ -190,8 +203,18 @@ public abstract class ResolveDataHelper {
             removeEmptyValue(data);
             if (data == null)
                 data = "";
+            ParamsSignHelper signHelper = new ParamsSignHelper(context);
+//            if (!signHelper.verifySignParams(data, jsonManager)) {
+//                requestDataFail("数据效验失败!");
+//                return;
+//            }
+
             if (onResolveDataFinish != null) {
                 Object resolveData = null;
+                if (requestData == null) {
+                    onResolveDataFinish.resolveFinish(null);
+                    return;
+                }
                 //model
                 if (dateType == 0) {
                     RequestData requestDataModel = (RequestData) requestData;

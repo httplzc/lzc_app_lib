@@ -5,9 +5,13 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.AbsListView;
@@ -22,6 +26,9 @@ import com.yioks.lzclib.Data.ScreenData;
 import com.yioks.lzclib.R;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * 可以下拉刷新的控件
@@ -44,6 +51,7 @@ public abstract class RefreshScrollParentViewBase<T extends View> extends Parent
     protected View reFreshMoreView;
     protected View reFreshMoreFailureView;
 
+
     protected LinearLayout refresh_succeed;
 
     protected View loadding_effect;
@@ -55,13 +63,25 @@ public abstract class RefreshScrollParentViewBase<T extends View> extends Parent
 
     protected int refreshColor;
     protected int footColor;
+    protected HashMap<View, View> groupViews = new LinkedHashMap();
+    protected boolean isGroupTagReplace = false;
+    protected LinearLayout groupLinearLayout;
+    private OnPullListener onPullListener;
 
     //刷新的状态  正在刷新 正常 下拉中  释放可以刷新
     public enum ReFreshSatus {
         ONREFRESH, NORMAL, PULL, PULLCANREFRESH
     }
 
-    ;
+
+    public boolean isGroupTagReplace() {
+        return isGroupTagReplace;
+    }
+
+    public void setGroupTagReplace(boolean groupTagReplace) {
+        isGroupTagReplace = groupTagReplace;
+    }
+
     //是否可以下拉刷新
     protected boolean canRefrish = true;
     //当前状态
@@ -84,9 +104,140 @@ public abstract class RefreshScrollParentViewBase<T extends View> extends Parent
     protected void inittype(Context context, AttributeSet attrs) {
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.RefreshScrollParentViewBase);
         refresh_position = typedArray.getInt(R.styleable.RefreshScrollParentViewBase_postion, 1);
-        refreshColor=typedArray.getColor(R.styleable.RefreshScrollParentViewBase_headColor, ContextCompat.getColor(context,R.color.line_color));
-        footColor=typedArray.getColor(R.styleable.RefreshScrollParentViewBase_bottomColor, ContextCompat.getColor(context,R.color.line_color));
+        refreshColor = typedArray.getColor(R.styleable.RefreshScrollParentViewBase_headColor, ContextCompat.getColor(context, R.color.line_color));
+        footColor = typedArray.getColor(R.styleable.RefreshScrollParentViewBase_bottomColor, ContextCompat.getColor(context, R.color.line_color));
         typedArray.recycle();
+    }
+
+
+    /**
+     * \
+     *
+     * @param context
+     * @param groupView
+     * @param cloneView_layout
+     * @return 返回克隆的view，可以对其处理
+     */
+    public View addGroupView(Context context, View groupView, int cloneView_layout) {
+        View cloneView = LayoutInflater.from(context).inflate(cloneView_layout, groupLinearLayout, false);
+        groupView.setTag(groupViews.size() * 100);
+        cloneView.setTag(groupViews.size());
+        groupViews.put(groupView, cloneView);
+        return cloneView;
+    }
+
+
+    protected abstract void checkOnScroll();
+
+    protected void dealReplace(View groupView, View cloneView) {
+        if (isGroupTagReplace) {
+            if (getChildViewTopDistance(groupView) < groupLinearLayout.getHeight() - ((groupLinearLayout != cloneView.getParent()) ? 0 : cloneView.getHeight())) {
+
+                Log.i("lzc", " cloneView.getTag()" + cloneView.getTag());
+                if ((int) cloneView.getTag() == 0) {
+                    if (cloneView.getParent() != groupLinearLayout && groupLinearLayout.getChildCount() == 0) {
+                        groupLinearLayout.addView(cloneView);
+                        Log.i("lzc", " addView_normal;");
+                        groupLinearLayout.setTranslationY(0);
+                        groupLinearLayout.invalidate();
+
+                    } else {
+                        groupLinearLayout.setTranslationY(0);
+                    }
+                } else {
+                    if (cloneView.getParent() != groupLinearLayout) {
+                        float trans = -(groupLinearLayout.getHeight() - getChildViewTopDistance(groupView));
+                        if (-trans >= groupLinearLayout.getHeight()) {
+                            groupLinearLayout.removeAllViews();
+                            groupLinearLayout.addView(cloneView);
+                            Log.i("lzc", " groupLinearLayout.addView(cloneView);");
+                            groupLinearLayout.invalidate();
+                            groupLinearLayout.setTranslationY(0);
+                        } else {
+                            groupLinearLayout.setTranslationY(trans);
+                        }
+                    } else {
+                        Log.i("lzc", "asdaew");
+                        groupLinearLayout.setTranslationY(0);
+                    }
+
+                }
+            } else {
+                if (groupLinearLayout == cloneView.getParent()) {
+                    groupLinearLayout.removeView(cloneView);
+                    if ((int) cloneView.getTag() != 0) {
+                        Log.i("lzc", " addView_back_before" + cloneView.getTag());
+                        View last = getGroupLastView((int) cloneView.getTag() - 1);
+                        if (last != null) {
+                            Log.i("lzc", " addView_back;");
+                            groupLinearLayout.addView(last);
+                            groupLinearLayout.setTranslationY(-last.getHeight());
+                        } else {
+                            groupLinearLayout.setTranslationY(0);
+                        }
+                    }
+                    groupLinearLayout.invalidate();
+                }
+//                            if ((int) cloneView.getTag() != 0) {
+//                                View lastView=getGroupLastView((int) cloneView.getTag());
+//                                Log.i("lzc","lastView"+lastView);
+//                                if (lastView!=null&&groupLinearLayout != lastView.getParent()) {
+//                                    groupLinearLayout.addView(lastView);
+//                                    groupLinearLayout.setTranslationY(-lastView.getHeight());
+//                                }
+//
+//                            }
+
+
+            }
+        } else {
+            if ((int) cloneView.getTag() == 0) {
+                Log.i("lzc", "roupView.getY()" + getChildViewTopDistance(groupView) + "---" + groupLinearLayout.getHeight() + ((groupLinearLayout != cloneView.getParent()) ? 0 : cloneView.getHeight()));
+            }
+
+            if (getChildViewTopDistance(groupView) < groupLinearLayout.getHeight() - ((groupLinearLayout != cloneView.getParent()) ? 0 : cloneView.getHeight())) {
+                if (groupLinearLayout != cloneView.getParent()) {
+                    groupLinearLayout.addView(cloneView);
+                    groupLinearLayout.invalidate();
+                }
+            } else {
+                if (groupLinearLayout == cloneView.getParent()) {
+                    groupLinearLayout.removeView(cloneView);
+                    groupLinearLayout.invalidate();
+                }
+            }
+            if (groupLinearLayout.getChildCount() != 0) {
+                View view = groupLinearLayout.getChildAt(groupLinearLayout.getChildCount() - 1);
+                int tag = (int) view.getTag();
+                if (tag != groupLinearLayout.getChildCount() - 1) {
+                    groupLinearLayout.removeAllViews();
+                    int count = 0;
+                    for (Map.Entry<View, View> viewViewEntry : groupViews.entrySet()) {
+                        if (count > tag)
+                            break;
+                        groupLinearLayout.addView(viewViewEntry.getValue());
+                        count++;
+                    }
+                }
+
+            }
+        }
+    }
+
+    private float getChildViewTopDistance(View view) {
+        return view.getY() - scrollView.getScrollY();
+    }
+
+    private View getGroupLastView(int tag) {
+        int count = 0;
+        for (Map.Entry<View, View> viewViewEntry : groupViews.entrySet()) {
+            if (count == tag) {
+                return viewViewEntry.getValue();
+            }
+            count++;
+
+        }
+        return null;
     }
 
     //加载完xml后 添加刷新view
@@ -94,8 +245,18 @@ public abstract class RefreshScrollParentViewBase<T extends View> extends Parent
     protected void onFinishInflate() {
         super.onFinishInflate();
         scrollView = (T) contentView;
+        if (scrollView == null)
+            throw new RuntimeException("必须需包含一个子类");
         addExternView();
-        //  reFreshView.setPadding(reFreshView.getPaddingLeft(), (int) (-60 * ScreenData.density), reFreshView.getPaddingRight(), reFreshView.getPaddingBottom());
+        initGroup();
+        //  setHeadPadding(reFreshView.getPaddingLeft(), (int) (-60 * ScreenData.density), reFreshView.getPaddingRight(), reFreshView.getPaddingBottom());
+    }
+
+    private void initGroup() {
+        groupLinearLayout = new LinearLayout(context);
+        groupLinearLayout.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        groupLinearLayout.setOrientation(LinearLayout.VERTICAL);
+        this.addView(groupLinearLayout);
     }
 
     protected abstract void addExternView();
@@ -112,7 +273,9 @@ public abstract class RefreshScrollParentViewBase<T extends View> extends Parent
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-//        Log.i("lzc","dispath"+dispath);
+        if (staus != Staus.Normal) {
+            return super.dispatchTouchEvent(ev);
+        }
         float eventX = ev.getX();
         float eventY = ev.getY();
         switch (ev.getAction()) {
@@ -152,7 +315,6 @@ public abstract class RefreshScrollParentViewBase<T extends View> extends Parent
                                 aClass = aClass.getSuperclass();
                             }
                             try {
-
                                 int activePointerIndex = ev.findPointerIndex(ev.getPointerId(0));
                                 int y = (int) ev.getY(activePointerIndex);
                                 Field mMotionYField = aClass.getDeclaredField("mMotionY");
@@ -169,8 +331,24 @@ public abstract class RefreshScrollParentViewBase<T extends View> extends Parent
                             } catch (IllegalAccessException e) {
                                 e.printStackTrace();
                             }
+                        } else if (scrollView instanceof RecycleView) {
+                            Class aClass = scrollView.getClass();
+                            while (!aClass.getName().equals(RecyclerView.class.getName())) {
+                                aClass = aClass.getSuperclass();
+                            }
+                            try {
+                                final int activePointerIndex = ev.findPointerIndex(ev.getPointerId(0));
+                                final int y = (int) ev.getY(activePointerIndex);
+                                Field field = aClass.getDeclaredField("mLastTouchY");
+                                field.setAccessible(true);
+                                field.set(scrollView, y);
+                                field.setAccessible(false);
+                            } catch (NoSuchFieldException e) {
+                                e.printStackTrace();
+                            } catch (IllegalAccessException e) {
+                                e.printStackTrace();
+                            }
                         }
-
                         return true;
                     } else {
                         onTouchDo(ev);
@@ -245,7 +423,8 @@ public abstract class RefreshScrollParentViewBase<T extends View> extends Parent
             //onBackToNormal();
         }
 
-        reFreshView.setPadding(0, newPadding, 0, 0);
+        setHeadPadding(newPadding);
+        //   Log.i("lzc","reFreshView"+reFreshView.getPaddingTop()+"---"+((LinearLayout.LayoutParams)reFreshView.getLayoutParams()).topMargin);
         //reFreshView.setLayoutParams(layoutParams);
 //        } else {
 //            //留下边线距离
@@ -286,7 +465,8 @@ public abstract class RefreshScrollParentViewBase<T extends View> extends Parent
             case MotionEvent.ACTION_MOVE:
                 //根据手指移动修改刷新布局上padding
                 float dy = eventY - lastY;
-                move(dy);
+                if (Math.abs(eventY - firstY) >= getResources().getDimension(R.dimen.min_pull_distance))
+                    move(dy);
                 lastX = eventX;
                 lastY = eventY;
                 return true;
@@ -350,7 +530,7 @@ public abstract class RefreshScrollParentViewBase<T extends View> extends Parent
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                reFreshView.setPadding(0, (int) animation.getAnimatedValue(), 0, 0);
+                setHeadPadding((int) animation.getAnimatedValue());
             }
         });
         valueAnimator.addListener(new Animator.AnimatorListener() {
@@ -386,6 +566,10 @@ public abstract class RefreshScrollParentViewBase<T extends View> extends Parent
         valueAnimator.start();
     }
 
+    protected void backCurrent() {
+        setHeadPadding(0);
+    }
+
     /**
      * 返回初始状态
      */
@@ -400,7 +584,7 @@ public abstract class RefreshScrollParentViewBase<T extends View> extends Parent
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                reFreshView.setPadding(0, (int) animation.getAnimatedValue(), 0, 0);
+                setHeadPadding((int) animation.getAnimatedValue());
                 if ((int) animation.getAnimatedValue() == 0) {
                     loadding.setVisibility(INVISIBLE);
                     pull.setVisibility(VISIBLE);
@@ -415,6 +599,12 @@ public abstract class RefreshScrollParentViewBase<T extends View> extends Parent
             }
         });
         valueAnimator.start();
+    }
+
+    private void setHeadPadding(int padding) {
+        reFreshView.setPadding(0, padding, 0, 0);
+        if (onPullListener != null)
+            onPullListener.onPull(padding);
     }
 
     /**
@@ -457,7 +647,7 @@ public abstract class RefreshScrollParentViewBase<T extends View> extends Parent
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 Float aFloat = (Float) animation.getAnimatedValue();
-                reFreshView.setPadding(0, (int) aFloat.floatValue(), 0, 0);
+                setHeadPadding((int) aFloat.floatValue());
                 if (ScreenData.density * 45f - aFloat < 0.01) {
                     if (onCenterReFreshListener != null) {
                         onCenterReFreshListener.onCenterReFresh();
@@ -495,5 +685,17 @@ public abstract class RefreshScrollParentViewBase<T extends View> extends Parent
 
     public void setDispath(boolean dispath) {
         this.dispath = dispath;
+    }
+
+    public interface OnPullListener {
+        void onPull(int dy);
+    }
+
+    public OnPullListener getOnPullListener() {
+        return onPullListener;
+    }
+
+    public void setOnPullListener(OnPullListener onPullListener) {
+        this.onPullListener = onPullListener;
     }
 }

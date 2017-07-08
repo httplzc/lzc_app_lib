@@ -5,13 +5,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
-import com.squareup.picasso.Picasso;
+import com.facebook.drawee.view.SimpleDraweeView;
+import com.yioks.lzclib.Data.ScreenData;
 import com.yioks.lzclib.Data.XiangceData;
 import com.yioks.lzclib.R;
+import com.yioks.lzclib.Untils.FunUntil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +51,7 @@ public class XiangceListAdapter extends BaseAdapter {
         {
             convertView= LayoutInflater.from(context).inflate(R.layout.item_xiangce_layout,null);
             ViewHolder viewHolder=new ViewHolder();
-            viewHolder.yulan_pic= (ImageView) convertView.findViewById(R.id.xiangce_yulan);
+            viewHolder.yulan_pic= (SimpleDraweeView) convertView.findViewById(R.id.xiangce_yulan);
             viewHolder.xiangce_name= (TextView) convertView.findViewById(R.id.xiangce_name);
             viewHolder.pic_count= (TextView) convertView.findViewById(R.id.pic_count);
             viewHolder.radioButton= (RadioButton) convertView.findViewById(R.id.choice_radio_button);
@@ -58,7 +59,8 @@ public class XiangceListAdapter extends BaseAdapter {
         }
         ViewHolder viewHolder= (ViewHolder) convertView.getTag();
         XiangceData xiangceData=xiangceDataList.get(position);
-        Picasso.with(context).load(xiangceData.getUri()).fit().centerCrop().into(viewHolder.yulan_pic);
+        FunUntil.loadImg((int)(80* ScreenData.density),(int)(80*ScreenData.density),viewHolder.yulan_pic,xiangceData.getUri());
+       // Picasso.with(context).load(xiangceData.getUri()).fit().centerCrop().into(viewHolder.yulan_pic);
         viewHolder.xiangce_name.setText(xiangceData.getName());
         viewHolder.pic_count.setText("" + xiangceData.getCount());
         if(SelectPostion==position)
@@ -74,7 +76,7 @@ public class XiangceListAdapter extends BaseAdapter {
 
     public class ViewHolder
     {
-        ImageView yulan_pic;
+        SimpleDraweeView yulan_pic;
         TextView xiangce_name;
         TextView pic_count;
         RadioButton radioButton;

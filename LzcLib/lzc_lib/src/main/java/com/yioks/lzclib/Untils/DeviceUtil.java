@@ -70,13 +70,31 @@ public class DeviceUtil {
         return dm.heightPixels;
     }
 
+
+    /**
+     * 获取当前版本号
+     *
+     * @param context
+     * @return
+     */
+    public static int getVersionCode(Context context) {
+        PackageManager packageManager = context.getPackageManager();
+        PackageInfo packageInfo;
+        try {
+            packageInfo = packageManager.getPackageInfo(context.getPackageName(), 0);
+            return packageInfo.versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
     /*
-     * 获取当前程序的版本号
+     * 获取当前程序的版本名
 	 */
-    public static String getVersionName(Context context){
+    public static String getVersionName(Context context) {
         // 获取packagemanager的实例
-        if( GlobalVariable.APP_VERSION==null)
-        {
+        if (GlobalVariable.APP_VERSION == null) {
             PackageManager packageManager = context.getPackageManager();
             // getPackageName()是你当前类的包名，0代表是获取版本信息
             PackageInfo packInfo = null;
@@ -86,18 +104,18 @@ public class DeviceUtil {
                 e.printStackTrace();
                 return "";
             }
-            GlobalVariable.APP_VERSION=packInfo.versionName;
+            GlobalVariable.APP_VERSION = packInfo.versionName;
         }
-        return  GlobalVariable.APP_VERSION;
+        return GlobalVariable.APP_VERSION;
     }
 
     /**
      * 获取手机制造商、手机版本 、android系统定制商
+     *
      * @return
      */
-    public static String getPhoneMessage()
-    {
-        return Build.PRODUCT+"-----"+Build.MODEL+"-----"+Build.BRAND;
+    public static String getPhoneMessage() {
+        return Build.PRODUCT + "-----" + Build.MODEL + "-----" + Build.BRAND;
     }
 
     /**
@@ -120,10 +138,9 @@ public class DeviceUtil {
      * @return
      */
     public static String getDeviceUUID(Activity context) {
-        if(GlobalVariable.PhoneUUID!=null&&!GlobalVariable.PhoneUUID.equals("")&&!GlobalVariable.PhoneUUID.equals(StringManagerUtil.md5("")))
-        {
+        if (GlobalVariable.PhoneUUID != null && !GlobalVariable.PhoneUUID.equals("") && !GlobalVariable.PhoneUUID.equals(StringManagerUtil.md5(""))) {
 
-            return  StringManagerUtil.md5(GlobalVariable.PhoneUUID);
+            return StringManagerUtil.md5(GlobalVariable.PhoneUUID);
         }
         final String tmDevice, tmSerial, androidId;
         if (ContextCompat.checkSelfPermission(context,
@@ -135,7 +152,6 @@ public class DeviceUtil {
                     Manifest.permission.READ_PHONE_STATE)) {
 
 
-
             } else {
 
                 ActivityCompat.requestPermissions(context,
@@ -143,29 +159,27 @@ public class DeviceUtil {
                         1024);
 
             }
-        }
-        else
-        {
+        } else {
             Log.i("lzc", "TelephonyManager");
             TelephonyManager mTm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
             tmDevice = "" + mTm.getDeviceId();
             tmSerial = "" + mTm.getSimSerialNumber();
+
             androidId = "" + android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
             UUID deviceUuid = new UUID(androidId.hashCode(), ((long) tmDevice.hashCode() << 32) | tmSerial.hashCode());
-            GlobalVariable.PhoneUUID=deviceUuid.toString();
+            GlobalVariable.PhoneUUID = deviceUuid.toString();
         }
 
 
-        return   StringManagerUtil.md5(GlobalVariable.PhoneUUID);
+        return StringManagerUtil.md5(GlobalVariable.PhoneUUID);
     }
 
     /**
-     *
      * @param context
      * @return
      */
     public static String getIMEI(Activity context) {
-        String imei="";
+        String imei = "";
         if (ContextCompat.checkSelfPermission(context,
                 Manifest.permission.READ_PHONE_STATE)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -175,7 +189,6 @@ public class DeviceUtil {
                     Manifest.permission.READ_PHONE_STATE)) {
 
 
-
             } else {
 
                 ActivityCompat.requestPermissions(context,
@@ -183,12 +196,18 @@ public class DeviceUtil {
                         1024);
 
             }
-        }
-        else
-        {
+        } else {
             imei = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
         }
         return imei;
+    }
+
+    /**
+     * 获得状态栏高度
+     */
+    public static int getStatusBarHeight(Context context) {
+        int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
+        return context.getResources().getDimensionPixelSize(resourceId);
     }
 
 }

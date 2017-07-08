@@ -5,7 +5,6 @@ import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.ImageView;
 
@@ -80,7 +79,7 @@ public class MoveImage extends ImageView {
         if (maxleft > left && maxtop > top && right > maxright && bottom > maxbottom) {
             matrix = matrixteamp;
         } else {
-            transLateDragToRight(left, right, bottom, top, matrix,currentRect);
+            transLateDragToRight(left, right, bottom, top, matrix, currentRect);
         }
     }
 
@@ -90,14 +89,14 @@ public class MoveImage extends ImageView {
         float realdy = dy;
 
         if (maxleft < left) {
-            realdx = maxleft-currentRect.left;
+            realdx = maxleft - currentRect.left;
         }
 
         if (maxtop < top) {
             realdy = maxtop - currentRect.top;
         }
         if (right < maxright) {
-            realdx = maxright-currentRect.right;
+            realdx = maxright - currentRect.right;
         }
         if (bottom < maxbottom) {
             realdy = maxbottom - currentRect.bottom;
@@ -109,8 +108,8 @@ public class MoveImage extends ImageView {
 
     //矫正放大位置
     private void transLateToRight(float left, float right, float bottom, float top, Matrix matrix) {
-        float realdx = dx;
-        float realdy = dy;
+        float realdx = 0;
+        float realdy = 0;
 
         if (maxleft < left) {
             realdx = maxleft - left;
@@ -212,7 +211,7 @@ public class MoveImage extends ImageView {
         matrix.set(currentMaritx);
         Matrix matrixteamp = new Matrix(currentMaritx);
         // setZoomCenter();
-        Log.i("lzc", "scale" + scale);
+      //  Log.i("lzc", "scale" + scale);
         matrixteamp.postScale(scale, scale, midPoint.x, midPoint.y);
         RectF rectF = new RectF();
         rectF.right = bitmapWidth;
@@ -223,9 +222,11 @@ public class MoveImage extends ImageView {
         float bottom = rectF.bottom;
         float top = rectF.top;
         if (!(maxleft > left && maxtop > top && right > maxright && bottom > maxbottom)) {
-            if (right - left < maxright - maxleft || bottom - top < maxbottom - maxtop)
+            if (right - left < maxright - maxleft || bottom - top < maxbottom - maxtop) {
+                //Log.i("lzc", "为空");
                 return null;
-            else {
+            } else {
+                //Log.i("lzc", "校正");
                 transLateToRight(left, right, bottom, top, matrixteamp);
                 return matrixteamp;
             }

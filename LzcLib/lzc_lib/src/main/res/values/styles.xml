@@ -38,6 +38,10 @@
         <item name="android:windowFullscreen">true</item>
     </style>
 
+    <style name="FullWindow" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
     <style name="FullActivityDialogTheme" parent="AppTheme.NoActionBar">
         <!--<item name="android:windowBackground">@android:color/transparent</item>-->
         <!--<item name="android:windowFullscreen">true</item>-->
@@ -52,7 +56,7 @@
         <item name="android:windowExitAnimation">@null</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowFullscreen">false</item>
 
     </style>
 

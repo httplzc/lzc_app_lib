@@ -1,12 +1,8 @@
 package com.yioks.lzclib.Untils;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
-
-import com.yioks.lzclib.Activity.LunchActivity;
-import com.yioks.lzclib.Data.GlobalVariable;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -21,7 +17,7 @@ import java.io.StringWriter;
  *
  * Created by Administrator on 2016/8/12 0012.
  */
-public class MyCrashhandle implements Thread.UncaughtExceptionHandler {
+public abstract class MyCrashhandle implements Thread.UncaughtExceptionHandler {
 
     private Context context;
     private Thread.UncaughtExceptionHandler mDefaultHandler;
@@ -61,7 +57,7 @@ public class MyCrashhandle implements Thread.UncaughtExceptionHandler {
      * @param s
      */
     private void sendErrorMsg(String s,String app_name) {
-        File dir = new File(context.getExternalFilesDir(null).getPath() + "/yioks_club_error_file");
+        File dir = new File(context.getExternalFilesDir(null).getPath() + "/error_file");
         if (!dir.exists()) {
             dir.mkdirs();
         }
@@ -80,7 +76,7 @@ public class MyCrashhandle implements Thread.UncaughtExceptionHandler {
             bufferedWriter.write("当前时间" + StringManagerUtil.getCurrentTime() + "\n");
             bufferedWriter.write("手机型号" + DeviceUtil.getPhoneMessage() + "\n");
             bufferedWriter.write("android 版本" + Build.VERSION.SDK_INT + "\n");
-            bufferedWriter.write("app版本" + GlobalVariable.APP_VERSION + "\n");
+            bufferedWriter.write("app版本" + DeviceUtil.getVersionName(context) + "\n");
             bufferedWriter.write("错误堆栈信息");
             bufferedWriter.newLine();
             bufferedWriter.write(s);
@@ -101,11 +97,11 @@ public class MyCrashhandle implements Thread.UncaughtExceptionHandler {
      *
      * @param context
      */
-    public static void restartApp(Context context) {
-        Intent intent = new Intent(context, LunchActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
-        android.os.Process.killProcess(android.os.Process.myPid());
-    }
+    public abstract  void restartApp(Context context);
+//        Intent intent = new Intent(context, LunchActivity.class);
+//        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+//        context.startActivity(intent);
+//        android.os.Process.killProcess(android.os.Process.myPid());
+
 
 }

@@ -5,6 +5,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.Adapter;
 import android.widget.FrameLayout;
@@ -41,6 +42,19 @@ public class ReFreshListViewParentView extends RefreshScrollParentViewBase<ListV
     }
 
     @Override
+    protected void checkOnScroll() {
+        ViewGroup viewGroup = (ViewGroup) scrollView;
+        for (int i = 0; i < viewGroup.getChildCount(); i++) {
+            View content = viewGroup.getChildAt(i);
+            if (groupViews.containsKey(content)) {
+                View cloneView = groupViews.get(content);
+                dealReplace(content, cloneView);
+            }
+        }
+    }
+
+
+    @Override
     protected void addExternView() {
         reFreshMoreView = LayoutInflater.from(context).inflate(R.layout.refresh_more_view, scrollView, false);
         reFreshMoreView.setBackgroundColor(footColor);
@@ -52,7 +66,7 @@ public class ReFreshListViewParentView extends RefreshScrollParentViewBase<ListV
                 scrollView.removeFooterView(reFreshMoreFailureView);
                 scrollView.addFooterView(reFreshMoreView);
                 isLoaddingMore = true;
-                isLoaddingMoreFailure=false;
+                isLoaddingMoreFailure = false;
                 if (loaddingMoreListener != null)
                     loaddingMoreListener.loadMore();
             }
@@ -91,12 +105,26 @@ public class ReFreshListViewParentView extends RefreshScrollParentViewBase<ListV
                         return;
                     }
                     isLoaddingMore = true;
-                    isLoaddingMoreFailure=false;
+                    isLoaddingMoreFailure = false;
                     load_more_text.setText("正在加载中……");
                     load_more_progress.setVisibility(VISIBLE);
                     scrollView.addFooterView(reFreshMoreView, null, false);
                     loaddingMoreListener.loadMore();
                 }
+            }
+        });
+
+        scrollView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            private float lastScrollY;
+
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                checkOnScroll();
             }
         });
     }

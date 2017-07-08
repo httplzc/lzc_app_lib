@@ -189,7 +189,7 @@ public class U3dPlayActivity extends AppCompatActivity {
         }
         file.createNewFile();
         Log.i("lzc", "url" + data.url);
-        HttpUtil.download(data.url, new FileDownloadCallBack(file,U3dPlayActivity.this) {
+        HttpUtil.download(data.url, new FileDownloadCallBack(file, U3dPlayActivity.this) {
             @Override
             public void onFailure(int statusCode, File file) {
                 parentView.setstaus(ParentView.Staus.Error);
@@ -214,7 +214,7 @@ public class U3dPlayActivity extends AppCompatActivity {
 
             @Override
             public void onProgress(int progress) {
-                Log.i("lzc","u3d_print:文件下载进度"+progress);
+                Log.i("lzc", "u3d_print:文件下载进度" + progress);
             }
         });
     }
@@ -303,8 +303,10 @@ public class U3dPlayActivity extends AppCompatActivity {
             });
             if (data.mode == 0) {
                 Log.i("lzc", "chapter" + data.chapter);
+                if (StringManagerUtil.CheckNull(data.chapter))
+                    data.chapter = "0";
                 String message = file.getName().replace(".xml", "") + "|" + data.chapter;
-                Log.i("lzc", "mypath" + message);
+                Log.i("lzc", "mypath " + message);
                 UnityPlayer.UnitySendMessage(play_name, "API_LoodXmlScend", message);
             } else {
                 String filename = file.getName().replace(".assetbundle", "");
@@ -317,7 +319,7 @@ public class U3dPlayActivity extends AppCompatActivity {
 
     private void callU3dClose() {
         HttpUtil.cancelAllClient(U3dPlayActivity.this);
-       // UnityPlayer.UnitySendMessage(play_name, "API_StopLoadXml", "");
+       //  UnityPlayer.UnitySendMessage(play_name, "API_StopLoadXml", "");
         moveTaskToBack(true);
     }
 

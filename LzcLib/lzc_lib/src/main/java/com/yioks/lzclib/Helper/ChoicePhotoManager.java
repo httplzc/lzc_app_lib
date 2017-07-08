@@ -14,6 +14,7 @@ import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -42,14 +43,14 @@ import static android.app.Activity.RESULT_OK;
  * <p>
  * 使用方法  ChoicePhotoManager showChoiceWindow 显示弹窗
  * 需要在onActivityResult 和 onRequestPermissionsResult  中调用对应方法
+ * 注意此类在每个activity 中只能初始化一次
  */
 
 public class ChoicePhotoManager {
 
     private final static int maxWidth = 720;
     private final static int maxHeight = 1280;
-    private final static float pressRadio = 0.2f;
-    private ChoicePhotoManager choicePhotoManager;
+    private final static float pressRadio = 0.3f;
     //底部弹窗
     public PopupWindow popupWindow;
     //选取图片值
@@ -79,6 +80,7 @@ public class ChoicePhotoManager {
     public static class Option implements Serializable {
         public boolean needToPress = true;
         public boolean needToCult = true;
+        public float longImgRatio = 3f;
         public float bili = 1;
         public int maxWidth = ChoicePhotoManager.maxWidth;
         public int maxHeight = ChoicePhotoManager.maxHeight;
@@ -87,7 +89,7 @@ public class ChoicePhotoManager {
 
     public void unRegisterReceiver() {
         context.unregisterReceiver(registerReceiver);
-        FileUntil.ClearTempFile();
+        // FileUntil.ClearTempFile();
     }
 
 
@@ -97,9 +99,9 @@ public class ChoicePhotoManager {
             @Override
             public void onReceive(Context context, Intent intent) {
                 Object datas[] = intent.getParcelableArrayExtra("data");
-                Uri uris[]=new Uri[datas.length];
+                Uri uris[] = new Uri[datas.length];
                 for (int i = 0; i < datas.length; i++) {
-                    uris[i]= (Uri) datas[i];
+                    uris[i] = (Uri) datas[i];
                 }
                 DialogUtil.dismissDialog();
                 if (onChoiceFinishListener != null) {
@@ -111,7 +113,8 @@ public class ChoicePhotoManager {
 
             }
         };
-        context.registerReceiver(registerReceiver, new IntentFilter(PressImgService.callbackReceiver));
+        Log.i("lzc","register  "+PressImgService.callbackReceiver+context.hashCode());
+        context.registerReceiver(registerReceiver, new IntentFilter(PressImgService.callbackReceiver+context.hashCode()));
     }
 
 //    public ChoicePhotoManager getInstance(Activity context)
@@ -186,8 +189,14 @@ public class ChoicePhotoManager {
                 if (option.needToPress) {
                     pressImage(uris);
                 } else {
-                    if (onChoiceFinishListener != null)
+                    if (onChoiceFinishListener != null) {
+                        if (uris.length == 1) {
+                            onChoiceFinishListener.onCutPicFinish(uris[0]);
+                            return;
+                        }
                         onChoiceFinishListener.onCutPicFinish(uris);
+                    }
+
                 }
             } else {
                 Uri uri = uris[0];
@@ -224,6 +233,16 @@ public class ChoicePhotoManager {
         }
     }
 
+    private class CancelDialogDo implements DialogUtil.CancelDialogDo
+    {
+
+        @Override
+        public void onCancelDialogDo() {
+            PressImgService.StopProcess(context);
+            if(onChoiceFinishListener!=null)
+                onChoiceFinishListener.cancel();
+        }
+    }
 
 
     /**
@@ -232,9 +251,9 @@ public class ChoicePhotoManager {
      * @param uris
      */
     private void pressImage(Uri[] uris) {
-        DialogUtil.showDialog(context,"正在压缩图片……");
+        DialogUtil.showDialog(context, "正在压缩图片……",new CancelDialogDo());
         for (int i = 0; i < uris.length; i++) {
-            PressImgService.startActionPress(context, uris[i], option, uris.length,i);
+            PressImgService.startActionPress(context, uris[i], option, uris.length, i);
         }
     }
 
@@ -244,8 +263,8 @@ public class ChoicePhotoManager {
      * @param uri
      */
     private void pressImage(Uri uri) {
-        DialogUtil.showDialog(context,"正在压缩图片……");
-        PressImgService.startActionPress(context, uri, option, 1,0);
+        DialogUtil.showDialog(context, "正在压缩图片……",new CancelDialogDo());
+        PressImgService.startActionPress(context, uri, option, 1, 0);
     }
 
 
@@ -253,6 +272,8 @@ public class ChoicePhotoManager {
         void onCutPicFinish(Uri uri);
 
         void onCutPicFinish(Uri[] uris);
+
+        void cancel();
 
     }
 //
@@ -380,6 +401,22 @@ public class ChoicePhotoManager {
         }
     }
 
+    public void dealImg(Context context, Option option, Uri uri) {
+        this.option = option;
+        if (option.needToCult) {
+            startCult(uri);
+        } else if (option.needToPress) {
+            pressImage(uri);
+        }
+    }
+
+    public void dealImg(Context context, Option option, Uri[] uris) {
+        this.option = option;
+        if (option.needToPress) {
+            pressImage(uris);
+        }
+    }
+
     /**
      * 显示底部弹窗
      *
@@ -397,6 +434,13 @@ public class ChoicePhotoManager {
         ScreenData.DownScreenColor(activity);
         popupWindow.showAtLocation(activity.getWindow().getDecorView(), Gravity.BOTTOM, 0, 0);
         return popupWindow;
+    }
+
+    public void choiceAlbum(Activity activity, int limitCount, Option option) {
+        this.option = option;
+        this.activity = activity;
+        this.limit = limitCount;
+        getImageFromAlbum();
     }
 
 

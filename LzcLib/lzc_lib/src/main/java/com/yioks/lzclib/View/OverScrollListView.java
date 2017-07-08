@@ -20,6 +20,7 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Scroller;
 
+import com.yioks.lzclib.Data.ScreenData;
 import com.yioks.lzclib.R;
 
 import java.lang.reflect.Field;
@@ -44,8 +45,9 @@ public class OverScrollListView extends ListView {
     private boolean dragOverScrollFootEnable = true;
 
     private int bottomHeight = 0;
-    private final static float radio = 0.45f;
-    private final static long back_time = 500;
+    private final static float radio = 0.35f;
+    private final static float back_ratio = 1;
+    private final static float overScroll_ratio=0.35f;
 
     private int headColor= Color.TRANSPARENT;
     private int footColor=Color.TRANSPARENT;
@@ -55,6 +57,11 @@ public class OverScrollListView extends ListView {
         this.context = context;
         initData();
 
+    }
+
+    private long calcTime(float ratio,float distance)
+    {
+        return (long) (distance/ratio);
     }
 
     private void initData() {
@@ -253,7 +260,7 @@ public class OverScrollListView extends ListView {
                     headview.invalidate();
                 }
             });
-            valueAnimator.setDuration(back_time);
+            valueAnimator.setDuration(calcTime(back_ratio,layoutParams.height));
             valueAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
             valueAnimator.start();
         }
@@ -271,7 +278,7 @@ public class OverScrollListView extends ListView {
                     footview.invalidate();
                 }
             });
-            valueAnimator2.setDuration(back_time);
+            valueAnimator2.setDuration(calcTime(back_ratio,layoutParams2.height));
             valueAnimator2.setInterpolator(new AccelerateDecelerateInterpolator());
             valueAnimator2.start();
         }
@@ -347,17 +354,20 @@ public class OverScrollListView extends ListView {
         if (velocityTracker == null) {
             initVelocity();
         }
+        int newScrollY = scrollY + deltaY;
+        final int bottom = maxOverScrollY + scrollRangeY;
+        final int top = -maxOverScrollY;
         velocityTracker.computeCurrentVelocity(1);
         int lastSpeed = (int) velocityTracker.getYVelocity();
-        Log.i("lzc", "lastSpeed" + lastSpeed);
+        Log.i("lzc", "lastSpeed" + lastSpeed+"|||"+deltaY+"|||"+newScrollY+"|||"+bottom+"|||"+top);
         if (!isTouchEvent && (valueAnimator == null || !valueAnimator.isRunning()) && (valueAnimator2 == null || !valueAnimator2.isRunning())) {
             if (overscrollAnimator == null || !overscrollAnimator.isRunning()) {
-                if (lastSpeed > 0) {
+                if (deltaY < 0) {
                     //  Log.i("lzc", "toppppppppppppppp");
-                    overScrollTop(lastSpeed);
+                    overScrollTop(-deltaY);
                 } else {
                     //   Log.i("lzc", "bottommmmmmmmmmmmmmm");
-                    overScrollBottom(-lastSpeed);
+                    overScrollBottom(deltaY);
                 }
             }
         }
@@ -365,20 +375,35 @@ public class OverScrollListView extends ListView {
     }
 
     protected void overScrollBottom(int deltaY) {
-        overscrollAnimator = ValueAnimator.ofInt(this.getScrollY(), this.getScrollY() + deltaY * 5, this.getScrollY());
+        if(deltaY<10*ScreenData.density)
+            return;
+        if (deltaY < 20*ScreenData.density) {
+            deltaY = (int) (20 * ScreenData.density);
+        }
+        if(deltaY>40*ScreenData.density)
+            deltaY=(int) (40 * ScreenData.density);
+        Log.i("lzc","deltaYdeltaYdeltaYdeltaY"+deltaY);
+        overscrollAnimator = ValueAnimator.ofInt(this.getScrollY(), this.getScrollY() + deltaY, this.getScrollY());
         overscrollAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 OverScrollListView.this.scrollTo(0, (int) (animation.getAnimatedValue()));
             }
         });
-        overscrollAnimator.setDuration(700);
+        overscrollAnimator.setDuration(calcTime(overScroll_ratio,deltaY*2));
         overscrollAnimator.setInterpolator(new DecelerateInterpolator());
         overscrollAnimator.start();
     }
 
     protected void overScrollTop(int deltaY) {
-        overscrollAnimator = ValueAnimator.ofInt(0, deltaY * 5, 0);
+        if(deltaY<10*ScreenData.density)
+            return;
+        if (deltaY < 20*ScreenData.density) {
+            deltaY = (int) (20 * ScreenData.density);
+        }
+        if(deltaY>40*ScreenData.density)
+            deltaY=(int) (40 * ScreenData.density);
+        overscrollAnimator = ValueAnimator.ofInt(0, deltaY, 0);
         overscrollAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
@@ -388,7 +413,7 @@ public class OverScrollListView extends ListView {
                 headview.invalidate();
             }
         });
-        overscrollAnimator.setDuration(700);
+        overscrollAnimator.setDuration(calcTime(overScroll_ratio,deltaY*2));
         overscrollAnimator.setInterpolator(new DecelerateInterpolator());
         overscrollAnimator.start();
 

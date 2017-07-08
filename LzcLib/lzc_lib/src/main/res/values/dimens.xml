@@ -5,4 +5,5 @@
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="cult_padding">20dp</dimen>
     <dimen name="view_pager_indicator_head">20dp</dimen>
+    <dimen name="min_pull_distance">8dp</dimen>
 </resources>

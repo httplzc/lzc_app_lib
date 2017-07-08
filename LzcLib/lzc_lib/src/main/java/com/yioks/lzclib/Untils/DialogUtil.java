@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -35,7 +36,22 @@ public class DialogUtil {
      * @param content
      */
     public static ProgressDialog showDialog(Context context, String content) {
-        return showDialog(context, content, null);
+        return showDialog(context, content, new DefaultCancelDialogDo(context));
+    }
+
+    private static class DefaultCancelDialogDo implements CancelDialogDo {
+
+        Context context;
+
+        public DefaultCancelDialogDo(Context context) {
+            this.context = context;
+        }
+
+        @Override
+        public void onCancelDialogDo() {
+            HttpUtil.cancelAllClient(context);
+            context = null;
+        }
     }
 
     public interface CancelDialogDo {
@@ -50,21 +66,45 @@ public class DialogUtil {
      */
     public static ProgressDialog showDialog(Context context, String content, final CancelDialogDo cancelDialogDo) {
 
-            progressDialog = new ProgressDialog(context);
-            DialogUtil.context = context;
-            progressDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                @Override
-                public void onDismiss(DialogInterface dialog) {
-                    //  HttpUtil.cancelAllClient(DialogUtil.context);
-                    DialogUtil.context = null;
-                    if (cancelDialogDo != null)
-                        cancelDialogDo.onCancelDialogDo();
-                }
-            });
-            progressDialog.setIndeterminate(true);
-            progressDialog.setCanceledOnTouchOutside(false);
-            progressDialog.setMessage(content);
-            progressDialog.show();
+        progressDialog = new ProgressDialog(context);
+        DialogUtil.context = context;
+        progressDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                //  HttpUtil.cancelAllClient(DialogUtil.context);
+                DialogUtil.context = null;
+                if (cancelDialogDo != null)
+                    cancelDialogDo.onCancelDialogDo();
+            }
+        });
+        progressDialog.setIndeterminate(true);
+        progressDialog.setCanceledOnTouchOutside(false);
+        progressDialog.setMessage(content);
+        progressDialog.show();
+
+        return progressDialog;
+    }
+
+    /**
+     * 加载提示框
+     *
+     * @param context
+     * @param content
+     */
+    public static ProgressDialog showDialog(Context context, String content, final boolean canKeyBack) {
+
+        progressDialog = new ProgressDialog(context);
+        DialogUtil.context = context;
+        progressDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+            @Override
+            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                return keyCode == KeyEvent.KEYCODE_BACK && !canKeyBack;
+            }
+        });
+        progressDialog.setIndeterminate(true);
+        progressDialog.setCanceledOnTouchOutside(false);
+        progressDialog.setMessage(content);
+        progressDialog.show();
 
         return progressDialog;
     }
@@ -78,22 +118,22 @@ public class DialogUtil {
      */
     public static ProgressDialog showDialog(Context context, String content, final Object cancelTag) {
 
-            progressDialog = new ProgressDialog(context);
-            DialogUtil.context = context;
-            progressDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                @Override
-                public void onDismiss(DialogInterface dialog) {
-                    if (cancelTag instanceof Context)
-                        HttpUtil.cancelAllClient((Context) cancelTag);
-                    else
-                        HttpUtil.cancelAllClient(cancelTag);
-                    DialogUtil.context = null;
-                }
-            });
-            progressDialog.setIndeterminate(true);
-            progressDialog.setCanceledOnTouchOutside(false);
-            progressDialog.setMessage(content);
-            progressDialog.show();
+        progressDialog = new ProgressDialog(context);
+        DialogUtil.context = context;
+        progressDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                if (cancelTag instanceof Context)
+                    HttpUtil.cancelAllClient((Context) cancelTag);
+                else
+                    HttpUtil.cancelAllClient(cancelTag);
+                DialogUtil.context = null;
+            }
+        });
+        progressDialog.setIndeterminate(true);
+        progressDialog.setCanceledOnTouchOutside(false);
+        progressDialog.setMessage(content);
+        progressDialog.show();
         progressDialog.setCancelMessage(null);
         return progressDialog;
     }
@@ -140,46 +180,56 @@ public class DialogUtil {
         }
         context = context.getApplicationContext();
         try {
-            if (mToast == null) {
-                mToast = Toast.makeText(context, str, Toast.LENGTH_SHORT);
+            if (mToast == null || (ToastString != null && ToastString.equals(str))) {
+                if (mToast == null) {
+                    mToast = Toast.makeText(context, str, Toast.LENGTH_SHORT);
+                    mToast.setGravity(Gravity.CENTER, 0, 0);
+                    LinearLayout toastView = (LinearLayout) mToast.getView();
+                    ImageView imageCodeProject = new ImageView(context);
+                    imageCodeProject.setImageResource(R.drawable.warning_bai);
+                    imageCodeProject.setPadding(0, (int) (3 * ScreenData.density), 0, (int) (3 * ScreenData.density));
+                    toastView.addView(imageCodeProject, 0);
 
-                mToast.setGravity(Gravity.CENTER, 0, 0);
-                LinearLayout toastView = (LinearLayout) mToast.getView();
-                ImageView imageCodeProject = new ImageView(context);
-                imageCodeProject.setImageResource(R.drawable.warning_bai);
-                imageCodeProject.setPadding(0, (int) (3 * ScreenData.density), 0, (int) (3 * ScreenData.density));
-                toastView.addView(imageCodeProject, 0);
-
-                ToastString = str;
+                    ToastString = str;
+                }
+                mToast.setDuration(Toast.LENGTH_SHORT);
                 mToast.show();
+                if (timer != null)
+                    timer.cancel();
                 timer = new Timer();
                 TimerTask timerTask = new TimerTask() {
                     @Override
                     public void run() {
                         DialogUtil.mToast = null;
                         DialogUtil.ToastString = "";
-                        timer.cancel();
+                        DialogUtil.context = null;
                         timer = null;
                     }
                 };
-                timer.schedule(timerTask, Toast.LENGTH_SHORT);
+                timer.schedule(timerTask, 2000);
             } else {
-                if (!ToastString.equals(str)) {
+                if (mToast != null) {
                     mToast.setText(str);
-                    // mToast.setDuration(Toast.LENGTH_SHORT);
                     ToastString = str;
+                    if (timer != null)
+                        timer.cancel();
+                    timer = new Timer();
                     TimerTask timerTask = new TimerTask() {
                         @Override
                         public void run() {
                             DialogUtil.mToast = null;
                             DialogUtil.ToastString = "";
-                            timer.cancel();
+                            DialogUtil.context = null;
                             timer = null;
                         }
                     };
-                    timer.schedule(timerTask, Toast.LENGTH_SHORT);
+                    timer.schedule(timerTask, 2000);
+                    mToast.setDuration(Toast.LENGTH_SHORT);
+                    mToast.show();
                 }
+
             }
+
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -187,8 +237,15 @@ public class DialogUtil {
     }
 
     public static void cancelToast() {
-        if (mToast != null)
+        if (mToast != null) {
             mToast.cancel();
+            if (timer != null)
+                timer.cancel();
+            timer = null;
+            context = null;
+            mToast = null;
+        }
+
     }
 
 //    private static void PlayVideo(Context context, String url, String name) {

@@ -20,7 +20,7 @@ public abstract class RefreshListFragment<T extends Bean> extends Fragment imple
     public ListView listView;
     public ListAdapter listAdapter;
     public boolean isMore = false;
-    public int REQUEST_COUNT = 15;
+    public int REQUEST_COUNT = 10;
 
     public void initView(View view) {
         parentView = (ReFreshListViewParentView) view.findViewById(R.id.parent_view);

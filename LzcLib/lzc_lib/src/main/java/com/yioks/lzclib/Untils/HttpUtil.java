@@ -7,6 +7,7 @@ import com.yioks.lzclib.Data.OkHttpInstance;
 import com.yioks.lzclib.Helper.FileDownloadCallBack;
 import com.yioks.lzclib.Helper.RequestParams;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -118,21 +119,32 @@ public class HttpUtil {
     private static HttpUrl formatUrl(RequestParams params, String urlString) {
         String scheme;
         String host;
-        urlString=urlString.replaceAll("\\?","");
+        String port;
+        urlString = urlString.replaceAll("\\?", "");
         scheme = urlString.contains("https://") ? "https" : "http";
-        String content = urlString.substring(urlString.indexOf(scheme) + scheme.length()+"://".length());
+        String content = urlString.substring(urlString.indexOf(scheme) + scheme.length() + "://".length());
         String temp[] = content.split("/");
-        host = temp[0];
+        String hostAndPort = temp[0];
+        if (hostAndPort.contains(":")) {
+            String[] temps = hostAndPort.split(":");
+            host = temps[0];
+            port = temps[1];
+        } else {
+            host = hostAndPort;
+            port = "";
+        }
         HttpUrl.Builder builder = new HttpUrl.Builder();
         builder.scheme(scheme);
         builder.host(host);
+        if (StringManagerUtil.VerifyNumber(port))
+            builder.port(Integer.valueOf(port));
         for (int i = 1; i < temp.length; i++) {
             builder.addPathSegment(temp[i]);
         }
         for (Map.Entry<String, String> entry : params.getUrlParamsEntry()) {
             builder.addEncodedQueryParameter(entry.getKey(), entry.getValue());
         }
-        Log.i("lzc","builder+url"+builder.toString());
+        Log.i("lzc", "builder+url" + builder.toString());
         return builder.build();
     }
 
@@ -151,8 +163,9 @@ public class HttpUtil {
 
     public static void cancelAllClient(Context context) {
         for (Call call : OkHttpInstance.getClient().dispatcher().queuedCalls()) {
-            if (call.request().tag() instanceof String && call.request().tag().equals(context.getPackageName() + context.getClass().getName())) {
+            if (call.request().tag() instanceof String && call.request().tag().equals(context.getPackageName() + context.getClass().getName()+context.hashCode())) {
                 call.cancel();
+                Log.i("lzc", "call_cancel_queuedCalls " + call.request().tag());
 //                if (call instanceof HandlerCallBack)
 //                    ((HandlerCallBack) call).cancelAllRequest();
             }
@@ -160,8 +173,9 @@ public class HttpUtil {
         }
 
         for (Call call : OkHttpInstance.getClient().dispatcher().runningCalls()) {
-            if (call.request().tag() instanceof String && call.request().tag().equals(context.getPackageName() + context.getClass().getName())) {
+            if (call.request().tag() instanceof String && call.request().tag().equals(context.getPackageName() + context.getClass().getName()+context.hashCode())) {
                 call.cancel();
+                Log.i("lzc", "call_cancel_runningCalls " + call.request().tag());
 //                if (call instanceof HandlerCallBack)
 //                    ((HandlerCallBack) call).cancelAllRequest();
             }
@@ -171,6 +185,8 @@ public class HttpUtil {
     }
 
     public static void cancelAllClient(Object tag) {
+        if (tag == null)
+            return;
         for (Call call : OkHttpInstance.getClient().dispatcher().queuedCalls()) {
             if (call.request().tag() == tag)
                 call.cancel();
@@ -202,7 +218,7 @@ public class HttpUtil {
             }
             for (Map.Entry<String, List<RequestParams.FileWrapper>> entry : params.getFileListParams()) {
                 for (RequestParams.FileWrapper fileWrapper : entry.getValue()) {
-                    builder.addFormDataPart(entry.getKey(), fileWrapper.customFileName, RequestBody.create(fileWrapper.contentType, fileWrapper.customFileName));
+                    builder.addFormDataPart(entry.getKey(), fileWrapper.customFileName, RequestBody.create(fileWrapper.contentType, fileWrapper.file));
                 }
 
             }
@@ -228,6 +244,17 @@ public class HttpUtil {
     public static void download(String url, FileDownloadCallBack fileDownloadCallBack) {
         Request request = new Request.Builder().url(url).tag(tag).build();
         OkHttpInstance.getClient().newCall(request).enqueue(fileDownloadCallBack);
+    }
+
+    //下载文件
+    public static void downloadResume(String url, FileDownloadCallBack fileDownloadCallBack) {
+        File file = fileDownloadCallBack.getFile();
+        if (file != null) {
+            Request request = new Request.Builder().url(url).tag(tag).addHeader("RANGE", " bytes=" + file.length() + "-").build();
+            Log.i("lzc", request.headers().toString());
+            OkHttpInstance.getClient().newCall(request).enqueue(fileDownloadCallBack);
+        }
+
     }
 
 }
