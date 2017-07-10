@@ -81,6 +81,8 @@ public class FileUntil {
         if (contentUri.getScheme().equals("file")) {
             return contentUri.getPath();
         }
+        if (context == null)
+            return null;
         String res = null;
         try {
             String[] proj = {MediaStore.Images.Media.DATA};
