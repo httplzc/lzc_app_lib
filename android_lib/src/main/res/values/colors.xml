@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <!--通用色值-->
+    <color name="gray">#ababab</color>
+    <color name="gray_text">#aaaaaa</color>
+    <color name="gray_text_deep">#5a5a5a</color>
+    <color name="gray_deep">#555555</color>
+    <color name="white">#FFFFFF</color>
+    <color name="line_color">#f0f0f0</color>
+    <color name="press_color">#dedede</color>
+
+
+    <color name="starBarColor">#3F51B5</color>
+
+    <!--progressBar默认底色-->
+    <color name="progress_bar_background">#cccfcfcf</color>
+    <color name="progress_bar_main">#3F51B5</color>
+
+    <!--titleView 用的颜色-->
+    <color name="normal_title_color">#3F51B5</color>
+    <color name="normal_title_text_color">#ffffff</color>
+    <color name="normal_title_deep_color">#3F51B5</color>
+
+
+    <!--dialog 颜色-->
+    <color name="dialog_positive_btn">#303030</color>
+    <color name="dialog_passive_btn">#303030</color>
+
+    <!--ViewPagerIndicatorPoint 小点前景 背景色-->
+    <color name="indicator_point_background">#8c8b8b</color>
+    <color name="indicator_point_foreground">#f1f1f1</color>
+
+    <!--stateView颜色-->
+    <color name="stateView_background">#ffffff</color>
+    <color name="stateView_text_color">#ababab</color>
+    <color name="stateView_tint_color">#3F51B5</color>
+
+    <!--refreshParent默认颜色-->
+    <color name="default_refresh_background">#ffffff</color>
+    <color name="default_refresh_tint_color">#3F51B5</color>
+    <color name="default_refresh_text_color">#5a5a5a</color>
+
+
+    <color name="pic_image_title_btn_color">#19287e</color>
+    <color name="pic_number_check_choice_color">#3F51B5</color>
+    <color name="pic_number_check_no_choice_color">#7d7d7d</color>
+
+
+</resources>

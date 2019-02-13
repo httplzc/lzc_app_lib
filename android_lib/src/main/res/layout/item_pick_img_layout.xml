@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:fresco="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="picImageData"
+            type="pers.lizechao.android_lib.support.img.pick.PickImageData"/>
+    </data>
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            fresco:layout_constraintDimensionRatio="1:1">
+
+            <pers.lizechao.android_lib.ui.widget.WrapImageView
+                android:id="@+id/pic_img"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:actualImageScaleType="focusCrop"
+                app:placeholderImage="@drawable/holder"
+                app:placeholderImageScaleType="fitXY"
+                app:imageUri="@{picImageData.uri}"
+                >
+            </pers.lizechao.android_lib.ui.widget.WrapImageView>
+
+            <pers.lizechao.android_lib.support.img.pick.NumberCheckView
+                android:id="@+id/pic_check_box"
+                android:layout_width="23dp"
+                android:layout_height="23dp"
+                android:layout_margin="5dp"
+                app:numberCheckCheck="@{picImageData.haveChoice}"
+                app:numberCheckNumber="@{picImageData.choiceIndex}"
+                android:visibility="visible"
+                />
+        </RelativeLayout>
+    </android.support.constraint.ConstraintLayout>
+</layout>

@@ -1,0 +1,13 @@
+<resources>
+    <style name="NoDisplayTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@style/NoDisplayAnimStyle</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:excludeFromRecents">true</item>
+        <item name="android:screenOrientation">behind</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+</resources>

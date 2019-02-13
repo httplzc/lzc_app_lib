@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+        <import type="android.view.View"/>
+
+        <variable
+            name="titleData"
+            type="pers.lizechao.android_lib.ui.layout.TitleData"/>
+
+    </data>
+
+    <FrameLayout
+        android:id="@+id/title_content"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/normal_title_color"
+        android:clipToPadding="true">
+
+        <LinearLayout
+            android:id="@+id/back_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="@{titleData.back_layout_show?View.VISIBLE:View.GONE}">
+
+            <ImageView
+                android:id="@+id/left_img"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/click_item_title_bar"
+                android:paddingBottom="10dp"
+                android:paddingLeft="8dp"
+                android:paddingRight="10dp"
+                android:paddingTop="10dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/ic_chevron_left"
+                android:tint="@color/normal_title_text_color"/>
+
+            <TextView
+                android:id="@+id/left_img_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{titleData.left_img_text}"
+                android:textColor="@color/normal_title_text_color"
+                android:visibility="@{titleData.left_text_show?View.VISIBLE:View.GONE}"/>
+        </LinearLayout>
+
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textColor="@color/normal_title_text_color"
+            android:textSize="16sp"
+            android:text="@{titleData.title}"/>
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical|end">
+
+            <ImageView
+                android:id="@+id/right_img"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/click_item_title_bar"
+                android:padding="10dp"
+                android:tint="@color/normal_title_text_color"
+                android:src="@{titleData.right_img_res_id}"
+                android:visibility="@{titleData.right_img_show?View.VISIBLE:View.GONE}"/>
+
+            <TextView
+                android:id="@+id/right_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@drawable/click_item_title_bar"
+                android:padding="10dp"
+                android:textColor="@color/normal_title_text_color"
+                android:textSize="15sp"
+                android:text="@{titleData.right_text}"
+                android:visibility="@{titleData.right_text_show?View.VISIBLE:View.GONE}"/>
+        </FrameLayout>
+
+    </FrameLayout>
+</layout>

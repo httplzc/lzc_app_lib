@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--用于ListPagerManager-->
+    <item name="refreshParent" type="id"/>
+    <item name="headFootRecycleView" type="id"/>
+    <item name="pageStateView" type="id"/>
+    <item name="titleBarView" type="id"/>
+</resources>

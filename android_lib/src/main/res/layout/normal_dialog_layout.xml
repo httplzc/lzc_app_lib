@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:background="@drawable/mydialog_bg"
+        android:divider="@drawable/divider_horizontal"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:showDividers="middle">
+
+        <LinearLayout
+            android:id="@+id/mydialog_head"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            >
+
+            <ImageView
+                android:id="@+id/dialog_waring_img"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="20dp"
+                android:src="@drawable/warning_bai"
+                android:tint="@color/colorPrimary"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="20dp"
+                android:gravity="center"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:visibility="visible"
+                tools:text="最新版本v1.1"/>
+
+
+            <TextView
+                android:id="@+id/remind"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:gravity="center"
+                android:maxHeight="200dp"
+                android:padding="15dp"
+                android:paddingRight="15dp"
+                android:textSize="16sp"
+                android:visibility="visible"
+                tools:text="您确定要退出登录?"/>
+
+            <LinearLayout
+                android:id="@+id/progress_state"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingBottom="10dp"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
+                android:paddingTop="10dp"
+                android:visibility="gone">
+
+                <pers.lizechao.android_lib.ui.widget.CustomProgressBar
+                    android:id="@+id/progress"
+                    android:layout_width="0dp"
+                    android:layout_height="3dp"
+                    android:layout_weight="1"
+                    app:progress="0"/>
+
+                <TextView
+                    android:id="@+id/progress_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:text="0%"
+                    android:textColor="@color/gray_text_deep"/>
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/confirm_cancel_state"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:divider="@drawable/divider_vertical"
+            android:showDividers="middle">
+
+            <TextView
+                android:id="@+id/cancel_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/mydialog_btn_selector_left"
+                android:gravity="center"
+                android:padding="13dp"
+                android:text="取消"
+                android:textColor="@color/dialog_passive_btn"
+                android:textSize="15sp"/>
+
+
+            <TextView
+                android:id="@+id/active_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/mydialog_btn_selector_right"
+                android:gravity="center"
+                android:padding="13dp"
+                android:text="确定"
+                android:textColor="@color/dialog_positive_btn"
+                android:textSize="15sp"/>
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/confirm_state"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/confirm_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/mydialog_btn_selector_right"
+                android:gravity="center"
+                android:padding="13dp"
+                android:text="确定"
+                android:textColor="@color/colorAccent"
+                android:textSize="15sp"
+                />
+        </FrameLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

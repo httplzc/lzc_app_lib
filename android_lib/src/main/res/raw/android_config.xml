@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Config>
+    <!--分享id-->
+    <share>
+        <wxId>""</wxId>
+        <wbId>""</wbId>
+        <qqId>""</qqId>
+    </share>
+    <!--分享id-->
+    <pay>
+        <wxPayId>""</wxPayId>
+        <alPayId>""</alPayId>
+    </pay>
+    <!--okHttp 工厂-->
+    <okHttp>
+        <OkHttpFactory>pers.lizechao.android_lib.net.okhttp.DefaultOkHttpFactory</OkHttpFactory>
+    </okHttp>
+    <!--刷新/分页组件工厂-->
+    <RefreshParent>
+        <RefreshViewFactory>pers.lizechao.android_lib.ui.layout.RefreshViewFactoryDefault</RefreshViewFactory>
+    </RefreshParent>
+    <!--页面状态组件工厂-->
+    <PageStateView>
+        <StateViewFactory>pers.lizechao.android_lib.ui.layout.DefaultStateViewFactory</StateViewFactory>
+    </PageStateView>
+
+    <!--图片加载框架配置项-->
+    <Fresco>
+        <FrescoConfigFactory>pers.lizechao.android_lib.support.img.load.DefaultFrescoConfigFactory</FrescoConfigFactory>
+    </Fresco>
+    <Serial>
+        <SerializerFactory>pers.lizechao.android_lib.common.DefaultSerializerFactory</SerializerFactory>
+    </Serial>
+</Config>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CornerTextView">
+        <attr name="corner_text_full_color" format="color"/>
+        <attr name="corner_text_line_width" format="dimension"/>
+        <attr name="corner_text_line_color" format="color"/>
+        <attr name="corner_text_isCircle" format="boolean"/>
+        <attr name="corner_text_corner_radius" format="dimension"/>
+    </declare-styleable>
+
+    <declare-styleable name="LabelView">
+        <attr name="label_padding_horizontal" format="dimension"/>
+        <attr name="label_padding_vertical" format="dimension"/>
+        <attr name="label_divider" format="reference"/>
+        <attr name="label_divider_padding" format="dimension"/>
+    </declare-styleable>
+
+    <declare-styleable name="MaskView">
+        <attr name="isCircle" format="boolean"/>
+        <attr name="mask_padding" format="dimension"/>
+        <attr name="mask_ratio" format="float"/>
+        <attr name="border_line_color" format="color"/>
+        <attr name="border_line_width" format="dimension"/>
+
+    </declare-styleable>
+    <declare-styleable name="CornerFrameLayout">
+        <attr name="left_top_radius" format="dimension"/>
+        <attr name="right_top_radius" format="dimension"/>
+        <attr name="left_bottom_radius" format="dimension"/>
+        <attr name="right_bottom_radius" format="dimension"/>
+        <attr name="corner_radius" format="dimension"/>
+    </declare-styleable>
+
+    <declare-styleable name="CustomProgressBar">
+        <attr name="background_res" format="reference|color"/>
+        <attr name="main_res" format="reference|color"/>
+        <attr name="progress" format="integer"/>
+        <attr name="max_progress" format="integer"/>
+        <attr name="is_circle" format="boolean"/>
+        <attr name="is_indeterminate" format="boolean"/>
+        <attr name="circle_width" format="dimension"/>
+        <attr name="show_text" format="boolean"/>
+        <attr name="only_text" format="boolean"/>
+        <attr name="text_size" format="dimension"/>
+        <attr name="text_color" format="color"/>
+        <attr name="indicator_res" format="reference"/>
+    </declare-styleable>
+
+    <declare-styleable name="AutoLoopViewPager">
+        <attr name="autoScroll" format="boolean"/>
+        <attr name="intervalTime" format="integer"/>
+    </declare-styleable>
+
+    <declare-styleable name="ImgRotateView">
+        <attr name="rotate_res" format="reference"/>
+    </declare-styleable>
+
+    <declare-styleable name="ViewPagerIndicatorPoint">
+        <attr name="point_foreground" format="reference|color"/>
+        <attr name="point_background" format="reference|color"/>
+        <attr name="point_size" format="dimension"/>
+        <attr name="point_interval_size" format="dimension"/>
+    </declare-styleable>
+
+    <declare-styleable name="WrapImageView">
+        <attr name="imageUrl" format="string"/>
+        <attr name="imageUri" format="string"/>
+        <attr name="imageResource" format="reference"/>
+        <attr name="imageWidth" format="dimension"/>
+        <attr name="imageHeight" format="dimension"/>
+        <attr name="noCache" format="boolean"/>
+    </declare-styleable>
+
+    <declare-styleable name="MoveImageView">
+        <attr name="image_ratio" format="float"/>
+        <attr name="image_padding" format="dimension"/>
+    </declare-styleable>
+
+    <declare-styleable name="RefreshParent">
+        <attr name="refreshViewFactory" format="string"/>
+        <attr name="refreshEnableHead" format="boolean"/>
+        <attr name="refreshEnableFoot" format="boolean"/>
+        <attr name="refreshFootIsAlwaysShow" format="boolean"/>
+    </declare-styleable>
+
+    <declare-styleable name="NumberCheckView">
+        <attr name="numberCheckNumber" format="integer"/>
+        <attr name="numberCheckCheck" format="boolean"/>
+    </declare-styleable>
+
+    <declare-styleable name="DividerLinearLayout">
+        <attr name="dl_divide" format="reference"/>
+        <attr name="dl_divide_height" format="dimension"/>
+        <attr name="dl_divide_width" format="dimension"/>
+        <attr name="dl_divide_padding_left" format="dimension"/>
+        <attr name="dl_divide_padding_right" format="dimension"/>
+    </declare-styleable>
+
+    <declare-styleable name="TopPopupView">
+        <attr name="top_pop_view_content_id" format="reference"/>
+    </declare-styleable>
+
+    <declare-styleable name="TitleBarView">
+        <attr name="title_bar_show_back" format="boolean"/>
+        <attr name="title_bar_title" format="string"/>
+    </declare-styleable>
+</resources>

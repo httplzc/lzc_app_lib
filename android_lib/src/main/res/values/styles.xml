@@ -1,0 +1,74 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <!--用于NormalDialog-->
+    <style name="my_dialog_default_anim">
+        <item name="android:windowEnterAnimation">@anim/my_dialog_anim_enter</item>
+        <item name="android:windowExitAnimation">@anim/my_dialog_anim_exit</item>
+    </style>
+    <style name="NormalDialogStyle" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
+    <!--全屏style-->
+    <style name="FullScreen" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <style name="NoDisplayTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@style/NoDisplayAnimStyle</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:excludeFromRecents">true</item>
+        <item name="android:screenOrientation">behind</item>
+    </style>
+
+    <style name="pop_window_anim_style_bottom">
+        <item name="android:windowEnterAnimation">@anim/bottom_dialog_show</item>
+        <item name="android:windowExitAnimation">@anim/bottom_dialog_hide</item>
+    </style>
+
+    <style name="pop_window_anim_style_alpha">
+        <item name="android:windowEnterAnimation">@anim/alpha_dialog_show</item>
+        <item name="android:windowExitAnimation">@anim/alpha_dialog_hide</item>
+    </style>
+    <style name="pop_window_anim_style_top">
+        <item name="android:windowEnterAnimation">@anim/top_dialog_show</item>
+        <item name="android:windowExitAnimation">@anim/top_dialog_hide</item>
+    </style>
+
+    <style name="window_alpha_anim">
+        <item name="android:activityCloseExitAnimation">@anim/window_alpha_exit</item>
+    </style>
+
+    <style name="window_scroll_anim">
+        <item name="android:windowEnterAnimation">@null</item>
+        <item name="android:windowExitAnimation">@null</item>
+        <item name="android:activityOpenEnterAnimation">@anim/window_scroll_enter</item>
+        <item name="android:activityOpenExitAnimation">@anim/window_stable</item>
+        <item name="android:activityCloseEnterAnimation">@null</item>
+        <item name="android:activityCloseExitAnimation">@anim/window_scroll_exit</item>
+    </style>
+
+
+    <style name="NoDisplayAnimStyle" parent="@android:style/Animation">
+        <item name="android:activityOpenEnterAnimation">@null</item>
+        <item name="android:activityOpenExitAnimation">@null</item>
+        <item name="android:activityCloseEnterAnimation">@null</item>
+        <item name="android:activityCloseExitAnimation">@null</item>
+        <item name="android:windowEnterAnimation">@null</item>
+        <item name="android:windowExitAnimation">@null</item>
+    </style>
+
+</resources>

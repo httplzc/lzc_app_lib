@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:orientation="vertical">
+
+        <pers.lizechao.android_lib.ui.layout.TitleBarView
+            android:id="@+id/titleBarView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <pers.lizechao.android_lib.ui.widget.MoveImageView
+                android:id="@+id/moveImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:image_padding="50dp"
+                app:image_ratio="1"/>
+
+            <pers.lizechao.android_lib.ui.widget.MaskView
+                android:id="@+id/maskView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#a0000000"
+                app:mask_padding="50dp"
+                app:mask_ratio="1"/>
+
+        </FrameLayout>
+
+    </LinearLayout>
+</layout>

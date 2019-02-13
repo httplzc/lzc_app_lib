@@ -1,0 +1,140 @@
+apply plugin: 'com.android.library'
+//apply plugin: 'kotlin-android'
+apply plugin: 'maven'
+android {
+    compileSdkVersion 28
+    defaultConfig {
+        minSdkVersion 19
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0.1"
+        ndk {
+            abiFilters 'armeabi-v7a'
+        }
+        buildConfigField "String", "LibTAG", "\"lzc\""
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++11 -frtti -fexceptions"
+            }
+        }
+    }
+    buildTypes {
+        debug{
+            minifyEnabled false
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    lintOptions {
+        checkReleaseBuilds false
+        // Or, if you prefer, you can continue to check for errors in release builds,
+        // but continue the build even when errors are found:
+        abortOnError false
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    dataBinding {
+        enabled = true
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    //android 依赖
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.android.support:exifinterface:27.1.1'
+    api 'com.android.support:design:27.1.1'
+    api 'com.android.support:support-v4:27.1.1'
+    api 'com.nineoldandroids:library:2.4.0'
+    api "android.arch.lifecycle:viewmodel:1.1.1"
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+
+    //rxJava依赖
+    api 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    api 'io.reactivex.rxjava2:rxjava:2.1.8'
+//    api 'com.squareup.retrofit2:retrofit:2.4.0'
+//    api('com.squareup.retrofit2:converter-gson:2.0.1') {
+//        exclude module: 'gson'
+//    }
+//    api 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
+    //网络请求
+    api 'com.squareup.okhttp3:okhttp:3.10.0'
+    //图片加载
+    api 'com.facebook.fresco:fresco:1.5.0'
+    api 'com.facebook.fresco:animated-gif:1.5.0'
+    api 'com.facebook.fresco:imagepipeline-okhttp3:1.4.0'
+    //分享
+    api 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:1.3.4'
+    api 'com.sina.weibo.sdk:core:4.1.0:openDefaultRelease@aar'
+    api files('libs/qq_share.jar')
+    //AOP框架
+    api 'org.aspectj:aspectjrt:1.9.1'
+    //对象与json互转框架
+    api 'com.google.code.gson:gson:2.8.4'
+    api 'com.annimon:stream:1.2.0'
+    //测试框架
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    implementation files('libs/alipayPay.jar')
+//    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}
+
+// 生成jar包
+task releaseJar(type: Copy) {
+    from('build/intermediates/bundles/release')
+    into('../jar')
+    include('classes.jar')
+    rename('classes.jar', 'okgo-' + version + '.jar')
+}
+
+
+
+ext {
+    PUBLISH_GROUP_ID = "pers.lizechao.android_lib"
+    PUBLISH_ARTIFACT_ID = "android_lib"
+    PUBLISH_VERSION = "1.0.0"
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        def usernameP = System.properties['usernameP'];
+        if (usernameP == null) {
+            Properties properties = new Properties()
+            properties.load(project.rootProject.file('local.properties').newDataInputStream())
+            def username = properties.getProperty("maven_username")
+            def password = properties.getProperty("maven_password")
+            def isLocal = properties.getProperty("isLocal")
+            def path = properties.getProperty("maven_path")
+            if (isLocal.equals("true"))
+                repository(url: path)
+            else {
+                repository(url: path) {
+                    authentication(userName: username, password: password)
+                }
+            }
+        } else {
+            def passwordP = System.properties['passwordP'];
+            def path = System.properties['path'];
+            repository(url: path) {
+                authentication(userName: usernameP, password: passwordP)
+            }
+        }
+
+        pom.project {
+            groupId project.PUBLISH_GROUP_ID
+            artifactId project.PUBLISH_ARTIFACT_ID
+            version project.PUBLISH_VERSION
+        }
+    }
+}
+repositories {
+    mavenCentral()
+}
