@@ -3,7 +3,6 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
-
         <import type="android.view.View"/>
 
         <variable
@@ -34,10 +33,10 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:background="@drawable/click_item_title_bar"
-                android:paddingBottom="10dp"
                 android:paddingLeft="8dp"
-                android:paddingRight="10dp"
                 android:paddingTop="10dp"
+                android:paddingRight="10dp"
+                android:paddingBottom="10dp"
                 android:scaleType="fitXY"
                 android:src="@drawable/ic_chevron_left"
                 android:tint="@color/normal_title_text_color"/>
@@ -57,9 +56,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:text="@{titleData.title}"
             android:textColor="@color/normal_title_text_color"
-            android:textSize="16sp"
-            android:text="@{titleData.title}"/>
+            android:textSize="16sp"/>
 
         <FrameLayout
             android:layout_width="wrap_content"
@@ -73,8 +72,8 @@
                 android:layout_gravity="center_vertical"
                 android:background="@drawable/click_item_title_bar"
                 android:padding="10dp"
-                android:tint="@color/normal_title_text_color"
                 android:src="@{titleData.right_img_res_id}"
+                android:tint="@color/normal_title_text_color"
                 android:visibility="@{titleData.right_img_show?View.VISIBLE:View.GONE}"/>
 
             <TextView
@@ -84,9 +83,9 @@
                 android:layout_gravity="center"
                 android:background="@drawable/click_item_title_bar"
                 android:padding="10dp"
+                android:text="@{titleData.right_text}"
                 android:textColor="@color/normal_title_text_color"
                 android:textSize="15sp"
-                android:text="@{titleData.right_text}"
                 android:visibility="@{titleData.right_text_show?View.VISIBLE:View.GONE}"/>
         </FrameLayout>
 
