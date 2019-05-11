@@ -27,10 +27,11 @@ import java.util.List;
  * Time: 16:20
  */
 public class CommRecyclerAdapter<T, BD extends ViewDataBinding> extends RecyclerView.Adapter<CommRecyclerAdapter.ViewHolder> {
-    private final int layoutId;
-    private final int BR_ID;
-    private List<T> dataList = new ArrayList<>();
-    private final Context context;
+    protected final int layoutId;
+    protected final int BR_ID;
+    protected List<T> dataList = new ArrayList<>();
+    protected Context context;
+
 
     public CommRecyclerAdapter(int layoutId, int BR_ID, Context context) {
         this.layoutId = layoutId;
@@ -47,13 +48,11 @@ public class CommRecyclerAdapter<T, BD extends ViewDataBinding> extends Recycler
 
     @Override
     public void onBindViewHolder(@NonNull CommRecyclerAdapter.ViewHolder holder, int position) {
-        T data = dataList.get(position);
-        holder.viewDataBinding.setVariable(BR_ID, data);
-        setExtraData((BD) holder.viewDataBinding,data);
+        setExtraData((BD) holder.viewDataBinding, dataList.get(position));
     }
-    public void setExtraData(BD viewBinding,T data)
-    {
 
+    public void setExtraData(BD viewDataBinding, T data) {
+        viewDataBinding.setVariable(BR_ID, data);
     }
 
     @Override
@@ -61,10 +60,10 @@ public class CommRecyclerAdapter<T, BD extends ViewDataBinding> extends Recycler
         return dataList.size();
     }
 
-   public class ViewHolder extends RecyclerView.ViewHolder {
-       public final BD viewDataBinding;
+    public class ViewHolder extends RecyclerView.ViewHolder {
+        public final BD viewDataBinding;
 
-        ViewHolder(BD viewDataBinding) {
+        public ViewHolder(BD viewDataBinding) {
             super(viewDataBinding.getRoot());
             this.viewDataBinding = viewDataBinding;
         }
@@ -78,4 +77,6 @@ public class CommRecyclerAdapter<T, BD extends ViewDataBinding> extends Recycler
     public List<T> getDataList() {
         return dataList;
     }
+
+
 }

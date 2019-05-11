@@ -29,9 +29,11 @@ public class LoopTask {
     private final Runnable scheduleTask = new Runnable() {
         @Override
         public void run() {
-            if (runnable != null)
-                runnable.run();
-            handler.postDelayed(this, timeSpan);
+            if (isRun) {
+                if (runnable != null)
+                    runnable.run();
+                handler.postDelayed(this, timeSpan);
+            }
         }
     };
 
@@ -57,7 +59,7 @@ public class LoopTask {
             handler.postDelayed(scheduleTask, timeSpan);
             isRun = true;
         } else {
-            handler.removeCallbacks(scheduleTask);
+            handler.removeCallbacksAndMessages(scheduleTask);
             isRun = false;
         }
     }
