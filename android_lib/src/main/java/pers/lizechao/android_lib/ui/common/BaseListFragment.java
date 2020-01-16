@@ -6,6 +6,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
+import com.facebook.common.references.CloseableReference;
+
 import java.util.List;
 
 import pers.lizechao.android_lib.R;
@@ -50,6 +52,7 @@ public abstract class BaseListFragment<T extends ViewDataBinding, LD> extends Ba
     @Override
     protected void initExtraView(View root) {
         super.initExtraView(root);
+        CloseableReference
         adapter = createAdapter();
         headFootRecycleView = root.findViewById(R.id.headFootRecycleView);
         refreshParent = root.findViewById(R.id.refreshParent);

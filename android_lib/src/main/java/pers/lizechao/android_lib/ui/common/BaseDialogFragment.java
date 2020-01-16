@@ -47,6 +47,8 @@ public abstract class BaseDialogFragment <T extends ViewDataBinding> extends Dia
         return viewBind.getRoot();
     }
 
+
+
     protected void requestData() {
 
     }

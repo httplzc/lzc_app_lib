@@ -87,11 +87,11 @@ public abstract class Stub<T> {
                 String key = paramsHead + i;
                 if (arg == null) {
                     bundle.putSerializable(key, null);
-                } else if (Parcelable.class.isInstance(arg)) {
+                } else if (arg instanceof Parcelable) {
                     bundle.putParcelable(key, (Parcelable) arg);
-                } else if (Serializable.class.isInstance(arg))
+                } else if (arg instanceof Serializable)
                     bundle.putSerializable(key, (Serializable) arg);
-                else if (Parcelable[].class.isInstance(arg)) {
+                else if (arg instanceof Parcelable[]) {
                     bundle.putParcelableArray(key, (Parcelable[]) arg);
                 } else {
                     bundle.putSerializable(key, null);

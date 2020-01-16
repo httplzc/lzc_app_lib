@@ -1,9 +1,11 @@
 package pers.lizechao.android_lib.ui.widget;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -14,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import pers.lizechao.android_lib.ProjectConfig;
+import pers.lizechao.android_lib.R;
 import pers.lizechao.android_lib.function.Notification;
 
 /**
@@ -57,13 +60,29 @@ public class PageStateView extends FrameLayout {
     public PageStateView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         initView();
+        initAttr(attrs);
+    }
+
+    private void initAttr(AttributeSet attrs) {
+        TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.PageStateView);
+        String factoryClassStr=typedArray.getString(R.styleable.PageStateView_state_view_factory);
+        typedArray.recycle();
+        if(TextUtils.isEmpty(factoryClassStr))
+            return;
+        try {
+            setStateViewFactory((StateViewFactory) Class.forName(factoryClassStr).newInstance());
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void initView() {
     }
-
-
-
 
     public void setState(State state) {
         if (this.state == state)
@@ -82,7 +101,6 @@ public class PageStateView extends FrameLayout {
             return contentView;
         return viewMap.get(state);
     }
-
 
     public void setCoverRect(Rect coverRect) {
         this.coverRect = coverRect;

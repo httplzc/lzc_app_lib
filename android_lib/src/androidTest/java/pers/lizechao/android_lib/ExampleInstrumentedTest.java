@@ -1,13 +1,18 @@
 package pers.lizechao.android_lib;
 
 import android.content.Context;
+import android.os.Handler;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
+import android.view.View;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.reactivestreams.Processor;
 
-import static org.junit.Assert.*;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -23,4 +28,27 @@ public class ExampleInstrumentedTest {
 
         assertEquals("pers.lizechao.android_lib", appContext.getPackageName());
     }
+
+    public class IMediaSource<I> {
+
+    }
+
+    public abstract class MediaFlowDispatch<T extends IMediaSource<I>,I> {
+        abstract public void register(I listener);
+    }
+
+    public class VideoMediaFlowDispatch extends MediaFlowDispatch<>
+    {
+
+    }
+
+
+
+    private Processor processorFirst;
+
+    void text() {
+
+    }
 }
+
+

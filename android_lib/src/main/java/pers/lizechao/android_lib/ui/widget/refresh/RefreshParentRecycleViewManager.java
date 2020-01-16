@@ -62,7 +62,7 @@ public class RefreshParentRecycleViewManager extends RefreshParent.RefreshParent
 
     @Override
     protected boolean isReadyLoadMore() {
-        if (contentView.getLayoutManager() instanceof LinearLayoutManager) {
+        if ((contentView.getLayoutManager() instanceof LinearLayoutManager)&&contentView.getChildCount()!=0) {
             LinearLayoutManager lm = (LinearLayoutManager) contentView.getLayoutManager();
             int fix=(lm instanceof GridLayoutManager)?((GridLayoutManager) lm).getSpanCount()+2:2;
             return lm.findLastCompletelyVisibleItemPosition()>= contentView.getTotalCount() - fix && !isLessData();

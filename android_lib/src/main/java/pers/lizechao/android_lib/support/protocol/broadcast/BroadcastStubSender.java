@@ -14,6 +14,7 @@ public class BroadcastStubSender<T> extends StubSender<T> {
     private final Context context;
     private String actionName;
     private String permissionName;
+    private boolean expert = false;
 
     public BroadcastStubSender(Context context, Class<T> interfaceClass) {
         super(interfaceClass);
@@ -22,17 +23,20 @@ public class BroadcastStubSender<T> extends StubSender<T> {
         if (broadcastMsg != null) {
             this.actionName = broadcastMsg.action();
             this.permissionName = broadcastMsg.permission();
-            if(TextUtils.isEmpty(this.permissionName))
-                this.permissionName=null;
+            this.expert = broadcastMsg.expert();
+            if (TextUtils.isEmpty(this.permissionName))
+                this.permissionName = null;
         }
     }
 
     @Override
     protected void sendStubData(StubData stubData) {
         Intent intent = new Intent(actionName)
-          .putExtra(BroadcastConstant.PROCESS_ID_TAG, Process.myPid())
-          .putExtra(BroadcastConstant.USER_ID_TAG, Process.myUid())
-          .putExtra(BroadcastConstant.DATA_TAG, stubData.getBundle());
+                .putExtra(BroadcastConstant.PROCESS_ID_TAG, Process.myPid())
+                .putExtra(BroadcastConstant.USER_ID_TAG, Process.myUid())
+                .putExtra(BroadcastConstant.DATA_TAG, stubData.getBundle());
+        if (!expert)
+            intent.setPackage(context.getPackageName());
         context.sendBroadcast(intent, permissionName);
     }
 }

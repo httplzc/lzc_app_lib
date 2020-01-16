@@ -104,4 +104,8 @@
         <attr name="title_bar_show_back" format="boolean"/>
         <attr name="title_bar_title" format="string"/>
     </declare-styleable>
+    
+    <declare-styleable name="PageStateView">
+        <attr name="state_view_factory" format="string"/>
+    </declare-styleable>
 </resources>

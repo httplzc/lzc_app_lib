@@ -56,11 +56,10 @@ public class RefreshParent extends FrameLayout {
     //Head Foot View 工厂
     private RefreshViewFactory refreshViewFactory;
 
-
     private int touchSlop;
     //是否处于正在请求状态
     private boolean isRequesting = false;
-
+    private boolean haveRequestHeadOnce = false;
 
     public RefreshParent(@NonNull Context context) {
         super(context);
@@ -91,7 +90,6 @@ public class RefreshParent extends FrameLayout {
 
     private boolean canCallCancel = true;
 
-
     //头部
     @Nullable
     private PullView headPullView;
@@ -111,7 +109,6 @@ public class RefreshParent extends FrameLayout {
     //无效的手指
     private static final int INVALID_POINTER = -1;
 
-
     private RefreshCallBack refreshCallBack;
 
     //没有更多数据了！不能触发下拉与底部
@@ -126,7 +123,6 @@ public class RefreshParent extends FrameLayout {
     private StickyTagHelper stickyTagHelper;
 
     private boolean enableStickyTagView = false;
-
 
     private void initAttrs(AttributeSet attrs) {
         TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.RefreshParent);
@@ -149,7 +145,6 @@ public class RefreshParent extends FrameLayout {
         ViewConfiguration viewConfiguration = ViewConfiguration.get(getContext());
         touchSlop = viewConfiguration.getScaledTouchSlop();
     }
-
 
     //加载完xml后 添加刷新view
     @Override
@@ -208,12 +203,13 @@ public class RefreshParent extends FrameLayout {
                 return;
             if (isRequesting)
                 return;
+            if (!haveRequestHeadOnce)
+                return;
             isRequesting = true;
             footRefreshView.onRefresh(true);
             this.post(this::addRefreshFootView);
         });
     }
-
 
     /**
      * 初始化头尾部View
@@ -241,11 +237,9 @@ public class RefreshParent extends FrameLayout {
         }
     }
 
-
     public void setRefreshViewFactory(RefreshViewFactory refreshViewFactory) {
         this.refreshViewFactory = refreshViewFactory;
     }
-
 
     @Override
     public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
@@ -264,7 +258,12 @@ public class RefreshParent extends FrameLayout {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        int activeIndex = activePointerId != INVALID_POINTER ? ev.findPointerIndex(activePointerId) : ev.getActionIndex();
+        int activeIndex = ev.getActionIndex();
+        int activePointerIndex;
+        if (activePointerId != INVALID_POINTER
+                && (activePointerIndex = ev.findPointerIndex(activePointerId)) >= 0) {
+            activeIndex = activePointerIndex;
+        }
         float eventX = ev.getX(activeIndex);
         float eventY = ev.getY(activeIndex);
         boolean handle = false;
@@ -350,7 +349,6 @@ public class RefreshParent extends FrameLayout {
             refreshCallBack.onRefresh();
     }
 
-
     private void addRefreshFootView() {
         if (footRefreshView != null) {
             if (footIsShow)
@@ -426,6 +424,7 @@ public class RefreshParent extends FrameLayout {
      */
     public void refreshFinish(boolean succeed) {
         isRequesting = false;
+        haveRequestHeadOnce = true;
         if (headPullView != null) {
             if (succeed) {
                 headPullView.onSucceed();
@@ -454,17 +453,14 @@ public class RefreshParent extends FrameLayout {
         }
     }
 
-
     //内部类与接口分界线
     //--------------------------------------------------------------------------------------------------------------------------------
-
 
     public interface RefreshCallBack {
         void onRefresh();
 
         void onLoadingMore();
     }
-
 
     /**
      * Created with
@@ -496,7 +492,6 @@ public class RefreshParent extends FrameLayout {
         //返回真实View
         protected abstract View onCreateView(Context context, ViewGroup viewGroup);
 
-
         //调整View到刷新状态
         protected abstract void onRefresh(boolean anim);
 
@@ -509,7 +504,6 @@ public class RefreshParent extends FrameLayout {
         protected abstract void callGetData();
 
     }
-
 
     /**
      * Created with
@@ -573,7 +567,6 @@ public class RefreshParent extends FrameLayout {
             this.isTop = isTop;
         }
 
-
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             child.measure(widthMeasureSpec, heightMeasureSpec);
@@ -585,7 +578,6 @@ public class RefreshParent extends FrameLayout {
                 frameLayout.bottomMargin = -childHeight + pullHeight;
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         }
-
 
         protected abstract void onUp();
 
@@ -639,7 +631,6 @@ public class RefreshParent extends FrameLayout {
         }
     }
 
-
     /**
      * Created with
      * ********************************************************************************
@@ -667,7 +658,6 @@ public class RefreshParent extends FrameLayout {
             return contentView;
         }
 
-
         protected abstract void addToHead(@NonNull View view);
 
         protected abstract void addToFoot(@NonNull View view);
@@ -687,12 +677,10 @@ public class RefreshParent extends FrameLayout {
 
         public abstract void callScrollBy(int x, int y);
 
-
         public interface OnScrollListener<T extends ViewGroup> {
             void onScroll(T view);
         }
     }
-
 
     /**
      * Created with
@@ -745,7 +733,6 @@ public class RefreshParent extends FrameLayout {
         RefreshParentManagerFactory.managers.put(viewClass, managerClass);
     }
 
-
     /**
      * Created with
      * ********************************************************************************
@@ -780,11 +767,9 @@ public class RefreshParent extends FrameLayout {
 
     }
 
-
     public interface OnPullListener {
         void onPull(int height);
     }
-
 
     public void setPullRatio(float pullRatio) {
         this.pullRatio = pullRatio;

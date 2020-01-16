@@ -40,8 +40,8 @@ public class BroadcastStubReceiver<T> extends ThreadReceiver<T> {
         if (broadcastMsg != null) {
             this.actionName = broadcastMsg.action();
             this.permissionName = broadcastMsg.permission();
-            if(TextUtils.isEmpty(this.permissionName))
-                this.permissionName=null;
+            if (TextUtils.isEmpty(this.permissionName))
+                this.permissionName = null;
         }
         initReceiver(context);
     }
@@ -65,7 +65,6 @@ public class BroadcastStubReceiver<T> extends ThreadReceiver<T> {
         filter.addAction(actionName);
         context.registerReceiver(receiver, filter, permissionName, null);
     }
-
 
     public void unregister(Context context) {
         if (receiver != null)

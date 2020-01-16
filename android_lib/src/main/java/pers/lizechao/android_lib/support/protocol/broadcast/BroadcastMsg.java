@@ -14,4 +14,6 @@ public @interface BroadcastMsg {
     String action();
 
     String permission();
+
+    boolean expert() default false;
 }

@@ -86,7 +86,7 @@ public class PopupViewEx {
      */
     public void showInTop() {
         onShowBefore();
-        origin.showAtLocation(activity.getWindow().getDecorView(), Gravity.BOTTOM, 0, 0);
+        origin.showAtLocation(activity.getWindow().getDecorView(), Gravity.TOP, 0, 0);
     }
 
     public void dismiss() {

@@ -56,7 +56,6 @@ public abstract class BaseActivity<T extends ViewDataBinding> extends AppCompatA
      * 请求数据
      */
     protected void requestData(boolean useCache) {
-
     }
 
     /**

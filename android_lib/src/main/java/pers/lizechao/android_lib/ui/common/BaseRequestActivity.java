@@ -47,30 +47,42 @@ public abstract class BaseRequestActivity<T extends ViewDataBinding> extends Bas
 
     @Override
     protected void requestData(boolean useCache) {
-        Completable request = dataBindRequestManager.getRequest(useCache);
-        if (request != null) {
-            request.subscribe(new CompletableObserver() {
-                @Override
-                public void onSubscribe(Disposable d) {
-                    requestLoading();
-                    baseRequestDisposable = d;
-                }
-
-                @Override
-                public void onComplete() {
-                    requestSucceed();
-                }
-
-                @Override
-                public void onError(Throwable e) {
-                    requestError(e);
-                }
-            });
-        } else
-            requestSucceed();
+        callBaseRequest(useCache);
 
     }
 
+    private void callBaseRequest(boolean useCache) {
+        if (baseRequestDisposable != null) {
+            baseRequestDisposable.dispose();
+        }
+        Completable request = dataBindRequestManager.getRequest(useCache);
+        if (request != null) {
+            request.doFinally(() -> baseRequestDisposable = null)
+                    .subscribe(new CompletableObserver() {
+                        @Override
+                        public void onSubscribe(Disposable d) {
+                            requestLoading();
+                            baseRequestDisposable = d;
+                        }
+
+                        @Override
+                        public void onComplete() {
+                            requestSucceed();
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            requestError(e);
+                        }
+                    });
+        } else
+            requestSucceed();
+    }
+
+    //调用刷新
+    protected void callBaseRequestRefresh() {
+        callBaseRequest(false);
+    }
 
     protected <D> void registerDataRequest(@NonNull Supplier<Single<D>> supplier, int BR_ID) {
         dataBindRequestManager.registerDataRequest(supplier, BR_ID);
@@ -79,7 +91,6 @@ public abstract class BaseRequestActivity<T extends ViewDataBinding> extends Bas
     protected <D> void registerDataRequest(@NonNull Supplier<Single<D>> supplier, Observer<D> observer) {
         dataBindRequestManager.registerDataRequest(supplier, observer);
     }
-
 
     protected abstract void requestError(Throwable e);
 
