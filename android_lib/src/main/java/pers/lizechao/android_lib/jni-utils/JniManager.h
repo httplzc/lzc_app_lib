@@ -8,6 +8,8 @@
 #include <functional>
 #include <android/log.h>
 #include <ctime>
+#include <assert.h>
+#include <memory>
 
 #define  LOG_TAG    "JniManager"
 #define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
@@ -45,32 +47,36 @@ namespace JniUtils {
 
     class JniManager {
     public:
+        typedef enum {
+            Int, Float, Double, Bool, String, Object, JniBundle
+        } DataType;
 
+
+        typedef std::function<void(std::string const &)> StringCallback;
+        typedef std::function<void(int)> IntCallback;
+        typedef std::function<void(double)> DoubleCallback;
+        typedef std::function<void(jobject const &)> ObjCallback;
+        typedef std::function<void(Bundle const &)> BundleCallback;
+        typedef std::function<void(bool)> BoolCallback;
+        typedef std::function<void(float)> FloatCallback;
         typedef std::unordered_map<JNIEnv *, std::vector<jobject>> LocalRefMapType;
+
         struct CallbackStore {
             std::unordered_map<std::string, void *> callbacksSuccess;
             std::unordered_map<std::string, void *> callbacksFail;
             std::unordered_map<std::string, void *> callbacksFlow;
         };
 
-        typedef enum {
-            Int, Float, Double, Bool, String, Object, JniBundle
-        } DataType;
-
-
-        typedef std::function<void(std::string)> StringCallback;
-        typedef std::function<void(int)> IntCallback;
-        typedef std::function<void(double)> DoubleCallback;
-        typedef std::function<void(jobject)> ObjCallback;
-        typedef std::function<void(Bundle *)> BundleCallback;
-        typedef std::function<void(bool)> BoolCallback;
-        typedef std::function<void(float)> FloatCallback;
 
         static void logI(const char *tag, const char *fmt, ...);
 
         static void logE(const char *tag, const char *fmt, ...);
 
-        static long getCurrentMillisTimes();
+        static long long int getCurrentMillisTimes();
+
+        static long long int getCurrentSecTimes();
+
+        static long long int getCurrentNanoTimes();
 
         static void setJavaVM(JavaVM *javaVM);
 
@@ -98,10 +104,7 @@ namespace JniUtils {
         static std::string basePackageName;
         static std::unordered_map<long, CallbackStore *> functionCallbacks;
 
-        static void setBasePackage(std::string name) {
-            basePackageName = name;
-            JniManager::initJniFunc();
-        }
+        static void setBasePackage(std::string name);
 
         static bool
         registerNativeMethods(JNIEnv *env, const char *className, JNINativeMethod sMethodTable[],
@@ -147,13 +150,11 @@ namespace JniUtils {
         static bool callStaticBooleanMethod(const std::string &className,
                                             const std::string &methodName,
                                             Ts... xs) {
-            long time1 = getCurrentMillisTimes();
             jboolean jret = JNI_FALSE;
             JniMethodInfo t;
             std::string signature = "(" + std::string(getJNISignature(xs...)) + ")Z";
             if (getStaticMethodInfo(t, className.c_str(), methodName.c_str(), signature.c_str())) {
                 LocalRefMapType localRefs;
-                LOGI("lzc use time %ld", (getCurrentMillisTimes() - time1));
                 jret = t.env->CallStaticBooleanMethod(t.classID, t.methodID,
                                                       convert(localRefs, t, xs)...);
                 t.env->DeleteLocalRef(t.classID);
@@ -377,6 +378,9 @@ namespace JniUtils {
         inline static jlong convert(LocalRefMapType &, JniMethodInfo &,
                                     int64_t value) { return static_cast<jlong>(value); }
 
+        inline static jlong convert(LocalRefMapType &, JniMethodInfo &,
+                                    long value) { return static_cast<jlong>(value); }
+
         inline static jfloat convert(LocalRefMapType &, JniMethodInfo &,
                                      float value) { return static_cast<jfloat>(value); }
 
@@ -459,7 +463,7 @@ namespace JniUtils {
 
 
     private:
-
+        static void initJniFunc();
 
         static void dispatchFunctionCallback(
                 Bundle *bundle,
@@ -481,63 +485,49 @@ namespace JniUtils {
             } else if (dataType == Object) {
                 (*static_cast<ObjCallback *>(funP))(bundle->getObj(SingleDataKey));
             } else if (dataType == JniBundle) {
-                (*static_cast<BundleCallback *>(funP))(bundle);
+                (*static_cast<BundleCallback *>(funP))(*bundle);
             }
             delete bundle;
         }
 
         static void dispatchFunctionCallbackSucceed(JNIEnv *env, jobject instance, jlong nativeObj,
                                                     jstring key, jint type, jobject bundle) {
-            CallbackStore *pStore = functionCallbacks[nativeObj];
+            CallbackStore *pStore = functionCallbacks[(long) nativeObj];
             std::string keyStr = JniManager::jstring2string(key);
+            void *funcP = pStore->callbacksSuccess[keyStr];
             dispatchFunctionCallback(new Bundle(bundle),
-                                     pStore->callbacksSuccess[keyStr],
+                                     funcP,
                                      DataType((int) type));
             pStore->callbacksSuccess.erase(keyStr);
             pStore->callbacksFail.erase(keyStr);
+            if (funcP)
+                delete funcP;
         }
 
         static void dispatchFunctionCallbackFail(JNIEnv *env, jobject instance, jlong nativeObj,
                                                  jstring key, jint type, jobject bundle) {
-            CallbackStore *pStore = functionCallbacks[nativeObj];
+            CallbackStore *pStore = functionCallbacks[(long) nativeObj];
             std::string keyStr = JniManager::jstring2string(key);
+            void *funcP = pStore->callbacksFail[keyStr];
             dispatchFunctionCallback(new Bundle(bundle),
-                                     pStore->callbacksFail[keyStr],
+                                     funcP,
                                      DataType((int) type));
             pStore->callbacksSuccess.erase(keyStr);
             pStore->callbacksFail.erase(keyStr);
+            delete funcP;
         }
 
         static void dispatchFlow(JNIEnv *env, jobject instance, jlong nativeObj,
                                  jstring key, jint type, jobject bundle) {
+
             CallbackStore *pStore = functionCallbacks[nativeObj];
             std::string keyStr = JniManager::jstring2string(key);
+            void *funcP = pStore->callbacksFlow[keyStr];
             dispatchFunctionCallback(new Bundle(bundle),
-                                     pStore->callbacksFlow[keyStr],
+                                     funcP,
                                      DataType((int) type));
         }
-
-        static void initJniFunc() {
-            typedef void(JniManager::*CallbackS)(JNIEnv *env, jobject instance,
-                                                 jstring key, jobject data, jint type);
-            JNINativeMethod sMethodTable[] = {
-                    {"dispatchFunctionCallbackSucceed", "(JLjava/lang/String;ILjava/lang/Object;)V", (void *) (dispatchFunctionCallbackSucceed)},
-                    {"dispatchFunctionCallbackFail",    "(JLjava/lang/String;ILjava/lang/Object;)V", (void *) (dispatchFunctionCallbackFail)},
-                    {"dispatchFlow",                    "(JLjava/lang/String;ILjava/lang/Object;)V", (void *) (dispatchFlow)},
-            };
-            bool succeed = JniManager::registerNativeMethods(JniManager::getEnv(),
-                                                             (JniManager::basePackageName +
-                                                              "/JniManager").c_str(),
-                                                             sMethodTable,
-                                                             sizeof(sMethodTable) /
-                                                             sizeof(JNINativeMethod));
-            assert(succeed);
-        }
-
     };
-
-    std::unordered_map<long, JniManager::CallbackStore *> JniManager::functionCallbacks;
-    std::string JniManager::basePackageName;
 
 
     class JniProxy {
@@ -711,38 +701,37 @@ namespace JniUtils {
         }
 
         template<typename T1, typename T2>
-        void registerCallback(const char *key, std::function<void(T1)> succeed,
-                              std::function<void(T2)> fail) {
+        void registerCallback(const char *key, std::function<void(T1)> const &success,
+                              std::function<void(T2)> const &fail) {
             staticCheckParams<T1>();
             staticCheckParams<T2>();
             JniManager::CallbackStore *store = JniManager::functionCallbacks[(long) this];
-            store->callbacksSuccess[key] = &succeed;
-            store->callbacksFail[key] = &fail;
+            store->callbacksSuccess[key] = new std::function<void(T1)>(success);
+            store->callbacksFail[key] = new std::function<void(T2)>(fail);
         }
 
         template<typename T>
-        void registerFlow(const char *key, std::function<void(T)> flow) {
+        void registerFlow(const char *key, std::function<void(T)> const &flow) {
             staticCheckParams<T>();
             JniManager::CallbackStore *store = JniManager::functionCallbacks[(long) this];
-            store->callbacksFlow[key] = &flow;
+            store->callbacksFlow[key] = new std::function<void(T)>(flow);
         }
 
         template<typename T>
         void staticCheckParams() {
-            static constexpr bool value =
-                    std::is_same<T, int>::value ||
-                    std::is_same<T, float>::value ||
-                    std::is_same<T, long>::value ||
-                    std::is_same<T, double>::value ||
-                    std::is_same<T, jobject>::value ||
-                    std::is_same<T, Bundle *>::value ||
-                    std::is_same<T, bool>::value ||
-                    std::is_same<T, long>::value ||
-                    std::is_same<T, std::string>::value;
-            static_assert(value);
+            constexpr bool checkResult = std::is_same<T, int>::value ||
+                                         std::is_same<T, float>::value ||
+                                         std::is_same<T, long>::value ||
+                                         std::is_same<T, double>::value ||
+                                         std::is_same<T, jobject const &>::value ||
+                                         std::is_same<T, Bundle const &>::value ||
+                                         std::is_same<T, bool>::value ||
+                                         std::is_same<T, long>::value ||
+                                         std::is_same<T, std::string const &>::value;
+            static_assert(checkResult, "callback type not support");
+
         }
 
     };
-
 }
 #endif
