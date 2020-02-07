@@ -14,4 +14,4 @@ LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH) \
 LOCAL_LDLIBS += -llog -landroid
 LOCAL_CFLAGS += -frtti
 
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_STATIC_LIBRARY)

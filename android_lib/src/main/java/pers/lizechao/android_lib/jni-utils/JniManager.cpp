@@ -1,39 +1,39 @@
 #include <JniManager.h>
 #include <string.h>
 #include <pthread.h>
+#include <chrono>
 #include "ccUTF8.h"
 
-static pthread_key_t g_key;
-
-jclass _getClassID(const char *className) {
-    if (nullptr == className) {
-        return nullptr;
-    }
-
-    JNIEnv *env = JniUtils::JniManager::getEnv();
-
-    jstring _jstrClassName = env->NewStringUTF(className);
-
-    jclass _clazz = (jclass) env->CallObjectMethod(JniUtils::JniManager::classloader,
-                                                   JniUtils::JniManager::loadclassMethod_methodID,
-                                                   _jstrClassName);
-
-    if (nullptr == _clazz) {
-        LOGE("Classloader failed to find class of %s", className);
-        env->ExceptionClear();
-    }
-
-    env->DeleteLocalRef(_jstrClassName);
-
-    return _clazz;
-}
-
-void _detachCurrentThread(void *a) {
-    JniUtils::JniManager::getJavaVM()->DetachCurrentThread();
-}
-
-static JavaVM *_psJavaVM;
 namespace JniUtils {
+    static pthread_key_t g_key;
+
+    jclass _getClassID(const char *className) {
+        if (nullptr == className) {
+            return nullptr;
+        }
+
+        JNIEnv *env = JniUtils::JniManager::getEnv();
+
+        jstring _jstrClassName = env->NewStringUTF(className);
+
+        jclass _clazz = (jclass) env->CallObjectMethod(JniUtils::JniManager::classloader,
+                                                       JniUtils::JniManager::loadclassMethod_methodID,
+                                                       _jstrClassName);
+
+        if (nullptr == _clazz) {
+            LOGE("Classloader failed to find class of %s", className);
+            env->ExceptionClear();
+        }
+
+        env->DeleteLocalRef(_jstrClassName);
+
+        return _clazz;
+    }
+
+    void _detachCurrentThread(void *a) {
+        JniUtils::JniManager::getJavaVM()->DetachCurrentThread();
+    }
+    static JavaVM *_psJavaVM;
 /**
  ==================================================================================
  * JniManager Class
@@ -42,6 +42,32 @@ namespace JniUtils {
     jmethodID JniManager::loadclassMethod_methodID = nullptr;
     jobject JniManager::classloader = nullptr;
     std::function<void()> JniManager::classloaderCallback = nullptr;
+    std::unordered_map<long, JniManager::CallbackStore *> JniManager::functionCallbacks;
+    std::string JniManager::basePackageName = "";
+
+
+    void JniManager::setBasePackage(std::string name) {
+        basePackageName = name;
+        initJniFunc();
+    }
+
+    void JniManager::initJniFunc() {
+        typedef void(JniManager::*CallbackS)(JNIEnv *env, jobject instance,
+                                             jstring key, jobject data, jint type);
+        JNINativeMethod sMethodTable[] = {
+                {"dispatchFunctionCallbackSucceed", "(JLjava/lang/String;ILjava/lang/Object;)V", (void *) (JniManager::dispatchFunctionCallbackSucceed)},
+                {"dispatchFunctionCallbackFail",    "(JLjava/lang/String;ILjava/lang/Object;)V", (void *) (JniManager::dispatchFunctionCallbackFail)},
+                {"dispatchFlow",                    "(JLjava/lang/String;ILjava/lang/Object;)V", (void *) (JniManager::dispatchFlow)},
+        };
+        bool succeed = JniManager::registerNativeMethods(JniManager::getEnv(),
+                                                         (JniManager::basePackageName +
+                                                          "/JniManager").c_str(),
+                                                         sMethodTable,
+                                                         sizeof(sMethodTable) /
+                                                         sizeof(JNINativeMethod));
+        assert(succeed);
+    }
+
 
     JavaVM *JniManager::getJavaVM() {
         pthread_t thisthread = pthread_self();
@@ -98,7 +124,7 @@ namespace JniUtils {
     }
 
 
-    bool JniManager::setClassLoaderFrom(jobject activityinstance) {
+    bool JniManager::setClassLoaderFrom(jobject contextObj) {
         JniMethodInfo _getclassloaderMethod;
         if (!JniManager::getMethodInfo_DefaultClassLoader(_getclassloaderMethod,
                                                           "android/content/Context",
@@ -107,7 +133,7 @@ namespace JniUtils {
             return false;
         }
 
-        jobject _c = getEnv()->CallObjectMethod(activityinstance,
+        jobject _c = getEnv()->CallObjectMethod(contextObj,
                                                 _getclassloaderMethod.methodID);
 
         if (nullptr == _c) {
@@ -281,6 +307,7 @@ namespace JniUtils {
                                  const std::string &signature) {
         LOGE("Failed to find static java method. Class name: %s, method name: %s, signature: %s ",
              className.c_str(), methodName.c_str(), signature.c_str());
+        assert(false);
     }
 
     void JniManager::logI(const char *tag, const char *fmt, ...) {
@@ -297,11 +324,25 @@ namespace JniUtils {
         va_end (ap);
     }
 
-    long JniManager::getCurrentMillisTimes() {
-        std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> tp = std::chrono::time_point_cast<std::chrono::milliseconds>(
-                std::chrono::system_clock::now());
-        auto tmp = std::chrono::duration_cast<std::chrono::milliseconds>(tp.time_since_epoch());
-        return static_cast<long>(tmp.count());
+    using namespace std::chrono;
+    typedef duration<int, std::ratio<60 * 60 * 24>> days_type;
+
+    long long int JniManager::getCurrentMillisTimes() {
+        system_clock::duration d = system_clock::now().time_since_epoch();
+        milliseconds mil = duration_cast<milliseconds>(d);
+        return mil.count();
+    }
+
+    long long int JniManager::getCurrentSecTimes() {
+        system_clock::duration d = system_clock::now().time_since_epoch();
+        seconds sec = duration_cast<seconds>(d);
+        return sec.count();
+    }
+
+    long long int JniManager::getCurrentNanoTimes() {
+        system_clock::duration d = system_clock::now().time_since_epoch();
+        nanoseconds nan = duration_cast<nanoseconds>(d);
+        return nan.count();
     }
 
     /**
@@ -316,33 +357,38 @@ namespace JniUtils {
 
     Bundle::~Bundle() {
         JNIEnv *env = JniManager::getEnv();
-        if (env)
+        if (env) {
+            JniManager::callStaticVoidMethod(className, "clear", bundleJ);
             env->DeleteGlobalRef(bundleJ);
+        }
     }
 
-    int Bundle::getInt(const char *key) {
+    int Bundle::getInt(const char *key) const {
         return JniManager::callStaticIntMethod(className, "getInt", bundleJ, key);
     }
 
-    bool Bundle::getBool(const char *key) {
+    bool Bundle::getBool(const char *key) const {
         return JniManager::callStaticBooleanMethod(className, "getBool", bundleJ, key);
     }
 
-    double Bundle::getDouble(const char *key) {
+    double Bundle::getDouble(const char *key) const {
         return JniManager::callStaticDoubleMethod(className, "getDouble", bundleJ, key);
-
     }
 
-    float Bundle::getFloat(const char *key) {
+    float Bundle::getFloat(const char *key) const {
         return JniManager::callStaticFloatMethod(className, "getFloat", bundleJ, key);
     }
 
-    jobject Bundle::getObj(const char *key) {
+    jobject Bundle::getObj(const char *key) const {
         return JniManager::callStaticObjectMethod(className, "getObj", "java/lang/Objects", bundleJ,
                                                   key);
     }
 
-    std::string Bundle::getString(const char *key) {
+    std::string Bundle::getString(const char *key) const {
         return JniManager::callStaticStringMethod(className, "getString", bundleJ, key);
+    }
+
+    long long Bundle::getLong(const char *key) const {
+        return JniManager::callStaticLongMethod(className, "getLong", bundleJ, key);
     }
 }

@@ -16,7 +16,7 @@ add_library( # Sets the name of the library.
              jni_manager
 
              # Sets the library as a shared library.
-             SHARED
+             STATIC
 
              # Provides a relative path to your source file(s).
              JniManager.cpp

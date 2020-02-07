@@ -1,6 +1,4 @@
-package com.liulishuo.myapplication
-
-import android.util.Log
+package com.liulishuo.lingococos2dx.jni_utils
 
 /**
  * Created by
@@ -18,7 +16,7 @@ import android.util.Log
  * Time: 11:54
  * Jni 代理对象的基类，实现回调分发等功能，不支持多线程！！
  */
-abstract class JniProxy {
+abstract class JniProxy : IJniProxy {
     protected var nativeObj: Long = 0
 
     companion object {
@@ -26,59 +24,59 @@ abstract class JniProxy {
     }
 
     //获取回调对象
-    fun <T : Any, R : Any> jniCallback(key: String): JniCallback<T, R> {
-        return object : JniCallback<T, R> {
+    override fun <T : Any, R : Any> jniCallback(key: String): IJniProxy.JniCallback<T, R> {
+        return object : IJniProxy.JniCallback<T, R> {
             override fun onSuccess(data: T) {
-                jniCallbackSuccess<T>(key).invoke(data);
+                jniCallbackSuccess<T>(key, data)
             }
 
             override fun onFail(data: R) {
-                jniCallbackFail<R>(key).invoke(data);
+                jniCallbackFail<R>(key, data)
             }
         }
     }
 
     //获取flow分发对象
-    fun <T : Any> jniCallbackSuccess(key: String): (T) -> Unit = {
+    override fun <T : Any> jniCallbackSuccess(key: String, data: T) {
         JniManager.dispatchFunctionCallbackSucceed(
             nativeObj,
             key,
-            getDataType(it).ordinal,
-            wrapDataType(it)
+            getDataType(data).ordinal,
+            wrapDataType(data)
         )
     }
 
     //获取flow分发对象
-    fun <T : Any> jniCallbackFail(key: String): (T) -> Unit = {
+    override fun <T : Any> jniCallbackFail(key: String, data: T) {
         JniManager.dispatchFunctionCallbackFail(
             nativeObj,
             key,
-            getDataType(it).ordinal,
-            wrapDataType(it)
+            getDataType(data).ordinal,
+            wrapDataType(data)
         )
     }
 
+    override fun jniCallbackSuccess(key: String) {
+        jniCallbackSuccess(key, Unit)
+    }
+
+    override fun jniCallbackFail(key: String) {
+        jniCallbackFail(key, Unit)
+    }
 
     //获取flow分发对象
-    fun <T : Any> jniFlow(key: String): (T) -> Unit = {
+    override fun <T : Any> jniFlow(key: String, data: T) {
         JniManager.dispatchFlow(
-            nativeObj, key, getDataType(it).ordinal, wrapDataType(it)
+            nativeObj, key, getDataType(data).ordinal, wrapDataType(data)
         )
-    }
-
-    interface JniCallback<T, R> {
-        fun onSuccess(data: T)
-        fun onFail(data: R)
     }
 
     private fun <T : Any> wrapDataType(data: T): JniBundle {
-        if (data::class == JniBundle::class) {
-            return data as JniBundle
+        return if (data::class == JniBundle::class) {
+            data as JniBundle
         } else {
-            return JniBundle.initBy(
-                mapOf(
-                    SingleDataKey to data
-                )
+            JniBundle.initBy(
+                SingleDataKey to data
             )
         }
     }
@@ -97,11 +95,17 @@ abstract class JniProxy {
             Boolean::class -> {
                 DataType.Bool
             }
+            Long::class -> {
+                DataType.Long
+            }
             String::class -> {
                 DataType.String
             }
             JniBundle::class -> {
                 DataType.JniBundle
+            }
+            Unit::class -> {
+                DataType.Void
             }
             else -> {
                 DataType.Object
@@ -110,16 +114,18 @@ abstract class JniProxy {
     }
 
     private enum class DataType {
-        Int, Float, Double, Bool, String, Object, JniBundle
+        Int, Float, Double, Bool, Long, String, Object, JniBundle, Void
     }
 
-    open fun createFromNative(nativeObj: Long) {
+    override fun createFromNative(nativeObj: Long) {
         this.nativeObj = nativeObj
-        Log.i("lzc", "nativeObj $nativeObj")
     }
 
-    open fun destroyFromNative() {
+    override fun destroyFromNative() {
+    }
 
+    override fun <T : Any> jniFlow(key: String, dataBuilder: () -> T) {
+        jniFlow(key, dataBuilder.invoke())
     }
 }
 

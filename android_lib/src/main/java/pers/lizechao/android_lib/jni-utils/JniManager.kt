@@ -1,4 +1,4 @@
-package com.liulishuo.myapplication
+package com.liulishuo.lingococos2dx.jni_utils
 
 /**
  * Created by
@@ -44,7 +44,6 @@ class JniManager {
 class JniBundle {
     private val mapData = HashMap<String, Any>()
 
-
     companion object {
         @JvmStatic
         fun getInt(bundle: Any, key: String) = (bundle as JniBundle).mapData[key] as Int
@@ -67,8 +66,13 @@ class JniBundle {
         @JvmStatic
         fun getObj(bundle: Any, key: String) = (bundle as JniBundle).mapData[key]
 
-        fun initBy(mapData: Map<String, Any>): JniBundle {
-            return JniBundle().also { it.mapData.putAll(mapData) }
+        @JvmStatic
+        fun clear(bundle: Any) {
+            (bundle as JniBundle).mapData.clear()
+        }
+
+        fun initBy(vararg pairs: Pair<String, Any>): JniBundle {
+            return JniBundle().also { it.mapData.putAll(mapOf(*pairs)) }
         }
     }
 }
